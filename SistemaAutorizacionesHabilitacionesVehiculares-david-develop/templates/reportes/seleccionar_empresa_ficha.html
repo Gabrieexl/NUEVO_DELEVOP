@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Ficha de Empresa - DRTC{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-file-person me-2"></i>Generar Ficha de Empresa
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'reportes:index' %}">Reportes</a></li>
+<li class="breadcrumb-item active">Ficha de Empresa</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-building me-2"></i>Seleccionar Empresa
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-4">
+                    Seleccione una empresa para generar su ficha completa en PDF. 
+                    La ficha incluirá toda la información de la empresa: datos generales, 
+                    autorizaciones, vehículos habilitados, conductores habilitados y rutas asignadas.
+                </p>
+                
+                <form id="formFichaEmpresa">
+                    <div class="mb-4">
+                        <label for="empresa" class="form-label">
+                            <strong>Empresa de Transporte</strong>
+                        </label>
+                        <select id="empresa" name="empresa" class="form-select form-select-lg" required>
+                            <option value="">-- Seleccione una empresa --</option>
+                            {% for empresa in empresas %}
+                            <option value="{{ empresa.pk }}">
+                                {{ empresa.razon_social }} (RUC: {{ empresa.ruc }})
+                            </option>
+                            {% empty %}
+                            <option value="" disabled>No hay empresas activas registradas</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">
+                            Solo se muestran empresas con estado ACTIVA. Total: {{ empresas.count }} empresa(s).
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'reportes:index' %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Volver
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg" id="btnGenerar">
+                            <i class="bi bi-file-earmark-pdf me-2"></i>Generar Ficha PDF
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Información adicional -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Contenido de la Ficha</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Datos generales de la empresa</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Estado y representante legal</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Autorizaciones vigentes</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Flota de vehículos habilitados</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Conductores habilitados</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Rutas asignadas</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('formFichaEmpresa').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const empresaId = document.getElementById('empresa').value;
+    
+    if (!empresaId) {
+        alert('Por favor seleccione una empresa');
+        return;
+    }
+    
+    // Abrir el PDF en una nueva pestaña
+    const url = "{% url 'reportes:ficha_empresa' pk=0 %}".replace('0', empresaId);
+    window.open(url, '_blank');
+});
+</script>
+{% endblock %}

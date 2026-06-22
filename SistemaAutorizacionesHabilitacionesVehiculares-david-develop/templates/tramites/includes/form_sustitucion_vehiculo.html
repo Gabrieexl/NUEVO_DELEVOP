@@ -1,0 +1,100 @@
+{% if tipo_tramite == 'SUSTITUCION_VEHICULO' %}
+<h6 class="border-bottom pb-2 mb-3"><i class="bi bi-arrow-left-right"></i> Sustitución de Vehículo</h6>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <label class="form-label">Vehículo a Sustituir (Saliente) *</label>
+        {{ form_especifico.vehiculo_saliente }}
+        {% if form_especifico.vehiculo_saliente.errors %}
+        <div class="text-danger small">{{ form_especifico.vehiculo_saliente.errors.0 }}</div>
+        {% endif %}
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Motivo de Sustitución *</label>
+        {{ form_especifico.motivo_sustitucion }}
+        {% if form_especifico.motivo_sustitucion.errors %}
+        <div class="text-danger small">{{ form_especifico.motivo_sustitucion.errors.0 }}</div>
+        {% endif %}
+    </div>
+</div>
+
+<h6 class="border-bottom pb-2 mb-3 mt-4"><i class="bi bi-truck"></i> Datos del Nuevo Vehículo</h6>
+
+<div class="row mb-3">
+    <div class="col-md-3">
+        <label class="form-label">Placa *</label>
+        <div class="input-group">
+            {{ form_especifico.placa }}
+            <button class="btn btn-outline-secondary" type="button" id="btn-verificar-placa" title="Verificar si la placa ya existe">
+                <i class="bi bi-search"></i> Verificar
+            </button>
+        </div>
+        <div id="resultado-verificacion-placa"></div>
+        {% if form_especifico.placa.errors %}
+        <div class="text-danger small">{{ form_especifico.placa.errors.0 }}</div>
+        {% endif %}
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Marca *</label>
+        {{ form_especifico.marca }}
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Modelo *</label>
+        {{ form_especifico.modelo }}
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Año Fabricación *</label>
+        {{ form_especifico.anio_fabricacion }}
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-2">
+        <label class="form-label">Categoría *</label>
+        {{ form_especifico.categoria }}
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Carrocería *</label>
+        {{ form_especifico.carroceria }}
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Capacidad Pasajeros *</label>
+        {{ form_especifico.capacidad_sentados }}
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Peso Bruto (kg)</label>
+        {{ form_especifico.peso_bruto }}
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Color</label>
+        {{ form_especifico.color }}
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Número TIV</label>
+        {{ form_especifico.numero_tiv }}
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <label class="form-label">Número de Serie/Chasis</label>
+        {{ form_especifico.numero_serie }}
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Número de Motor</label>
+        {{ form_especifico.numero_motor }}
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <label class="form-label">Fecha Vencimiento SOAT</label>
+        {{ form_especifico.fecha_venc_soat }}
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Fecha Vencimiento CITV</label>
+        {{ form_especifico.fecha_venc_citv }}
+    </div>
+</div>
+
+{% endif %}

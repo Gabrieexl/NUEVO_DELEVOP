@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}Pagina no encontrada - DRTC{% endblock %}
+
+{% block extra_css %}
+<style>
+    .error-wrapper {
+        min-height: calc(100vh - 3rem);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+    }
+
+    .error-card {
+        max-width: 720px;
+        width: 100%;
+        border: 0;
+        border-radius: 1.25rem;
+        overflow: hidden;
+        box-shadow: 0 1rem 3rem rgba(13, 110, 253, 0.12);
+    }
+
+    .error-banner {
+        background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+        color: #fff;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .error-code {
+        font-size: 4rem;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 0.75rem;
+    }
+
+    .error-body {
+        padding: 2rem;
+    }
+
+    .error-actions .btn {
+        min-width: 220px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="error-wrapper">
+    <div class="card error-card">
+        <div class="error-banner">
+            <div class="error-code">404</div>
+            <h1 class="h3 mb-2">Pagina no encontrada</h1>
+            <p class="mb-0">La direccion que intentaste abrir no existe o ya no esta disponible.</p>
+        </div>
+
+        <div class="error-body text-center">
+            <p class="text-muted mb-4">
+                Puedes volver a la pagina principal del sistema para continuar trabajando.
+            </p>
+
+            <div class="error-actions d-flex flex-column flex-sm-row gap-3 justify-content-center">
+                <a href="{% url 'usuarios:dashboard' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-house-door me-2"></i>Ir al sistema
+                </a>
+                <button type="button" class="btn btn-outline-secondary btn-lg" onclick="history.back()">
+                    <i class="bi bi-arrow-left me-2"></i>Volver
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content_noauth %}
+<div class="error-wrapper">
+    <div class="card error-card">
+        <div class="error-banner">
+            <div class="error-code">404</div>
+            <h1 class="h3 mb-2">Pagina no encontrada</h1>
+            <p class="mb-0">La direccion que intentaste abrir no existe o ya no esta disponible.</p>
+        </div>
+
+        <div class="error-body text-center">
+            <p class="text-muted mb-4">
+                Puedes volver a la pagina principal del sistema para continuar trabajando.
+            </p>
+
+            <div class="error-actions d-flex flex-column flex-sm-row gap-3 justify-content-center">
+                <a href="{% url 'usuarios:dashboard' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-house-door me-2"></i>Ir al sistema
+                </a>
+                <button type="button" class="btn btn-outline-secondary btn-lg" onclick="history.back()">
+                    <i class="bi bi-arrow-left me-2"></i>Volver
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

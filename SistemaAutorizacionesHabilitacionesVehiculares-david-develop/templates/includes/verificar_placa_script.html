@@ -1,0 +1,184 @@
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const btnVerificar = document.getElementById('btn-verificar-placa');
+    
+    // Buscar el input de placa (puede ser id_placa o id_placa_nueva)
+    let inputPlaca = document.getElementById('id_placa');
+    if (!inputPlaca) {
+        inputPlaca = document.getElementById('id_placa_nueva');
+    }
+
+    const resultadoContainer = document.getElementById('resultado-verificacion-placa');
+
+    if (btnVerificar && inputPlaca) {
+        // Crear contenedor si no existe (aunque debería existir en el HTML)
+        if (!resultadoContainer) {
+            const container = document.createElement('div');
+            container.id = 'resultado-verificacion-placa';
+            inputPlaca.parentNode.appendChild(container);
+        }
+
+        btnVerificar.addEventListener('click', function(e) {
+            e.preventDefault();
+            const placa = inputPlaca.value.trim();
+            
+            if (!placa) {
+                mostrarAlerta('warning', 'Por favor ingrese una placas.');
+                return;
+            }
+
+            // Validar si la placa ya está en el trámite actual (si existe la variable global)
+            if (typeof placasEnTramite !== 'undefined' && Array.isArray(placasEnTramite)) {
+                // Normalizar placa para comparación (quitar guiones y espacios)
+                const placaNormalizada = placa.replace(/[-\s]/g, '').toUpperCase();
+                const placasNormalizadas = placasEnTramite.map(p => p.replace(/[-\s]/g, '').toUpperCase());
+                
+                if (placasNormalizadas.includes(placaNormalizada)) {
+                    mostrarAlerta('danger', '<strong>¡Atención!</strong> Este vehículo ya ha sido agregado a este trámite.');
+                    return;
+                }
+            }
+
+            // UI State: Loading
+            btnVerificar.disabled = true;
+            btnVerificar.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Verificando...';
+            
+            // Limpiar resultados anteriores
+            const container = document.getElementById('resultado-verificacion-placa');
+            container.innerHTML = '<div class="text-center mt-2"><div class="spinner-border spinner-border-sm text-primary" role="status"></div> Buscando en base de datos...</div>';
+            
+            const urlBase = "{% url 'consultas:api_internal_placa' placa='PLACEHOLDER' %}";
+            const url = urlBase.replace('PLACEHOLDER', encodeURIComponent(placa));
+            
+            fetch(url)
+                .then(async response => {
+                    let payload = null;
+                    try {
+                        payload = await response.json();
+                    } catch (_) {
+                        payload = null;
+                    }
+                    if (!response.ok) {
+                        const backendMsg = payload?.message || `Error HTTP ${response.status} al verificar la placa.`;
+                        throw new Error(backendMsg);
+                    }
+
+                    if (!payload || typeof payload.found === 'undefined') {
+                        throw new Error('La respuesta del servidor no tiene el formato esperado.');
+                    }
+                    return payload;
+                })
+                .then(data => {
+                    if (data.found) {
+                        const info = data.data;
+                        
+                        // --- Lógica de Validación Estricta ---
+                        const estadoVehiculo = info.vehiculo ? info.vehiculo.estado : null;
+                        const tieneHabilitacionVigente = (
+                            info.habilitacion_vehicular &&
+                            info.habilitacion_vehicular.estado === 'VIGENTE'
+                        );
+                        
+                        const esBaja = estadoVehiculo === 'BAJA';
+                        const bloqueaPorEstado = ['PROPUESTO', 'HABILITADO', 'NO_HABILITADO'].includes(estadoVehiculo);
+                        
+                        if (esBaja){
+                            mostrarAlerta('info', '<strong>Vehículo nuevo:</strong> Complete los datos técnicos manualmente.', 5000);
+                            return
+                        }
+                        
+                        if (bloqueaPorEstado || tieneHabilitacionVigente) {
+
+                            let msg = `<strong>⚠️ BLOQUEADO:</strong> El vehículo placa ${info.vehiculo.placa} ya se encuentra <strong>${estadoVehiculo || 'REGISTRADO'}</strong>`;
+                            if (info.empresa) {
+                                msg += ` en la empresa '${info.empresa.razon_social}'.`;
+                            }
+
+                            if (estadoVehiculo === 'NO_HABILITADO') {
+                                msg += `<br>No puede ser registrado en una nueva empresa si ya está REGISTRADO.`;
+                            } else if (estadoVehiculo === 'PROPUESTO') {
+                                msg += `<br>No puede ser registrado en otra empresa mientras mantenga estado PROPUESTO.`;
+                            } else {
+                                msg += `<br>No puede ser registrado en una nueva empresa si ya está activo.`;
+                            }
+
+                            mostrarAlerta('danger', msg, 15000);
+                            return;
+                        }
+                        // Lógica de AUTOFILL
+                        if (info.vehiculo) {
+                            const v = info.vehiculo;
+                            const setVal = (id, val) => {
+                                const el = document.getElementById(id);
+                                if (el && val !== null && val !== undefined) {
+                                    el.value = val;
+                                    el.dispatchEvent(new Event('change'));
+                                }
+                            };
+                            
+                            setVal('id_marca', v.marca);
+                            setVal('id_modelo', v.modelo);
+                            setVal('id_anio_fabricacion', v.anio_fabricacion);
+                            setVal('id_color', v.color);
+                            setVal('id_numero_motor', v.numero_motor);
+                            setVal('id_numero_serie', v.numero_serie);
+                            setVal('id_numero_tiv', v.numero_tiv);
+                            setVal('id_peso_bruto', v.peso_bruto);
+                            setVal('id_capacidad_sentados', v.capacidad_sentados);
+                            setVal('id_placa_nueva', v.placa);
+                            setVal('id_capacidad_pasajeros', v.capacidad_sentados);
+                            setVal('id_numero_tarjeta_propiedad', v.numero_tiv);
+                            setVal('id_categoria', v.categoria_id);
+                            setVal('id_carroceria', v.carroceria_id);
+                            // Fechas (SOAT/CITV)
+                            setVal('id_fecha_venc_soat', v.fecha_venc_soat);
+                            setVal('id_fecha_venc_citv', v.fecha_venc_citv);
+                            
+                            mostrarAlerta('success', `<strong>Vehículo encontrado:</strong> Los datos de la placa ${v.placa} se han cargado automáticamente.`, 5000);
+                        }
+                    } else {
+                        mostrarAlerta('info', data.message || 'Vehículo no registrado en el sistema.', 5000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    mostrarAlerta('danger', error.message || 'Ocurrió un error al verificar la placa.', 7000);
+                })
+                .finally(() => {
+                    btnVerificar.disabled = false;
+                    btnVerificar.innerHTML = '<i class="bi bi-search"></i> Verificar';
+                });
+        });
+    }
+
+    function mostrarAlerta(tipo, mensaje, timeout = 5000) {
+        const container = document.getElementById('resultado-verificacion-placa');
+        if (container) {
+            container.innerHTML = `
+                <div class="alert alert-${tipo} alert-dismissible fade show mt-2" role="alert">
+                    ${mensaje}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+
+            // Auto-cerrar después del tiempo especificado
+            if (timeout > 0) {
+                setTimeout(() => {
+                    const alertNode = container.querySelector('.alert');
+                    if (alertNode) {
+                        // Intentar usar el objeto de Bootstrap si está disponible
+                        if (typeof bootstrap !== 'undefined' && bootstrap.Alert) {
+                            const bsAlert = bootstrap.Alert.getOrCreateInstance(alertNode);
+                            if (bsAlert) bsAlert.close();
+                        } else {
+                            // Fallback simple si no hay BS JS
+                            alertNode.classList.remove('show');
+                            setTimeout(() => { container.innerHTML = ''; }, 150);
+                        }
+                    }
+                }, timeout);
+            }
+        }
+    }
+});
+</script>

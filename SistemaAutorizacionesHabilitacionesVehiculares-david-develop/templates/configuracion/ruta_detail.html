@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }} - DRTC{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-signpost-2 me-2"></i>{{ titulo }}
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'configuracion:home' %}">Configuración</a></li>
+<li class="breadcrumb-item"><a href="{% url 'configuracion:rutas_lista' %}">Rutas</a></li>
+<li class="breadcrumb-item active">{{ ruta.codigo }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">{{ ruta.codigo }} - {{ ruta.nombre }}</h5>
+                {% if ruta.activo %}
+                <span class="badge bg-success">Activo</span>
+                {% else %}
+                <span class="badge bg-secondary">Inactivo</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Origen:</strong><br>{{ ruta.origen }}</p>
+                        <p><strong>Destino:</strong><br>{{ ruta.destino }}</p>
+                        {% if ruta.puntos_intermedios %}
+                        <p><strong>Puntos Intermedios:</strong><br>{{ ruta.puntos_intermedios }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Distancia:</strong><br>
+                            {% if ruta.distancia_km %}{{ ruta.distancia_km }} km{% else %}-{% endif %}
+                        </p>
+                        <p><strong>Tiempo Estimado:</strong><br>{{ ruta.tiempo_estimado_display }}</p>
+                        <p><strong>Ámbito:</strong><br>{{ ruta.get_ambito_display }}</p>
+                    </div>
+                </div>
+                
+                {% if ruta.observaciones %}
+                <hr>
+                <p><strong>Observaciones:</strong></p>
+                <p class="text-muted">{{ ruta.observaciones }}</p>
+                {% endif %}
+                
+                <hr>
+                <p class="text-muted small mb-0">
+                    Creado el {{ ruta.fecha_creacion|date:"d/m/Y H:i" }}
+                    {% if ruta.creado_por %}por {{ ruta.creado_por }}{% endif %}
+                </p>
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'configuracion:rutas_editar' ruta.pk %}" class="btn btn-primary">
+                    <i class="bi bi-pencil me-1"></i>Editar
+                </a>
+                <a href="{% url 'configuracion:rutas_lista' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Ruta completa -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0">Ruta Completa</h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-0">{{ ruta.ruta_completa }}</p>
+            </div>
+        </div>
+        
+        <!-- Autorizaciones que usan esta ruta -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Autorizaciones</h6>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for aut in autorizaciones %}
+                <li class="list-group-item">
+                    <a href="{% url 'autorizaciones:detalle' aut.pk %}">{{ aut.numero_resolucion }}</a>
+                    <br><small class="text-muted">{{ aut.empresa.nombre_corto }}</small>
+                </li>
+                {% empty %}
+                <li class="list-group-item text-muted">Sin autorizaciones asignadas</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

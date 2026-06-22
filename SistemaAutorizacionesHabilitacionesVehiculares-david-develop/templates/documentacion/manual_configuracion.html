@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Manual de Configuración - DRTC{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-gear me-2"></i>Manual del Módulo de Configuración
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'documentacion:index' %}">Documentación</a></li>
+<li class="breadcrumb-item active">Configuración</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="card shadow-sm sticky-top" style="top: 80px;">
+            <div class="card-header bg-light text-primary fw-bold">
+                Manual de Configuración
+            </div>
+            <div class="list-group list-group-flush small">
+                <a href="#paso-rutas" class="list-group-item list-group-item-action">1. Crear Rutas Regionales</a>
+                <a href="#paso-categorias" class="list-group-item list-group-item-action">2. Clasificación Vehicular</a>
+                <a href="#paso-servicios" class="list-group-item list-group-item-action">3. Tipos de Servicio</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body p-4">
+                <section id="paso-rutas" class="mb-5">
+                    <h4 class="border-bottom pb-2 text-primary">1. Paso a Paso: Registro de Rutas</h4>
+                    <p>Las rutas deben estar previamente registradas para poder seleccionarlas en una Autorización:</p>
+                    <ol>
+                        <li class="mb-2">Ubique el módulo <strong>Configuración</strong> en el menú lateral.</li>
+                        <li class="mb-2">Seleccione <strong>"Rutas"</strong> y luego haga clic en el botón verde <strong>"+ Nueva Ruta"</strong>.</li>
+                        <li class="mb-2"><strong>Asignar Nombre:</strong> Use un nombre claro (ej: Madre de Dios - Laberinto).</li>
+                        <li class="mb-2"><strong>Seleccionar Ámbito:</strong> Escoja el departamento correspondiente del menú desplegable.</li>
+                        <li class="mb-2"><strong>Definir Origen/Destino:</strong> Escriba las localidades exactas y guarde.</li>
+                    </ol>
+                </section>
+
+                <section id="paso-categorias" class="mb-5">
+                    <h4 class="border-bottom pb-2 text-primary">2. Paso a Paso: Categorías y Carrocerías</h4>
+                    <p>Si al registrar un vehículo no encuentra su categoría (ej: Rural):</p>
+                    <ol>
+                        <li>Vaya a <strong>Configuración > Categorías</strong>.</li>
+                        <li>Haga clic en <strong>"+ Crear Nueva"</strong>.</li>
+                        <li>Ingrese la <strong>Abreviatura</strong> (ej. M1) y la <strong>Descripción</strong> (ej. Vehículos de 8 asientos o menos).</li>
+                        <li>Del mismo modo proceda en <strong>Carrocerías</strong> para agregar tipos como 'Station Wagon' o 'Pick-up'.</li>
+                    </ol>
+                </section>
+
+                <section id="paso-servicios" class="mb-5">
+                    <h4 class="border-bottom pb-2 text-primary">3. Configuración de Tipos de Servicio</h4>
+                    <p>Determine qué modalidades de transporte operan en la región:</p>
+                    <ol>
+                        <li>Vaya a <strong>Configuración > Tipos de Servicio</strong>.</li>
+                        <li>Verifique si existen: "Regular de Personas", "Especial" o "Turístico".</li>
+                        <li>Para añadir uno nuevo, haga clic en <strong>"+ Añadir"</strong> e ingrese el nombre del servicio. Esto aparecerá al crear resoluciones.</li>
+                    </ol>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }} - DRTC{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-signpost-2 me-2"></i>{{ titulo }}
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'configuracion:home' %}">Configuración</a></li>
+<li class="breadcrumb-item"><a href="{% url 'configuracion:rutas_lista' %}">Rutas</a></li>
+<li class="breadcrumb-item active">{{ accion }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">{{ titulo }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ request.path }}" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.codigo.id_for_label }}" class="form-label">Código *</label>
+                            {{ form.codigo }}
+                            {% if form.codigo.errors %}
+                            <div class="invalid-feedback d-block">{{ form.codigo.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8 mb-3">
+                            <label for="{{ form.nombre.id_for_label }}" class="form-label">Nombre *</label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}
+                            <div class="invalid-feedback d-block">{{ form.nombre.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.origen.id_for_label }}" class="form-label">Origen *</label>
+                            {{ form.origen }}
+                            {% if form.origen.errors %}
+                            <div class="invalid-feedback d-block">{{ form.origen.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.destino.id_for_label }}" class="form-label">Destino *</label>
+                            {{ form.destino }}
+                            {% if form.destino.errors %}
+                            <div class="invalid-feedback d-block">{{ form.destino.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.puntos_intermedios.id_for_label }}" class="form-label">Puntos Intermedios</label>
+                        {{ form.puntos_intermedios }}
+                        <small class="text-muted">Separar por coma (ej: Laberinto, Santa Rosa)</small>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.distancia_km.id_for_label }}" class="form-label">Distancia (km)</label>
+                            {{ form.distancia_km }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.tiempo_estimado_minutos.id_for_label }}" class="form-label">Tiempo (minutos)</label>
+                            {{ form.tiempo_estimado_minutos }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.ambito.id_for_label }}" class="form-label">Ámbito</label>
+                            {{ form.ambito }}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.observaciones.id_for_label }}" class="form-label">Observaciones</label>
+                        {{ form.observaciones }}
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        {{ form.activo }}
+                        <label class="form-check-label" for="{{ form.activo.id_for_label }}">
+                            Ruta Activa
+                        </label>
+                    </div>
+                    
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        {% if is_modal %}
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg me-1"></i>Cancelar
+                        </button>
+                        {% else %}
+                        <a href="{% url 'configuracion:rutas_lista' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Cancelar
+                        </a>
+                        {% endif %}
+                        {% if is_modal %}
+                        <button type="button" class="btn btn-primary js-modal-submit">
+                            <i class="bi bi-check-lg me-1"></i>{{ accion }}
+                        </button>
+                        {% else %}
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>{{ accion }}
+                        </button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

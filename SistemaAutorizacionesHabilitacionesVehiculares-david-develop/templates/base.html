@@ -1,0 +1,567 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}DRTC - Sistema de Autorizaciones{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --sidebar-width: 250px;
+            --header-height: 56px;
+            --primary-color: #0d6efd;
+            --sidebar-bg: #212529;
+        }
+        
+        body {
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background-color: var(--sidebar-bg);
+            padding-top: var(--header-height);
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.75rem 1rem;
+            border-radius: 0.25rem;
+            margin: 0.125rem 0.5rem;
+        }
+        
+        .sidebar .nav-link:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar .nav-link.active {
+            color: #fff;
+            background-color: var(--primary-color);
+        }
+        
+        .sidebar .nav-link i {
+            margin-right: 0.5rem;
+            width: 1.25rem;
+            text-align: center;
+        }
+        
+        .sidebar-header {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 0.5rem;
+        }
+        
+        .sidebar-header h6 {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin: 0;
+        }
+        
+        /* Header */
+        .main-header {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: var(--header-height);
+            background-color: #fff;
+            border-bottom: 1px solid #dee2e6;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+        }
+        
+        .main-header .brand {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        /* Main content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding-top: calc(var(--header-height) + 1rem);
+            padding-bottom: 2rem;
+            min-height: 100vh;
+        }
+        
+        .main-content .container-fluid {
+            padding: 0 1.5rem;
+        }
+        
+        /* Page header */
+        .page-header {
+            margin-bottom: 1.5rem;
+        }
+        
+        .page-header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        /* Cards */
+        .card {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+        
+        .card-header {
+            background-color: #fff;
+            border-bottom: 1px solid #dee2e6;
+            font-weight: 600;
+        }
+        
+        /* Stats cards */
+        .stat-card {
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .stat-card.success {
+            border-left-color: #198754;
+        }
+        
+        .stat-card.warning {
+            border-left-color: #ffc107;
+        }
+        
+        .stat-card.danger {
+            border-left-color: #dc3545;
+        }
+        
+        .stat-card .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        
+        .stat-card .stat-label {
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+        
+        /* Tables */
+        .table th {
+            font-weight: 600;
+            background-color: #f8f9fa;
+        }
+        
+        /* Badges */
+        .badge-estado {
+            font-weight: 500;
+            padding: 0.35em 0.65em;
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-header {
+                left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h6>Menú Principal</h6>
+        </div>
+        
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" 
+                   href="{% url 'usuarios:dashboard' %}">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+            </li>
+            
+            {% if not user.es_consulta_inspector %}
+            <div class="sidebar-header mt-3">
+                <h6>Gestión</h6>
+            </div>
+            
+            <li class="nav-item">
+                <a class="nav-link {% if 'empresas' in request.path %}active{% endif %}" 
+                   href="{% url 'empresas:lista' %}">
+                    <i class="bi bi-building"></i> Empresas
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'autorizaciones' in request.path %}active{% endif %}" 
+                   href="{% url 'autorizaciones:lista' %}">
+                    <i class="bi bi-file-earmark-text"></i> Autorizaciones
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'vehiculos' in request.path %}active{% endif %}" 
+                   href="{% url 'vehiculos:lista' %}">
+                    <i class="bi bi-truck"></i> Vehículos
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'conductores' in request.path %}active{% endif %}" 
+                   href="{% url 'conductores:lista' %}">
+                    <i class="bi bi-person-badge"></i> Conductores
+                </a>
+            </li>
+            
+            {% if user.puede_crear_tramites or user.puede_evaluar_tecnicamente or user.puede_evaluar_legalmente or user.puede_firmar or user.es_control_calidad %}
+            <div class="sidebar-header mt-3">
+                <h6>Trámites</h6>
+            </div>
+            
+            <li class="nav-item">
+                <a class="nav-link {% if 'tramites' in request.path and 'crear' not in request.path %}active{% endif %}" 
+                   href="{% url 'tramites:lista' %}">
+                    <i class="bi bi-folder2-open"></i> Todos los Trámites
+                </a>
+            </li>
+            
+            {% if user.puede_crear_tramites %}
+            <li class="nav-item">
+                <a class="nav-link {% if 'tramites/crear' in request.path %}active{% endif %}" 
+                   href="{% url 'tramites:crear' %}">
+                    <i class="bi bi-plus-circle"></i> Nuevo Trámite
+                </a>
+            </li>
+            {% endif %}
+            {% endif %}
+            {% endif %}
+            
+            <div class="sidebar-header mt-3">
+                <h6>Consultas</h6>
+            </div>
+            
+            <li class="nav-item">
+                <a class="nav-link {% if 'consultas/placa' in request.path %}active{% endif %}" 
+                   href="{% url 'consultas:consulta_placa' %}">
+                    <i class="bi bi-search"></i> Consulta por Placa
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'consultas/conductor' in request.path %}active{% endif %}" 
+                   href="{% url 'consultas:consulta_conductor' %}">
+                    <i class="bi bi-person-search"></i> Consulta de Conductor
+                </a>
+            </li>
+            
+            <div class="sidebar-header mt-3">
+                <h6>Reportes</h6>
+            </div>
+            
+            <li class="nav-item">
+                <a class="nav-link {% if 'reportes' in request.path and 'estadisticas' not in request.path %}active{% endif %}" 
+                   href="{% url 'reportes:index' %}">
+                    <i class="bi bi-file-earmark-bar-graph"></i> Reportes
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'estadisticas' in request.path %}active{% endif %}" 
+                   href="{% url 'reportes:estadisticas' %}">
+                    <i class="bi bi-graph-up"></i> Estadísticas
+                </a>
+            </li>
+            
+            {% if user.es_admin %}
+            <div class="sidebar-header mt-3">
+                <h6>Administración</h6>
+            </div>
+            
+            <li class="nav-item">
+                <a class="nav-link {% if 'configuracion' in request.path %}active{% endif %}" 
+                   href="{% url 'configuracion:home' %}">
+                    <i class="bi bi-sliders"></i> Configuración
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'usuario' in request.path %}active{% endif %}" 
+                   href="{% url 'usuarios:usuario_list' %}">
+                    <i class="bi bi-people"></i> Usuarios
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'admin:index' %}">
+                    <i class="bi bi-gear"></i> Admin Django
+                </a>
+            </li>
+            {% endif %}
+
+            <div class="sidebar-header mt-3">
+                <h6>Ayuda</h6>
+            </div>
+            <li class="nav-item">
+                <a class="nav-link {% if 'documentacion' in request.path %}active{% endif %}" 
+                   href="{% url 'documentacion:index' %}">
+                    <i class="bi bi-question-circle"></i> Manuales de Usuario
+                </a>
+            </li>
+        </ul>
+    </nav>
+    
+    <!-- Header -->
+    <header class="main-header">
+        <button class="btn btn-link d-lg-none me-2" type="button" onclick="toggleSidebar()">
+            <i class="bi bi-list fs-4"></i>
+        </button>
+        
+        <span class="brand">DRTC - Sistema de Autorizaciones</span>
+        
+        <div class="ms-auto d-flex align-items-center">
+            <!-- Campanita de Notificaciones -->
+            <div class="dropdown me-3">
+                <button class="btn btn-link position-relative p-0" type="button" 
+                        data-bs-toggle="dropdown" aria-expanded="false" id="notificaciones-dropdown">
+                    <i class="bi bi-bell fs-5 text-secondary"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notificaciones-badge" 
+                          style="display: none; font-size: 0.65rem;">
+                        0
+                    </span>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end shadow" style="width: 350px; max-height: 400px; overflow-y: auto;">
+                    <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+                        <h6 class="mb-0">Notificaciones</h6>
+                        <a href="{% url 'notificaciones:lista' %}" class="small text-decoration-none">Ver todas</a>
+                    </div>
+                    <div id="notificaciones-lista">
+                        <div class="text-center py-3 text-muted">
+                            <i class="bi bi-bell-slash"></i>
+                            <p class="mb-0 small">Cargando...</p>
+                        </div>
+                    </div>
+                    <div class="border-top px-3 py-2">
+                        <button class="btn btn-sm btn-outline-secondary w-100" id="btn-marcar-todas-dropdown" style="display: none;">
+                            <i class="bi bi-check2-all me-1"></i>Marcar todas como leídas
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <span class="badge bg-secondary me-3">{{ user.get_rol_display }}</span>
+            
+            <div class="dropdown">
+                <button class="btn btn-link dropdown-toggle text-decoration-none" type="button" 
+                        data-bs-toggle="dropdown">
+                    <i class="bi bi-person-circle me-1"></i>
+                    {{ user.get_full_name }}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="{% url 'usuarios:perfil' %}">
+                        <i class="bi bi-person me-2"></i>Mi Perfil
+                    </a></li>
+                    <li><a class="dropdown-item" href="{% url 'usuarios:cambiar_password' %}">
+                        <i class="bi bi-key me-2"></i>Cambiar Contraseña
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form method="post" action="{% url 'usuarios:logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="dropdown-item text-danger">
+                                <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content">
+        <div class="container-fluid">
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{% if 'error' in message.tags %}danger{% elif 'success' in message.tags %}success{% elif 'warning' in message.tags %}warning{% else %}info{% endif %} alert-dismissible fade show" role="alert">
+                {% if 'safe' in message.tags %}
+                    {{ message|safe }}
+                {% else %}
+                    {{ message }}
+                {% endif %}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+            
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+    
+    {% else %}
+    <!-- Contenido para usuarios no autenticados -->
+    <main class="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+        <div class="container">
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+            
+            {% block content_noauth %}{% endblock %}
+        </div>
+    </main>
+    {% endif %}
+    
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('show');
+        }
+        
+        // ==========================================
+        // Sistema de Notificaciones
+        // ==========================================
+        {% if user.is_authenticated %}
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarNotificaciones();
+            // Actualizar notificaciones cada 60 segundos
+            setInterval(cargarNotificaciones, 60000);
+        });
+        
+        function cargarNotificaciones() {
+            fetch('/notificaciones/api/no-leidas/')
+            .then(response => response.json())
+            .then(data => {
+                const badge = document.querySelector('.notificaciones-badge');
+                const lista = document.getElementById('notificaciones-lista');
+                const btnMarcarTodas = document.getElementById('btn-marcar-todas-dropdown');
+                
+                // Actualizar badge
+                if (data.count > 0) {
+                    badge.textContent = data.count > 99 ? '99+' : data.count;
+                    badge.style.display = 'inline';
+                    btnMarcarTodas.style.display = 'block';
+                } else {
+                    badge.style.display = 'none';
+                    btnMarcarTodas.style.display = 'none';
+                }
+                
+                // Actualizar lista
+                if (data.notificaciones && data.notificaciones.length > 0) {
+                    let html = '';
+                    data.notificaciones.forEach(n => {
+                        const iconClass = getIconClass(n.tipo);
+                        const bgClass = getBgClass(n.prioridad);
+                        html += `
+                            <a href="${n.url || '#'}" class="dropdown-item py-2 border-bottom" 
+                               onclick="marcarNotificacionLeida(${n.id})">
+                                <div class="d-flex align-items-start">
+                                    <span class="badge ${bgClass} rounded-circle p-2 me-2">
+                                        <i class="bi ${iconClass}"></i>
+                                    </span>
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold small">${n.titulo}</div>
+                                        <div class="text-muted small text-truncate" style="max-width: 250px;">${n.mensaje}</div>
+                                        <div class="text-muted small"><i class="bi bi-clock me-1"></i>${n.tiempo_relativo}</div>
+                                    </div>
+                                </div>
+                            </a>
+                        `;
+                    });
+                    lista.innerHTML = html;
+                } else {
+                    lista.innerHTML = `
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-bell-slash fs-3"></i>
+                            <p class="mb-0 small mt-2">No hay notificaciones nuevas</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error al cargar notificaciones:', error);
+            });
+        }
+        
+        function getIconClass(tipo) {
+            const icons = {
+                'tramite_recibido': 'bi-file-earmark-plus',
+                'tramite_subsanado': 'bi-arrow-repeat',
+                'tramite_aprobado': 'bi-check-lg',
+                'tramite_denegado': 'bi-x-lg',
+                'tramite_observado': 'bi-exclamation-lg',
+                'tramite_evaluacion': 'bi-clipboard-check',
+                'tramite_legal': 'bi-file-earmark-text',
+                'tramite_firma': 'bi-pen',
+                'venc_autorizacion': 'bi-clock',
+                'venc_soat': 'bi-shield-exclamation',
+                'venc_citv': 'bi-car-front',
+                'venc_licencia': 'bi-person-badge',
+            };
+            return icons[tipo] || 'bi-bell';
+        }
+        
+        function getBgClass(prioridad) {
+            const classes = {
+                'urgente': 'bg-danger',
+                'alta': 'bg-warning',
+                'media': 'bg-info',
+                'baja': 'bg-secondary'
+            };
+            return classes[prioridad] || 'bg-info';
+        }
+        
+        function marcarNotificacionLeida(id) {
+            fetch(`/notificaciones/api/marcar-leida/${id}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            }).then(() => cargarNotificaciones());
+        }
+        
+        document.getElementById('btn-marcar-todas-dropdown')?.addEventListener('click', function(e) {
+            e.stopPropagation();
+            fetch('/notificaciones/api/marcar-todas-leidas/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            }).then(() => cargarNotificaciones());
+        });
+        {% endif %}
+    </script>
+    
+    <script src="{% static 'js/cascading_selects.js' %}"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

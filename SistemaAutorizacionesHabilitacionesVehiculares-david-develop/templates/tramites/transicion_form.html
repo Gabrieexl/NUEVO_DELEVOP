@@ -1,0 +1,461 @@
+{% extends 'base.html' %}
+{% load tramites_filters %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>{{ titulo }}</h2>
+    <a href="{% url 'tramites:detalle' tramite.pk %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Volver al Trámite
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{{ titulo }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <strong>Expediente:</strong> {{ tramite.numero_expediente }}<br>
+                    <strong>Estado Actual:</strong> {{ tramite.get_estado_display }}<br>
+                    <strong>Tipo:</strong> {{ tramite.get_tipo_tramite_display }}
+                </div>
+
+                {% if tramite.estado == 'OBSERVADO' %}
+                <div class="card border-warning mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Observaciones a Subsanar</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-1"><strong>Detalle:</strong></p>
+                        <div class="bg-light p-2 rounded mb-2 small">
+                            {{ tramite.observaciones_tecnicas|default:tramite.observaciones_legales|format_comentario_rol|default:"No hay detalles registrados." }}
+                        </div>
+                        {% if tramite.plazo_subsanacion %}
+                        <p class="mb-0 small"><strong>Plazo:</strong> {{ tramite.plazo_subsanacion|date:"d/m/Y" }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    
+                    {% if es_subsanacion or es_observacion %}
+                    <!-- SUBSANACION / OBSERVACION: Mostrar campos personalizados -->
+                    {% if es_subsanacion %}
+                    <div class="alert alert-info mb-4">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Modo Subsanación:</strong> Aquí puede escribir los detalles de cómo se subsanaron las observaciones.
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning mb-4">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Modo Observación:</strong> Registre aquí las observaciones encontradas y especifique a qué rol va dirigida la subsanación.
+                    </div>
+                    {% endif %}
+                    
+                    {% if form.observaciones %}
+                    <div class="mb-3">
+                        <label class="form-label">Observaciones{{ form.observaciones.field.required|yesno:" *," }}</label>
+                        {{ form.observaciones }}
+                        {% if form.observaciones.help_text %}
+                        <small class="text-muted d-block">{{ form.observaciones.help_text|safe }}</small>
+                        {% endif %}
+                        {% if form.observaciones.errors %}
+                        <div class="text-danger small">{{ form.observaciones.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    {% if form.plazo_subsanacion %}
+                    <div class="mb-3">
+                        <label class="form-label">Plazo para Subsanar{{ form.plazo_subsanacion.field.required|yesno:" *," }}</label>
+                        {{ form.plazo_subsanacion }}
+                        {% if form.plazo_subsanacion.help_text %}
+                        <small class="text-muted d-block">{{ form.plazo_subsanacion.help_text|safe }}</small>
+                        {% endif %}
+                        {% if form.plazo_subsanacion.errors %}
+                        <div class="text-danger small">{{ form.plazo_subsanacion.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    {% if form.rol_proximo_responsable and not es_subsanacion %}
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Rol Responsable de Subsanación{{ form.rol_proximo_responsable.field.required|yesno:" *," }}
+                        </label>
+                        {{ form.rol_proximo_responsable }}
+                        {% if form.rol_proximo_responsable.help_text %}
+                        <small class="text-muted d-block">{{ form.rol_proximo_responsable.help_text|safe }}</small>
+                        {% endif %}
+                        {% if form.rol_proximo_responsable.errors %}
+                        <div class="text-danger small">{{ form.rol_proximo_responsable.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    {% if es_subsanacion %}
+                    {% if form.comentario %}
+                    <div class="mb-3">
+                        <label class="form-label">Descripción de la Subsanación{{ form.comentario.field.required|yesno:" *," }}</label>
+                        {{ form.comentario }}
+                        {% if form.comentario.help_text %}
+                        <small class="text-muted d-block">{{ form.comentario.help_text|safe }}</small>
+                        {% endif %}
+                        {% if form.comentario.errors %}
+                        <div class="text-danger small">{{ form.comentario.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                    {% else %}
+                    <!-- OTROS PROCESOS: Mostrar campos del formulario normalmente -->
+                    {% for field in form %}
+                        {% if tipo_tramite == 'RENOVACION_TUC' %}
+                            <!-- RENOVACION_TUC: Campos de Expediente -->
+                            {% if field.name == 'numero_resolucion' %}
+                            <div class="mb-3">
+                                <label class="form-label">Número de Expediente {% if field.field.required %}*{% endif %}</label>
+                                <input type="text" class="form-control" value="{{ tramite.numero_expediente }}" readonly>
+                                <input type="hidden" name="numero_resolucion" value="{{ tramite.numero_expediente }}">
+                                <small class="text-muted">Se utiliza el número de expediente del trámite.</small>
+                            </div>
+                            {% elif field.name == 'fecha_resolucion' %}
+                            <div class="mb-3">
+                                <label class="form-label">Fecha Expediente{% if field.field.required %} *{% endif %}</label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                <small class="text-muted">Fecha del expediente</small>
+                                {% endif %}
+                                {% if field.errors %}
+                                <div class="text-danger small">{{ field.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            {% elif field.name == 'archivo_resolucion' %}
+                            <div class="mb-3">
+                                <label class="form-label">Archivo Expediente{% if field.field.required %} *{% endif %}</label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                <small class="text-muted">Adjuntar expediente (PDF)</small>
+                                {% endif %}
+                                {% if field.errors %}
+                                <div class="text-danger small">{{ field.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <div class="mb-3">
+                                <label class="form-label">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                <small class="text-muted">{{ field.help_text }}</small>
+                                {% endif %}
+                                {% if field.errors %}
+                                <div class="text-danger small">{{ field.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        {% else %}
+                            <!-- OTROS TIPOS DE TRÁMITE: Campos normales de Resolución -->
+                            <div class="mb-3">
+                                <label class="form-label">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                <small class="text-muted">{{ field.help_text }}</small>
+                                {% endif %}
+                                {% if field.errors %}
+                                <div class="text-danger small">{{ field.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    {% endif %}
+
+                    {% if tuc_formset %}
+                    <div class="mt-4 mb-4">
+                        <h5 class="border-bottom pb-2">Registro de TUCs por Vehículo</h5>
+                        {% if tipo_tramite == 'INCREMENTO_FLOTA' or tipo_tramite == 'AUTORIZACION_INICIAL' %}
+                        <p class="text-muted small">Registre las vigencias para cada vehículo antes de finalizar el trámite. El número de TUC y la expedición son opcionales.</p>
+                        {% else %}
+                        <p class="text-muted small">Debe registrar el número de TUC y vigencias para cada vehículo antes de finalizar el trámite.</p>
+                        {% endif %}
+                        
+                        {{ tuc_formset.management_form }}
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered align-middle">
+                                <thead class="table-light text-center">
+                                    <tr>
+                                        <th style="min-width: 150px;">Vehículo</th>
+                                        <th style="min-width: 120px;">N° TUC{% if tipo_tramite != 'INCREMENTO_FLOTA' and tipo_tramite != 'AUTORIZACION_INICIAL' %} *{% endif %}</th>
+                                        <th style="min-width: 150px;">Expedición{% if tipo_tramite != 'INCREMENTO_FLOTA' and tipo_tramite != 'AUTORIZACION_INICIAL' %} *{% endif %}</th>
+                                        {% if tipo_tramite == 'RENOVACION_TUC' %}
+                                        <th style="min-width: 180px;">Fecha Autorizacion Transportista *</th>
+                                        <th style="min-width: 180px;">Fecha Expiracion Transportista *</th>
+                                        {% else %}
+                                        <th style="min-width: 150px;">Inicio Aut. *</th>
+                                        <th style="min-width: 150px;">Venc. Aut. *</th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for tuc_form in tuc_formset %}
+                                    <tr>
+                                        <td>
+                                            {% for hidden in tuc_form.hidden_fields %}
+                                                {{ hidden }}
+                                            {% endfor %}
+                                            <span class="fw-bold">
+                                                {% if tuc_form.instance.placa_nueva %}
+                                                    {{ tuc_form.instance.placa_nueva }}
+                                                {% elif tuc_form.instance.vehiculo_existente %}
+                                                    {{ tuc_form.instance.vehiculo_existente.placa }}
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </span>
+                                            <br><small class="text-muted">{{ tuc_form.instance.marca }}</small>
+                                        </td>
+                                        <td>
+                                            {{ tuc_form.numero_tuc }}
+                                            {% if tuc_form.numero_tuc.errors %}
+                                            <div class="text-danger x-small">{{ tuc_form.numero_tuc.errors.0 }}</div>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {{ tuc_form.fecha_expedicion_tuc }}
+                                            {% if tuc_form.fecha_expedicion_tuc.errors %}
+                                            <div class="text-danger x-small">{{ tuc_form.fecha_expedicion_tuc.errors.0 }}</div>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {{ tuc_form.fecha_autorizacion_transportista }}
+                                            {% if tuc_form.fecha_autorizacion_transportista.errors %}
+                                            <div class="text-danger x-small">{{ tuc_form.fecha_autorizacion_transportista.errors.0 }}</div>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {{ tuc_form.fecha_expiracion_transportista }}
+                                            {% if tuc_form.fecha_expiracion_transportista.errors %}
+                                            <div class="text-danger x-small">{{ tuc_form.fecha_expiracion_transportista.errors.0 }}</div>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // Configurar cálculo automático de fecha de vencimiento para TUCs
+                        const inicioInputs = document.querySelectorAll('input[data-tuc-inicio]');
+                        
+                        inicioInputs.forEach(function(inicioInput) {
+                            // Encontrar el campo de vencimiento correspondiente en la misma fila
+                            const row = inicioInput.closest('tr');
+                            const vencimientoInput = row ? row.querySelector('input[data-tuc-vencimiento]') : null;
+                            
+                            if (vencimientoInput) {
+                                // Función para calcular fecha + 1 año SIN problemas de zona horaria
+                                function calcularVencimiento() {
+                                    const fechaStr = inicioInput.value;
+                                    if (fechaStr) {
+                                        // Parsear directamente el string YYYY-MM-DD
+                                        const partes = fechaStr.split('-');
+                                        if (partes.length === 3) {
+                                            let año = parseInt(partes[0], 10);
+                                            let mes = partes[1];
+                                            let día = partes[2];
+                                            
+                                            // Sumar 1 año
+                                            año += 1;
+                                            
+                                            // Formatear como YYYY-MM-DD
+                                            vencimientoInput.value = `${año}-${mes}-${día}`;
+                                        }
+                                    }
+                                }
+                                
+                                // Ejecutar cuando cambie la fecha de inicio
+                                inicioInput.addEventListener('change', calcularVencimiento);
+                                
+                                // Ejecutar al cargar si ya tiene valor
+                                if (inicioInput.value) {
+                                    calcularVencimiento();
+                                }
+                            }
+                        });
+                    });
+                    </script>
+                    {% endif %}
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> {{ accion }}
+                        </button>
+                        <a href="{% url 'tramites:detalle' tramite.pk %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    {% if datos_tramite %}
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Datos que se Procesarán</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">
+                    Al aprobar este trámite, se crearán/actualizarán las siguientes entidades:
+                </p>
+                
+                <h6 class="text-primary">{{ tipo_tramite_display }}</h6>
+                
+                {% if datos_tramite.autorizacion %}
+                <div class="mb-3">
+                    <strong>Autorización:</strong>
+                    <ul class="list-unstyled ms-3">
+                        {% if datos_tramite.autorizacion.tipo_servicio %}
+                        <li><small>Tipo Servicio: {{ datos_tramite.autorizacion.tipo_servicio }}</small></li>
+                        {% endif %}
+                        {% if datos_tramite.autorizacion.modalidad %}
+                        <li><small>Modalidad: {{ datos_tramite.autorizacion.modalidad }}</small></li>
+                        {% endif %}
+                        {% if datos_tramite.autorizacion.ambito %}
+                        <li><small>Ámbito: {{ datos_tramite.autorizacion.ambito }}</small></li>
+                        {% endif %}
+                        {% if datos_tramite.autorizacion.fecha_inicio_vigencia %}
+                        <li><small>Vigencia: {{ datos_tramite.autorizacion.fecha_inicio_vigencia }} - {{ datos_tramite.autorizacion.fecha_fin_vigencia }}</small></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endif %}
+                
+                {% if datos_tramite.vehiculo %}
+                <div class="mb-3">
+                    <strong>Vehículo:</strong>
+                    <ul class="list-unstyled ms-3">
+                        {% if datos_tramite.vehiculo.placa %}
+                        <li><small>Placa: {{ datos_tramite.vehiculo.placa }}</small></li>
+                        {% endif %}
+                        {% if datos_tramite.vehiculo.marca %}
+                        <li><small>Marca/Modelo: {{ datos_tramite.vehiculo.marca }} {{ datos_tramite.vehiculo.modelo }}</small></li>
+                        {% endif %}
+                        {% if datos_tramite.vehiculo.anio_fabricacion %}
+                        <li><small>Año: {{ datos_tramite.vehiculo.anio_fabricacion }}</small></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endif %}
+                
+                {% if datos_tramite.conductor %}
+                <div class="mb-3">
+                    <strong>Conductor:</strong>
+                    <ul class="list-unstyled ms-3">
+                        {% if datos_tramite.conductor.dni %}
+                        <li><small>DNI: {{ datos_tramite.conductor.dni }}</small></li>
+                        {% endif %}
+                        {% if datos_tramite.conductor.nombres %}
+                        <li><small>Nombre: {{ datos_tramite.conductor.nombres }} {{ datos_tramite.conductor.apellido_paterno }}</small></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endif %}
+                
+                <div class="alert alert-warning mt-3">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <small>Esta acción creará registros en la base de datos que afectarán las autorizaciones, vehículos o conductores de la empresa.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ===== INFERIR CATEGORÍA Y CARGAR CARROCERÍAS =====
+    const capacidadInput = document.querySelector('input[name="capacidad_sentados"]') || document.querySelector('input[name="capacidad_pasajeros"]');
+    const pesoInput = document.querySelector('input[name="peso_bruto"]');
+    const categoriaSelect = document.querySelector('select[name="categoria"]');
+    const carroceriaSelect = document.querySelector('select[name="carroceria"]');
+
+    async function cargarCarrocerias(categoriaId) {
+        if (!carroceriaSelect) return;
+        
+        if (!categoriaId) {
+            carroceriaSelect.innerHTML = '<option value="">---------</option>';
+            return;
+        }
+
+        try {
+            const response = await fetch(`/configuracion/api/carrocerias/?categoria_id=${categoriaId}`);
+            const data = await response.json();
+            
+            carroceriaSelect.innerHTML = '<option value="">---------</option>';
+            data.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = item.nombre;
+                carroceriaSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error al cargar carrocerías:', error);
+        }
+    }
+
+    if (categoriaSelect) {
+        categoriaSelect.addEventListener('change', function() {
+            cargarCarrocerias(this.value);
+        });
+    }
+
+    if (capacidadInput && categoriaSelect) {
+        function inferirCategoria() {
+            const capacidad = parseInt(capacidadInput.value) || 0;
+            const peso = parseFloat(pesoInput.value) || 0;
+            
+            if (capacidad === 0) return;
+
+            let sugerencia = "";
+            
+            if (capacidad <= 8) {
+                sugerencia = "M1";
+            } else {
+                if (peso > 0) {
+                    if (peso <= 5000) {
+                        sugerencia = "M2";
+                    } else {
+                        sugerencia = "M3";
+                    }
+                } else {
+                    sugerencia = "M2";
+                }
+            }
+
+            if (sugerencia) {
+                for (let i = 0; i < categoriaSelect.options.length; i++) {
+                    if (categoriaSelect.options[i].text.toUpperCase().includes(sugerencia)) {
+                        if (categoriaSelect.selectedIndex !== i) {
+                            categoriaSelect.selectedIndex = i;
+                            categoriaSelect.dispatchEvent(new Event('change'));
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        capacidadInput.addEventListener('input', inferirCategoria);
+        if (pesoInput) pesoInput.addEventListener('input', inferirCategoria);
+    }
+});
+</script>
+{% endblock %}

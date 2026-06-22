@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Centro de Documentación - DRTC{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-book me-2"></i>Centro de Documentación
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Documentación</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card shadow-sm border-0 bg-primary text-white">
+            <div class="card-body p-4">
+                <h4 class="mb-2">¿Cómo podemos ayudarte hoy?</h4>
+                <p class="mb-0">Explora los manuales detallados del sistema para optimizar tu trabajo diario.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manual de Usuarios -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body text-center p-4">
+                <div class="mb-3 text-primary">
+                    <i class="bi bi-people" style="font-size: 3rem;"></i>
+                </div>
+                <h5>Módulo de Usuarios</h5>
+                <p class="text-muted">Gestión de personal, roles, permisos y seguridad de acceso.</p>
+                <a href="{% url 'documentacion:usuarios' %}" class="btn btn-outline-primary mt-auto">Ver Manual</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manual de Configuración -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body text-center p-4">
+                <div class="mb-3 text-success">
+                    <i class="bi bi-gear" style="font-size: 3rem;"></i>
+                </div>
+                <h5>Parámetros y Configuración</h5>
+                <p class="text-muted">Rutas, frecuencias, tipos de servicio y categorías vehiculares.</p>
+                <a href="{% url 'documentacion:configuracion' %}" class="btn btn-outline-success mt-auto">Ver Manual</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manual de Reportes -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body text-center p-4">
+                <div class="mb-3 text-info">
+                    <i class="bi bi-file-earmark-bar-graph" style="font-size: 3rem;"></i>
+                </div>
+                <h5>Reportes y Tablas</h5>
+                <p class="text-muted">Exportación a Excel, generación de PDFs y estadísticas operativas.</p>
+                <a href="{% url 'documentacion:reportes' %}" class="btn btn-outline-info mt-auto">Ver Manual</a>
+            </div>
+        </div>
+    </div>
+    <!-- Manual Operativo (NUEVO) -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body text-center p-4">
+                <div class="mb-3 text-warning">
+                    <i class="bi bi-truck-front" style="font-size: 3rem;"></i>
+                </div>
+                <h5>Operación y Trámites</h5>
+                <p class="text-muted small"><strong>Paso a Paso:</strong> Registrar Empresas, Autorizaciones, Vehículos y Conductores.</p>
+                <a href="{% url 'documentacion:operativo' %}" class="btn btn-warning mt-auto">Ir al Tutorial</a>
+            </div>
+        </div>
+    </div></div>
+{% endblock %}

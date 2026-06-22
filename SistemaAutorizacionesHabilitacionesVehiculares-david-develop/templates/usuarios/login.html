@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Iniciar Sesión - DRTC{% endblock %}
+
+{% block content_noauth %}
+<div class="row justify-content-center">
+    <div class="col-md-5 col-lg-4">
+        <div class="card shadow">
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <i class="bi bi-truck text-primary" style="font-size: 3rem;"></i>
+                    <h4 class="mt-2">DRTC</h4>
+                    <p class="text-muted">Sistema de Autorizaciones y Habilitaciones</p>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <small>Usuario o contraseña incorrectos.</small>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <label for="id_username" class="form-label">Usuario</label>
+                        {{ form.username }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_password" class="form-label">Contraseña</label>
+                        {{ form.password }}
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <p class="text-center text-muted mt-3">
+            <small>Dirección Regional de Transportes y Comunicaciones</small>
+        </p>
+    </div>
+</div>
+{% endblock %}

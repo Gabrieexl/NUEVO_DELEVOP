@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ asunto }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .email-wrapper {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a4480 0%, #2c5aa0 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .header .subtitle {
+            margin: 10px 0 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .logo-container {
+            margin-bottom: 15px;
+        }
+        .logo-placeholder {
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+        }
+        .content {
+            padding: 30px 25px;
+        }
+        .alert-box {
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+            color: #155724;
+        }
+        .alert-warning {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            color: #856404;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            border-left: 4px solid #dc3545;
+            color: #721c24;
+        }
+        .alert-info {
+            background-color: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            color: #0c5460;
+        }
+        .alert-box h2 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+        }
+        .info-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .info-row {
+            display: flex;
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #495057;
+            width: 40%;
+        }
+        .info-value {
+            color: #212529;
+            width: 60%;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #1a4480 0%, #2c5aa0 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            margin: 20px 0;
+        }
+        .btn:hover {
+            background: linear-gradient(135deg, #2c5aa0 0%, #1a4480 100%);
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 25px;
+            text-align: center;
+            border-top: 3px solid #1a4480;
+        }
+        .footer p {
+            margin: 5px 0;
+            color: #6c757d;
+            font-size: 13px;
+        }
+        .footer .institucion {
+            font-weight: 600;
+            color: #1a4480;
+            font-size: 14px;
+        }
+        .divider {
+            height: 1px;
+            background: #e9ecef;
+            margin: 25px 0;
+        }
+        .observaciones {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .observaciones h3 {
+            color: #856404;
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
+        .plazo-box {
+            background: #dc3545;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .plazo-box strong {
+            font-size: 18px;
+        }
+        @media only screen and (max-width: 600px) {
+            .content {
+                padding: 20px 15px;
+            }
+            .info-row {
+                flex-direction: column;
+            }
+            .info-label, .info-value {
+                width: 100%;
+            }
+            .info-label {
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-wrapper">
+        {% block header %}
+        <div class="header">
+            <div class="logo-container">
+                <div class="logo-placeholder">DRTC</div>
+            </div>
+            <h1>DIRECCIÓN REGIONAL DE TRANSPORTES Y COMUNICACIONES</h1>
+            <p class="subtitle">Sistema de Autorizaciones y Habilitaciones Vehiculares</p>
+        </div>
+        {% endblock %}
+        
+        <div class="content">
+            {% block content %}
+            <!-- Contenido específico del email -->
+            {% endblock %}
+        </div>
+        
+        {% block footer %}
+        <div class="footer">
+            <p class="institucion">Dirección Regional de Transportes y Comunicaciones</p>
+            <p>Este es un mensaje automático del sistema. Por favor no responda a este correo.</p>
+            <p>© {{ anio_actual }} DRTC - Todos los derechos reservados</p>
+        </div>
+        {% endblock %}
+    </div>
+</body>
+</html>

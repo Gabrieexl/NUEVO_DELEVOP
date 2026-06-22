@@ -1,0 +1,59 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<div class="alert-box alert-danger">
+    <h2>❌ Trámite Denegado</h2>
+    <p>Lamentamos informarle que su trámite ha sido denegado.</p>
+</div>
+
+<p>Estimado(a) <strong>{{ nombre_solicitante }}</strong>,</p>
+
+<p>Le comunicamos que, luego de la evaluación correspondiente, su trámite ha sido <strong>DENEGADO</strong>.</p>
+
+<div class="info-card">
+    <div class="info-row">
+        <span class="info-label">N° Expediente:</span>
+        <span class="info-value"><strong>{{ numero_expediente }}</strong></span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Tipo de Trámite:</span>
+        <span class="info-value">{{ tipo_tramite }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Estado:</span>
+        <span class="info-value"><span style="color: #dc3545; font-weight: bold;">{{ estado }}</span></span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Fecha:</span>
+        <span class="info-value">{{ fecha }}</span>
+    </div>
+</div>
+
+{% if comentario %}
+<div class="observaciones" style="background: #f8d7da; border-color: #dc3545;">
+    <h3 style="color: #721c24;">📋 Motivo de Denegación:</h3>
+    <p style="color: #721c24;">{{ comentario }}</p>
+</div>
+{% endif %}
+
+<div class="divider"></div>
+
+<h3>📋 Información Importante:</h3>
+<ul>
+    <li>La resolución de denegación se encuentra disponible para su recojo en nuestras oficinas.</li>
+    <li>Tiene derecho a presentar recurso de reconsideración dentro de los 15 días hábiles siguientes a la notificación.</li>
+    <li>También puede presentar recurso de apelación dentro del mismo plazo.</li>
+</ul>
+
+<p style="background: #f8d7da; padding: 15px; border-radius: 8px; border-left: 4px solid #dc3545; color: #721c24;">
+    <strong>⚠️ Nota:</strong> Los recursos impugnatorios deben ser presentados por escrito, fundamentando los motivos del recurso y adjuntando la documentación sustentatoria.
+</p>
+
+<div class="divider"></div>
+
+<p>Si considera que hubo un error en la evaluación o desea mayor información, puede acercarse a nuestras oficinas.</p>
+
+<p>Atentamente,</p>
+<p><strong>Dirección de Transporte Terrestre</strong><br>
+DRTC</p>
+{% endblock %}

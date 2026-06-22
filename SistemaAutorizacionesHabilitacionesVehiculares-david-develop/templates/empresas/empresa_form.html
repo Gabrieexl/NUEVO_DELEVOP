@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>{{ titulo }}</h2>
+    <a href="{% url 'empresas:lista' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{{ accion }} Empresa</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">RUC *</label>
+                            {{ form.ruc }}
+                            {% if form.ruc.errors %}
+                            <div class="text-danger small">{{ form.ruc.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Estado *</label>
+                            {{ form.estado }}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Razón Social *</label>
+                            {{ form.razon_social }}
+                            {% if form.razon_social.errors %}
+                            <div class="text-danger small">{{ form.razon_social.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Nombre Comercial</label>
+                            {{ form.nombre_comercial }}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Domicilio Fiscal *</label>
+                        {{ form.domicilio_fiscal }}
+                    </div>
+                    
+                    <hr>
+                    <h6 class="text-muted mb-3">Representante Legal</h6>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nombre Completo *</label>
+                            {{ form.representante_legal }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">DNI *</label>
+                            {{ form.dni_representante }}
+                            {% if form.dni_representante.errors %}
+                            <div class="text-danger small">{{ form.dni_representante.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    <h6 class="text-muted mb-3">Datos de Contacto</h6>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Teléfono</label>
+                            {{ form.telefono }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            {{ form.email }}
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> {{ accion }}
+                        </button>
+                        <a href="{% url 'empresas:lista' %}" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Información</h6>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted">
+                    <strong>RUC:</strong> Registro Único de Contribuyentes, debe tener 11 dígitos.
+                </p>
+                <p class="small text-muted">
+                    <strong>DNI:</strong> Documento Nacional de Identidad, debe tener 8 dígitos.
+                </p>
+                <p class="small text-muted">
+                    Los campos marcados con * son obligatorios.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Función reutilizable para validar solo números
+    function configurarCampoNumerico(selector) {
+        const input = document.querySelector(selector);
+        if (input) {
+            input.addEventListener('input', function(e) {
+                // Remover caracteres no numéricos
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+            
+            // Bloquear pegado de caracteres no numéricos
+            input.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const pasteText = (e.clipboardData || window.clipboardData).getData('text');
+                const numericText = pasteText.replace(/[^0-9]/g, '');
+                this.value = numericText;
+            });
+        }
+    }
+    
+    // Aplicar validación a campos numéricos
+    configurarCampoNumerico('input[name="ruc"]');
+    configurarCampoNumerico('input[name="telefono"]');
+    configurarCampoNumerico('input[name="dni_representante"]');
+});
+</script>
+{% endblock %}

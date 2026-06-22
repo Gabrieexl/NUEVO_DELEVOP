@@ -1,0 +1,78 @@
+{% if tramites %}
+<div class="table-responsive">
+    <table class="table table-hover mb-0">
+        <thead class="table-light">
+            <tr>
+                <th>Expediente</th>
+                <th>Tipo</th>
+                <th>Empresa / Solicitante</th>
+                <th>Estado</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tramite in tramites %}
+            <tr>
+                <td>
+                    <a href="{% url 'tramites:detalle' tramite.pk %}?next={{ request.get_full_path|urlencode }}">
+                        <strong>{{ tramite.numero_expediente }}</strong>
+                    </a>
+                </td>
+                <td>{{ tramite.get_tipo_tramite_display }}</td>
+                <td>
+                    {% if tramite.empresa %}
+                    <a href="{% url 'empresas:detalle' tramite.empresa.pk %}">
+                        {{ tramite.empresa.razon_social|truncatechars:30 }}
+                    </a>
+                    {% elif tramite.solicitante_nombres %}
+                    <span class="text-dark">{{ tramite.solicitante_nombres|truncatechars:30 }}</span>
+                    {% else %}
+                    <span class="text-muted">-</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if tramite.estado == 'RECIBIDO' %}
+                    <span class="badge bg-info">{{ tramite.get_estado_display }}</span>
+                    {% elif tramite.estado == 'EN_EVAL_TECNICA' %}
+                    <span class="badge bg-primary">{{ tramite.get_estado_display }}</span>
+                    {% elif tramite.estado == 'EN_DIRECCION_ADMINISTRATIVA' %}
+                    <span class="badge bg-warning text-dark">{{ tramite.get_estado_display }}</span>
+                    {% elif tramite.estado == 'EN_DIRECCION_GENERAL' %}
+                    <span class="badge bg-info text-dark">{{ tramite.get_estado_display }}</span>
+                    {% elif tramite.estado == 'OBSERVADO' %}
+                    <span class="badge bg-warning text-dark">{{ tramite.get_estado_display }}</span>
+                    {% elif tramite.estado == 'EN_REVISION_LEGAL' %}
+                    <span class="badge bg-secondary">{{ tramite.get_estado_display }}</span>
+                    {% elif tramite.estado == 'PENDIENTE_FIRMA' %}
+                    <span class="badge bg-dark">{{ tramite.get_estado_display }}</span>
+                    {% elif tramite.estado == 'APROBADO' %}
+                    <span class="badge bg-success">{{ tramite.get_estado_display }}</span>
+                    {% elif tramite.estado == 'DENEGADO' %}
+                    <span class="badge bg-danger">{{ tramite.get_estado_display }}</span>
+                    {% else %}
+                    <span class="badge bg-secondary">{{ tramite.get_estado_display }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ tramite.fecha_creacion|date:"d/m/Y" }}</td>
+                <td>
+                    <a href="{% url 'tramites:detalle' tramite.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-primary" title="Ver">
+                        <i class="bi bi-eye"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="text-center text-muted py-5">
+    <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+    <p class="mt-2">No hay trámites pendientes</p>
+    {% if usuario.puede_crear_tramites %}
+    <a href="{% url 'tramites:crear' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Crear Nuevo Trámite
+    </a>
+    {% endif %}
+</div>
+{% endif %}

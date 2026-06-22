@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }} - DRTC{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-person-badge me-2"></i>{{ titulo }}
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'tramites:lista' %}">Tramites</a></li>
+<li class="breadcrumb-item"><a href="{% url 'tramites:detalle' tramite.pk %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">{{ tramite.numero_expediente }}</a></li>
+<li class="breadcrumb-item active">Agregar Conductor</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-person-badge me-2"></i>{{ titulo }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <strong>Tramite:</strong> {{ tramite.numero_expediente }} - {{ tramite.get_tipo_tramite_display }}
+                    {% if tramite.autorizacion %}
+                    <br><strong>Autorizacion:</strong> {{ tramite.autorizacion.numero_resolucion }}
+                    {% endif %}
+                    {% if tramite.empresa %}
+                    <br><strong>Empresa:</strong> {{ tramite.empresa.razon_social }}
+                    {% endif %}
+                </div>
+
+                {% if conductores_existentes %}
+                <div class="alert alert-warning">
+                    <strong><i class="bi bi-info-circle me-1"></i>Conductores actualmente habilitados:</strong>
+                    <ul class="mb-0 mt-2">
+                        {% for c in conductores_existentes %}
+                        <li>{{ c.dni }} - {{ c.nombre_completo }} ({{ c.licencia_categoria }})</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if form.warnings %}
+                <div class="alert alert-warning">
+                    <ul class="mb-0">
+                        {% for warning in form.warnings %}
+                        <li><i class="bi bi-exclamation-triangle me-2"></i>{{ warning }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <h6 class="text-primary mb-3"><i class="bi bi-person me-1"></i>Datos Personales</h6>
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">DNI <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                {{ form.dni }}
+                                <button class="btn btn-outline-secondary" type="button" id="btn-verificar-dni">
+                                    <i class="bi bi-search"></i> Verificar
+                                </button>
+                            </div>
+                            {% if form.dni.errors %}
+                            <div class="text-danger small">{{ form.dni.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Nombres <span class="text-danger">*</span></label>
+                            {{ form.nombres }}
+                            {% if form.nombres.errors %}
+                            <div class="text-danger small">{{ form.nombres.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Apellido Paterno <span class="text-danger">*</span></label>
+                            {{ form.apellido_paterno }}
+                            {% if form.apellido_paterno.errors %}
+                            <div class="text-danger small">{{ form.apellido_paterno.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Apellido Materno <span class="text-danger">*</span></label>
+                            {{ form.apellido_materno }}
+                            {% if form.apellido_materno.errors %}
+                            <div class="text-danger small">{{ form.apellido_materno.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Fecha de Nacimiento <span class="text-danger">*</span></label>
+                            {{ form.fecha_nacimiento }}
+                            {% if form.fecha_nacimiento.errors %}
+                            <div class="text-danger small">{{ form.fecha_nacimiento.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        {% if tramite.tipo_tramite == 'INCREMENTO_FLOTA' %}
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Estado <span class="text-danger">*</span></label>
+                            {{ form.estado }}
+                            {% if form.estado.errors %}
+                            <div class="text-danger small">{{ form.estado.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Telefono</label>
+                            {{ form.telefono }}
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Email</label>
+                            {{ form.email }}
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Direccion</label>
+                            {{ form.direccion }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <hr>
+
+                    <h6 class="text-primary mb-3"><i class="bi bi-card-text me-1"></i>Licencia de Conducir</h6>
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">N Licencia <span class="text-danger">*</span></label>
+                            {{ form.licencia_numero }}
+                            {% if form.licencia_numero.errors %}
+                            <div class="text-danger small">{{ form.licencia_numero.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Categoria <span class="text-danger">*</span></label>
+                            {{ form.licencia_categoria }}
+                            {% if tramite.tipo_tramite == 'INCREMENTO_FLOTA' %}
+                            <small class="text-muted">Ej: AI, AII, AIII, etc.</small>
+                            {% endif %}
+                            {% if form.licencia_categoria.errors %}
+                            <div class="text-danger small">{{ form.licencia_categoria.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Fecha de Emision <span class="text-danger">*</span></label>
+                            {{ form.licencia_fecha_emision }}
+                            {% if form.licencia_fecha_emision.errors %}
+                            <div class="text-danger small">{{ form.licencia_fecha_emision.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Fecha de Vencimiento <span class="text-danger">*</span></label>
+                            {{ form.licencia_fecha_vencimiento }}
+                            {% if form.licencia_fecha_vencimiento.errors %}
+                            <div class="text-danger small">{{ form.licencia_fecha_vencimiento.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if tramite.tipo_tramite != 'INCREMENTO_FLOTA' %}
+                    <div class="mb-3">
+                        <label class="form-label">Observaciones</label>
+                        {{ form.observaciones }}
+                    </div>
+                    {% endif %}
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'tramites:detalle' tramite.pk %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>Guardar Conductor
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dniInput = document.getElementById('id_dni');
+
+    if (dniInput) {
+        function configurarCampoDNI(input) {
+            input.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+                if (this.value.length > 8) {
+                    this.value = this.value.slice(0, 8);
+                }
+            });
+            input.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const pasteText = (e.clipboardData || window.clipboardData).getData('text');
+                let pasteNumeric = pasteText.replace(/[^0-9]/g, '');
+                if (pasteNumeric.length > 8) {
+                    pasteNumeric = pasteNumeric.slice(0, 8);
+                }
+                this.value = pasteNumeric;
+            });
+        }
+
+        configurarCampoDNI(dniInput);
+    }
+});
+</script>
+{% include 'includes/verificar_dni_script.html' %}
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}Manual de Usuarios - DRTC{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-people me-2"></i>Manual del Módulo de Usuarios
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'documentacion:index' %}">Documentación</a></li>
+<li class="breadcrumb-item active">Usuarios</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="card shadow-sm sticky-top" style="top: 80px;">
+            <div class="card-header bg-light text-primary fw-bold">
+                Índice
+            </div>
+            <div class="list-group list-group-flush small">
+                <a href="#proceso-creacion" class="list-group-item list-group-item-action">1. Crear Nuevo Usuario</a>
+                <a href="#roles-detalle" class="list-group-item list-group-item-action">2. Roles y Permisos</a>
+                <a href="#gestion-perfil" class="list-group-item list-group-item-action">3. Gestión de Mi Perfil</a>
+                <a href="#desactivacion" class="list-group-item list-group-item-action">4. Activar/Desactivar Acceso</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body p-4">
+                <section id="proceso-creacion" class="mb-5">
+                    <h4 class="border-bottom pb-2 text-primary"><i class="bi bi-person-plus me-2"></i>1. Paso a Paso: Cómo Registrar un Nuevo Usuario</h4>
+                    <p>Siga estas instrucciones para dar de alta a un nuevo trabajador en el sistema:</p>
+                    <div class="card bg-light border-0 mb-3">
+                        <div class="card-body">
+                            <ol class="mb-0">
+                                <li class="mb-2"><strong>Navegación:</strong> En el menú lateral izquierdo, busque la sección <strong>Administración</strong> y haga clic en <strong>Usuarios</strong> (o Gestión de Personal).</li>
+                                <li class="mb-2"><strong>Acción:</strong> En la parte superior derecha de la lista de usuarios, haga clic en el botón azul <span class="badge bg-primary"><i class="bi bi-plus"></i> Crear Usuario</span>.</li>
+                                <li class="mb-2"><strong>Identificación:</strong> 
+                                    <ul>
+                                        <li><strong>Usuario:</strong> Ingrese el DNI o un código corto único.</li>
+                                        <li><strong>Email:</strong> Ingrese el correo institucional (necesario para notificaciones).</li>
+                                    </ul>
+                                </li>
+                                <li class="mb-2"><strong>Asignación de Cargo:</strong> Seleccione el <strong>Rol</strong> en el menú desplegable. Esto determinará qué botones verá el usuario (ej: Mesa de partes solo ve registro, Director solo ve firma).</li>
+                                <li class="mb-2"><strong>Finalizar:</strong> Revise que los nombres y apellidos estén correctamente escritos (se usarán en documentos oficiales) y presione <strong>Guardar Usuario</strong>.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="roles-detalle" class="mb-5">
+                    <h4 class="border-bottom pb-2 text-primary"><i class="bi bi-shield-check me-2"></i>2. Definición de Roles (Paso a Paso)</h4>
+                    <p>Al registrar, debe seleccionar uno de estos perfiles según la función laboral:</p>
+                    <ul>
+                        <li class="mb-2"><strong>Mesa de Partes:</strong> Solo registra expedientes y recibe documentos. No puede evaluar ni aprobar.</li>
+                        <li class="mb-2"><strong>Especialista Técnico:</strong> Recibe trámites para revisión de flota y rutas. Emite informes técnicos.</li>
+                        <li class="mb-2"><strong>Asesoría Legal:</strong> Revisa el cumplimiento normativo y redacta proyectos de resolución.</li>
+                        <li class="mb-2"><strong>Director:</strong> Revisión final y firma electrónica/digital de la resolución.</li>
+                    </ul>
+                </section>
+
+                <section id="gestion-perfil" class="mb-5">
+                    <h4 class="border-bottom pb-2 text-primary"><i class="bi bi-person-circle me-2"></i>3. Cómo Gestionar Mi Propio Perfil</h4>
+                    <p>Cada usuario es responsable de su seguridad:</p>
+                    <ol>
+                        <li>Haga clic en su nombre en la barra superior (derecha).</li>
+                        <li>Seleccione <strong>Mi Perfil</strong>.</li>
+                        <li><strong>Cambio de Password:</strong> Presione el botón de cambio de contraseña, ingrese su clave actual y la nueva. El sistema le pedirá confirmación.</li>
+                    </ol>
+                </section>
+
+                <section id="desactivacion" class="mb-5">
+                    <h4 class="border-bottom pb-2 text-primary"><i class="bi bi-person-x me-2"></i>4. Cómo Quitar el Acceso a un Usuario</h4>
+                    <p>Si un trabajador deja la entidad, <strong>no elimine el registro</strong> (para no perder la auditoría de lo que hizo). Siga estos pasos:</p>
+                    <ol>
+                        <li>Busque al usuario en la lista general.</li>
+                        <li>Haga clic en <strong>Editar</strong>.</li>
+                        <li>Busque la casilla <strong>"Activo"</strong> y desmárquela.</li>
+                        <li>Guarde los cambios. El usuario ya no podrá ingresar, pero sus firmas e informes seguirán en el sistema.</li>
+                    </ol>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

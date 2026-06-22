@@ -1,0 +1,11 @@
+[phases.build]
+cmds = [
+    "pip install -r requirements.txt",
+    "python manage.py collectstatic --noinput"
+]
+
+[phases.setup]
+nixPkgs = ["python311", "postgresql"]
+
+[start]
+cmd = "gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2"

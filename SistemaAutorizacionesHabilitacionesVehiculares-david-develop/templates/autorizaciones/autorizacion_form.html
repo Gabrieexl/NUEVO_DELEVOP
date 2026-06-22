@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if accion == 'Actualizar' %}Editar{% else %}Nueva{% endif %} Autorización - DRTC{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-file-earmark-text me-2"></i>{% if accion == 'Actualizar' %}Editar{% else %}Nueva{% endif %} Autorización
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'autorizaciones:lista' %}">Autorizaciones</a></li>
+<li class="breadcrumb-item active">{% if accion == 'Actualizar' %}Editar{% else %}Nueva{% endif %}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">{% if accion == 'Actualizar' %}Editar{% else %}Registrar{% endif %} Autorización</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                        <p class="mb-0">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <!-- Datos de la Resolución -->
+                        <div class="col-12 mb-3">
+                            <h6 class="text-primary border-bottom pb-2">
+                                <i class="bi bi-file-text me-2"></i>Datos de la Resolución
+                            </h6>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.numero_resolucion.id_for_label }}" class="form-label">
+                                N° Resolución <span class="text-danger">*</span>
+                            </label>
+                            {{ form.numero_resolucion }}
+                            {% if form.numero_resolucion.errors %}
+                            <div class="invalid-feedback d-block">{{ form.numero_resolucion.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.fecha_resolucion.id_for_label }}" class="form-label">
+                                Fecha de Resolución <span class="text-danger">*</span>
+                            </label>
+                            {{ form.fecha_resolucion }}
+                            {% if form.fecha_resolucion.errors %}
+                            <div class="invalid-feedback d-block">{{ form.fecha_resolucion.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label for="{{ form.archivo_resolucion.id_for_label }}" class="form-label">
+                                Archivo de Resolución (PDF)
+                            </label>
+                            {{ form.archivo_resolucion }}
+                            {% if form.archivo_resolucion.errors %}
+                            <div class="invalid-feedback d-block">{{ form.archivo_resolucion.errors.0 }}</div>
+                            {% endif %}
+                            {% if form.instance.archivo_resolucion %}
+                            <div class="mt-2">
+                                <a href="{{ form.instance.archivo_resolucion.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-file-earmark-pdf"></i> Ver Resolución Actual
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.empresa.id_for_label }}" class="form-label">
+                                Empresa <span class="text-danger">*</span>
+                            </label>
+                            {{ form.empresa }}
+                            {% if form.empresa.errors %}
+                            <div class="invalid-feedback d-block">{{ form.empresa.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.tipo_servicio.id_for_label }}" class="form-label">
+                                Tipo de Servicio <span class="text-danger">*</span>
+                            </label>
+                            {{ form.tipo_servicio }}
+                            {% if form.tipo_servicio.errors %}
+                            <div class="invalid-feedback d-block">{{ form.tipo_servicio.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Vigencia -->
+                        <div class="col-12 mb-3 mt-2">
+                            <h6 class="text-primary border-bottom pb-2">
+                                <i class="bi bi-calendar-range me-2"></i>Vigencia
+                            </h6>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.fecha_inicio_vigencia.id_for_label }}" class="form-label">
+                                Fecha Inicio <span class="text-danger">*</span>
+                            </label>
+                            {{ form.fecha_inicio_vigencia }}
+                            {% if form.fecha_inicio_vigencia.errors %}
+                            <div class="invalid-feedback d-block">{{ form.fecha_inicio_vigencia.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.fecha_fin_vigencia.id_for_label }}" class="form-label">
+                                Fecha Fin <span class="text-danger">*</span>
+                            </label>
+                            {{ form.fecha_fin_vigencia }}
+                            {% if form.fecha_fin_vigencia.errors %}
+                            <div class="invalid-feedback d-block">{{ form.fecha_fin_vigencia.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Detalle del Servicio -->
+                        <div class="col-12 mb-3 mt-2">
+                            <h6 class="text-primary border-bottom pb-2">
+                                <i class="bi bi-geo-alt me-2"></i>Detalle del Servicio
+                            </h6>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.ambito.id_for_label }}" class="form-label">
+                                Ámbito <span class="text-danger">*</span>
+                            </label>
+                            {{ form.ambito }}
+                            {% if form.ambito.errors %}
+                            <div class="invalid-feedback d-block">{{ form.ambito.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.estado.id_for_label }}" class="form-label">
+                                Estado <span class="text-danger">*</span>
+                            </label>
+                            {{ form.estado }}
+                            {% if form.estado.errors %}
+                            <div class="invalid-feedback d-block">{{ form.estado.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Rutas y Frecuencias Configuradas -->
+                        <div class="col-12 mb-3 mt-2">
+                            <h6 class="text-primary border-bottom pb-2">
+                                <i class="bi bi-signpost-2 me-2"></i>Rutas y Frecuencias
+                            </h6>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">
+                                Rutas Autorizadas
+                            </label>
+                            <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                                {% for checkbox in form.rutas %}
+                                <div class="form-check">
+                                    {{ checkbox.tag }}
+                                    <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                                        {{ checkbox.choice_label }}
+                                    </label>
+                                </div>
+                                {% empty %}
+                                <p class="text-muted mb-0">No hay rutas configuradas. <a href="{% url 'configuracion:rutas_crear' %}">Crear ruta</a></p>
+                                {% endfor %}
+                            </div>
+                            {% if form.rutas.errors %}
+                            <div class="invalid-feedback d-block">{{ form.rutas.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">
+                                Frecuencias Asignadas
+                            </label>
+                            <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                                {% for checkbox in form.frecuencias_asignadas %}
+                                <div class="form-check">
+                                    {{ checkbox.tag }}
+                                    <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                                        {{ checkbox.choice_label }}
+                                    </label>
+                                </div>
+                                {% empty %}
+                                <p class="text-muted mb-0">No hay frecuencias configuradas. <a href="{% url 'configuracion:frecuencias_crear' %}">Crear frecuencia</a></p>
+                                {% endfor %}
+                            </div>
+                            {% if form.frecuencias_asignadas.errors %}
+                            <div class="invalid-feedback d-block">{{ form.frecuencias_asignadas.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Descripción Adicional -->
+                        <div class="col-12 mb-3 mt-2">
+                            <h6 class="text-primary border-bottom pb-2">
+                                <i class="bi bi-card-text me-2"></i>Información Adicional
+                            </h6>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="{{ form.descripcion_rutas.id_for_label }}" class="form-label">
+                                Descripción de Rutas (adicional)
+                            </label>
+                            {{ form.descripcion_rutas }}
+                            {% if form.descripcion_rutas.errors %}
+                            <div class="invalid-feedback d-block">{{ form.descripcion_rutas.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="{{ form.frecuencias.id_for_label }}" class="form-label">
+                                Frecuencias (descripción adicional)
+                            </label>
+                            {{ form.frecuencias }}
+                            {% if form.frecuencias.errors %}
+                            <div class="invalid-feedback d-block">{{ form.frecuencias.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="{{ form.observaciones.id_for_label }}" class="form-label">
+                                Observaciones
+                            </label>
+                            {{ form.observaciones }}
+                            {% if form.observaciones.errors %}
+                            <div class="invalid-feedback d-block">{{ form.observaciones.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <hr>
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'autorizaciones:lista' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg me-1"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

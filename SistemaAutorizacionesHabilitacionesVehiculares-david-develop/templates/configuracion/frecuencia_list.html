@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}Frecuencias - DRTC{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-clock me-2"></i>{{ titulo }}
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'configuracion:home' %}">Configuración</a></li>
+<li class="breadcrumb-item active">Frecuencias</li>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Lista de Frecuencias</h5>
+        <a href="{% url 'configuracion:frecuencias_crear' %}" class="btn btn-success btn-sm">
+            <i class="bi bi-plus-lg me-1"></i>Nueva Frecuencia
+        </a>
+    </div>
+    <div class="card-body">
+        <!-- Filtros -->
+        <form method="get" class="row g-3 mb-4">
+            <div class="col-md-6">
+                <input type="text" name="q" value="{{ q }}" 
+                       class="form-control" placeholder="Buscar por código, nombre...">
+            </div>
+            <div class="col-md-3">
+                <select name="activo" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="true" {% if activo == 'true' %}selected{% endif %}>Activos</option>
+                    <option value="false" {% if activo == 'false' %}selected{% endif %}>Inactivos</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-secondary w-100">
+                    <i class="bi bi-search me-1"></i>Filtrar
+                </button>
+            </div>
+        </form>
+
+        <!-- Tabla -->
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Hora Salida</th>
+                        <th>Hora Llegada</th>
+                        <th>Días</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for frecuencia in frecuencias %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'configuracion:frecuencias_detalle' frecuencia.pk %}" class="text-decoration-none fw-medium">
+                                {{ frecuencia.codigo }}
+                            </a>
+                        </td>
+                        <td>{{ frecuencia.nombre|truncatechars:30 }}</td>
+                        <td>{{ frecuencia.hora_salida|time:"H:i" }}</td>
+                        <td>
+                            {% if frecuencia.hora_llegada_estimada %}
+                            {{ frecuencia.hora_llegada_estimada|time:"H:i" }}
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <small>{{ frecuencia.dias_operacion_display|truncatechars:25 }}</small>
+                        </td>
+                        <td>
+                            {% if frecuencia.activo %}
+                            <span class="badge bg-success">Activo</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <a href="{% url 'configuracion:frecuencias_detalle' frecuencia.pk %}" class="btn btn-sm btn-outline-primary" title="Ver">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'configuracion:frecuencias_editar' frecuencia.pk %}" class="btn btn-sm btn-outline-secondary" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            No hay frecuencias registradas
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Paginación">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query_params %}&{{ query_params }}{% endif %}">Anterior</a>
+                </li>
+                {% endif %}
+                <li class="page-item disabled">
+                    <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                </li>
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query_params %}&{{ query_params }}{% endif %}">Siguiente</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

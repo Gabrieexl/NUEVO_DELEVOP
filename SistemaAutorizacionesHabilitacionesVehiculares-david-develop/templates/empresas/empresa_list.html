@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>{{ titulo }}</h2>
+    <div>
+        <a href="{% url 'empresas:exportar' %}{% if query_params %}?{{ query_params }}{% endif %}" class="btn btn-success me-2">
+            <i class="bi bi-file-excel"></i> Exportar
+        </a>
+        {% if request.user.rol == 'ADMIN_SISTEMA' or request.user.rol == 'MESA_PARTES' or request.user.rol == 'ESPECIALISTA_TECNICO' %}
+        <a href="{% url 'empresas:crear' %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> Nueva Empresa
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Filtros de búsqueda -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-6">
+                {{ form_busqueda.q }}
+            </div>
+            <div class="col-md-4">
+                {{ form_busqueda.estado }}
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-outline-primary w-100">Buscar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Estadísticas -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5 class="card-title">Total Empresas</h5>
+                <h2>{{ total_empresas }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabla de empresas -->
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>RUC</th>
+                    <th>Razón Social</th>
+                    <th>Representante Legal</th>
+                    <th>Estado</th>
+                    <th>Autorizaciones</th>
+                    <th>Vehículos</th>
+                    <th>Conductores</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for empresa in empresas %}
+                <tr>
+                    <td>{{ empresa.ruc }}</td>
+                    <td>
+                        <a href="{% url 'empresas:detalle' empresa.pk %}">
+                            {{ empresa.razon_social }}
+                        </a>
+                        {% if empresa.nombre_comercial %}
+                        <br><small class="text-muted">{{ empresa.nombre_comercial }}</small>
+                        {% endif %}
+                    </td>
+                    <td>{{ empresa.representante_legal }}</td>
+                    <td>
+                        {% if empresa.estado == 'ACTIVA' %}
+                        <span class="badge bg-success">Activa</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Inactiva</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ empresa.num_autorizaciones }}</td>
+                    <td>{{ empresa.num_vehiculos }}</td>
+                    <td>{{ empresa.num_conductores }}</td>
+                    <td>
+                        <a href="{% url 'empresas:detalle' empresa.pk %}" class="btn btn-sm btn-outline-primary" title="Ver">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <a href="{% url 'empresas:editar' empresa.pk %}" class="btn btn-sm btn-outline-secondary" title="Editar">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-4">No se encontraron empresas</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Paginación -->
+{% if is_paginated %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query_params %}&{{ query_params }}{% endif %}">Anterior</a>
+        </li>
+        {% endif %}
+        
+        <li class="page-item disabled">
+            <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        </li>
+        
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query_params %}&{{ query_params }}{% endif %}">Siguiente</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

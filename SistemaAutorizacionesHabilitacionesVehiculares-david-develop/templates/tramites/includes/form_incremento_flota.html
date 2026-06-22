@@ -1,0 +1,509 @@
+{% if tipo_tramite == 'INCREMENTO_FLOTA' or tipo_tramite == 'AUTORIZACION_INICIAL' %}
+<h6 class="border-bottom pb-2 mb-3"><i class="bi bi-truck"></i>
+    {% if tipo_tramite == 'AUTORIZACION_INICIAL' %}Vehiculos de la Flota Inicial{% else %}Vehiculos a Agregar{% endif %}
+</h6>
+
+{{ incremento_vehiculo_formset.management_form }}
+{% if incremento_vehiculo_formset.non_form_errors %}
+<div class="alert alert-danger">
+    {% for error in incremento_vehiculo_formset.non_form_errors %}
+    <div>{{ error }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div id="incremento-vehiculos-formset">
+    {% for veh_form in incremento_vehiculo_formset.forms %}
+    <div class="incremento-form-row border rounded p-3 mb-3" data-form-row>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="mb-0">Vehiculo <span class="incremento-row-number">{{ forloop.counter }}</span></h6>
+            <button type="button" class="btn btn-sm btn-outline-danger incremento-remove-row">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+        <div class="d-none">{{ veh_form.DELETE }}</div>
+
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label class="form-label">Placa *</label>
+                <div class="input-group">
+                    {{ veh_form.placa }}
+                    <button class="btn btn-outline-secondary btn-verificar-placa-row" type="button" title="Verificar si la placa ya existe">
+                        <i class="bi bi-search"></i> Verificar
+                    </button>
+                </div>
+                <div class="resultado-verificacion-placa"></div>
+                {% if veh_form.placa.errors %}
+                <div class="text-danger small">{{ veh_form.placa.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Marca *</label>
+                {{ veh_form.marca }}
+                {% if veh_form.marca.errors %}
+                <div class="text-danger small">{{ veh_form.marca.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Modelo *</label>
+                {{ veh_form.modelo }}
+                {% if veh_form.modelo.errors %}
+                <div class="text-danger small">{{ veh_form.modelo.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Anio Fabricacion *</label>
+                {{ veh_form.anio_fabricacion }}
+                {% if veh_form.anio_fabricacion.errors %}
+                <div class="text-danger small">{{ veh_form.anio_fabricacion.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label class="form-label">Categoría *</label>
+                {{ veh_form.categoria }}
+                {% if veh_form.categoria.errors %}
+                <div class="text-danger small">{{ veh_form.categoria.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Carroceria *</label>
+                {{ veh_form.carroceria }}
+                {% if veh_form.carroceria.errors %}
+                <div class="text-danger small">{{ veh_form.carroceria.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Capacidad Pasajeros *</label>
+                {{ veh_form.capacidad_sentados }}
+                {% if veh_form.capacidad_sentados.errors %}
+                <div class="text-danger small">{{ veh_form.capacidad_sentados.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Peso Bruto (kg)</label>
+                {{ veh_form.peso_bruto }}
+                {% if veh_form.peso_bruto.errors %}
+                <div class="text-danger small">{{ veh_form.peso_bruto.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <label class="form-label">Fecha Vencimiento SOAT</label>
+                {{ veh_form.fecha_venc_soat }}
+                {% if veh_form.fecha_venc_soat.errors %}
+                <div class="text-danger small">{{ veh_form.fecha_venc_soat.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<button type="button" class="btn btn-outline-primary mb-4" id="agregar-vehiculo-incremento">
+    <i class="bi bi-plus-lg"></i> Agregar Vehiculo
+</button>
+
+<hr>
+
+<h6 class="border-bottom pb-2 mb-3"><i class="bi bi-person-badge"></i>
+    {% if tipo_tramite == 'AUTORIZACION_INICIAL' %}Conductores Iniciales{% else %}Conductores a Agregar{% endif %}
+</h6>
+
+{{ incremento_conductor_formset.management_form }}
+{% if incremento_conductor_formset.non_form_errors %}
+<div class="alert alert-danger">
+    {% for error in incremento_conductor_formset.non_form_errors %}
+    <div>{{ error }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div id="incremento-conductores-formset">
+    {% for cond_form in incremento_conductor_formset.forms %}
+    <div class="incremento-form-row border rounded p-3 mb-3" data-form-row>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="mb-0">Conductor <span class="incremento-row-number">{{ forloop.counter }}</span></h6>
+            <button type="button" class="btn btn-sm btn-outline-danger incremento-remove-row">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+        <div class="d-none">{{ cond_form.DELETE }}</div>
+
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label class="form-label">DNI *</label>
+                <div class="input-group">
+                    {{ cond_form.dni }}
+                    <button class="btn btn-outline-secondary btn-verificar-dni-row" type="button" title="Verificar DNI">
+                        <i class="bi bi-search"></i> Verificar
+                    </button>
+                </div>
+                <div class="resultado-verificacion-dni"></div>
+                {% if cond_form.dni.errors %}
+                <div class="text-danger small">{{ cond_form.dni.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Nombres *</label>
+                {{ cond_form.nombres }}
+                {% if cond_form.nombres.errors %}
+                <div class="text-danger small">{{ cond_form.nombres.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Apellido Paterno *</label>
+                {{ cond_form.apellido_paterno }}
+                {% if cond_form.apellido_paterno.errors %}
+                <div class="text-danger small">{{ cond_form.apellido_paterno.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Apellido Materno *</label>
+                {{ cond_form.apellido_materno }}
+                {% if cond_form.apellido_materno.errors %}
+                <div class="text-danger small">{{ cond_form.apellido_materno.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label class="form-label">Fecha de Nacimiento *</label>
+                {{ cond_form.fecha_nacimiento }}
+                {% if cond_form.fecha_nacimiento.errors %}
+                <div class="text-danger small">{{ cond_form.fecha_nacimiento.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Estado *</label>
+                {{ cond_form.estado }}
+                {% if cond_form.estado.errors %}
+                <div class="text-danger small">{{ cond_form.estado.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <h6 class="text-primary mb-3"><i class="bi bi-card-text me-1"></i>Licencia de Conducir</h6>
+        <div class="row">
+            <div class="col-md-3">
+                <label class="form-label">N Licencia *</label>
+                {{ cond_form.licencia_numero }}
+                {% if cond_form.licencia_numero.errors %}
+                <div class="text-danger small">{{ cond_form.licencia_numero.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Categoría *</label>
+                {{ cond_form.licencia_categoria }}
+                <small class="text-muted">Ej: AI, AII, AIII, etc.</small>
+                {% if cond_form.licencia_categoria.errors %}
+                <div class="text-danger small">{{ cond_form.licencia_categoria.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Fecha de Emision *</label>
+                {{ cond_form.licencia_fecha_emision }}
+                {% if cond_form.licencia_fecha_emision.errors %}
+                <div class="text-danger small">{{ cond_form.licencia_fecha_emision.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Fecha de Vencimiento *</label>
+                {{ cond_form.licencia_fecha_vencimiento }}
+                {% if cond_form.licencia_fecha_vencimiento.errors %}
+                <div class="text-danger small">{{ cond_form.licencia_fecha_vencimiento.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<button type="button" class="btn btn-outline-info mb-3" id="agregar-conductor-incremento">
+    <i class="bi bi-plus-lg"></i> Agregar Conductor
+</button>
+
+<template id="incremento-vehiculo-empty-form">
+    <div class="incremento-form-row border rounded p-3 mb-3" data-form-row>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="mb-0">Vehiculo <span class="incremento-row-number"></span></h6>
+            <button type="button" class="btn btn-sm btn-outline-danger incremento-remove-row">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+        <div class="d-none">{{ incremento_vehiculo_formset.empty_form.DELETE }}</div>
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label class="form-label">Placa *</label>
+                <div class="input-group">
+                    {{ incremento_vehiculo_formset.empty_form.placa }}
+                    <button class="btn btn-outline-secondary btn-verificar-placa-row" type="button" title="Verificar si la placa ya existe">
+                        <i class="bi bi-search"></i> Verificar
+                    </button>
+                </div>
+                <div class="resultado-verificacion-placa"></div>
+            </div>
+            <div class="col-md-3"><label class="form-label">Marca *</label>{{ incremento_vehiculo_formset.empty_form.marca }}</div>
+            <div class="col-md-3"><label class="form-label">Modelo *</label>{{ incremento_vehiculo_formset.empty_form.modelo }}</div>
+            <div class="col-md-3"><label class="form-label">Anio Fabricacion *</label>{{ incremento_vehiculo_formset.empty_form.anio_fabricacion }}</div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-3"><label class="form-label">Categoría *</label>{{ incremento_vehiculo_formset.empty_form.categoria }}</div>
+            <div class="col-md-3"><label class="form-label">Carroceria *</label>{{ incremento_vehiculo_formset.empty_form.carroceria }}</div>
+            <div class="col-md-3"><label class="form-label">Capacidad Pasajeros *</label>{{ incremento_vehiculo_formset.empty_form.capacidad_sentados }}</div>
+            <div class="col-md-3"><label class="form-label">Peso Bruto (kg)</label>{{ incremento_vehiculo_formset.empty_form.peso_bruto }}</div>
+        </div>
+        <div class="row">
+            <div class="col-md-4"><label class="form-label">Fecha Vencimiento SOAT</label>{{ incremento_vehiculo_formset.empty_form.fecha_venc_soat }}</div>
+        </div>
+    </div>
+</template>
+
+<template id="incremento-conductor-empty-form">
+    <div class="incremento-form-row border rounded p-3 mb-3" data-form-row>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="mb-0">Conductor <span class="incremento-row-number"></span></h6>
+            <button type="button" class="btn btn-sm btn-outline-danger incremento-remove-row">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+        <div class="d-none">{{ incremento_conductor_formset.empty_form.DELETE }}</div>
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label class="form-label">DNI *</label>
+                <div class="input-group">
+                    {{ incremento_conductor_formset.empty_form.dni }}
+                    <button class="btn btn-outline-secondary btn-verificar-dni-row" type="button" title="Verificar DNI">
+                        <i class="bi bi-search"></i> Verificar
+                    </button>
+                </div>
+                <div class="resultado-verificacion-dni"></div>
+            </div>
+            <div class="col-md-3"><label class="form-label">Nombres *</label>{{ incremento_conductor_formset.empty_form.nombres }}</div>
+            <div class="col-md-3"><label class="form-label">Apellido Paterno *</label>{{ incremento_conductor_formset.empty_form.apellido_paterno }}</div>
+            <div class="col-md-3"><label class="form-label">Apellido Materno *</label>{{ incremento_conductor_formset.empty_form.apellido_materno }}</div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-3"><label class="form-label">Fecha de Nacimiento *</label>{{ incremento_conductor_formset.empty_form.fecha_nacimiento }}</div>
+            <div class="col-md-3"><label class="form-label">Estado *</label>{{ incremento_conductor_formset.empty_form.estado }}</div>
+        </div>
+        <h6 class="text-primary mb-3"><i class="bi bi-card-text me-1"></i>Licencia de Conducir</h6>
+        <div class="row">
+            <div class="col-md-3"><label class="form-label">N Licencia *</label>{{ incremento_conductor_formset.empty_form.licencia_numero }}</div>
+            <div class="col-md-3"><label class="form-label">Categoría *</label>{{ incremento_conductor_formset.empty_form.licencia_categoria }}<small class="text-muted">Ej: AI, AII, AIII, etc.</small></div>
+            <div class="col-md-3"><label class="form-label">Fecha de Emision *</label>{{ incremento_conductor_formset.empty_form.licencia_fecha_emision }}</div>
+            <div class="col-md-3"><label class="form-label">Fecha de Vencimiento *</label>{{ incremento_conductor_formset.empty_form.licencia_fecha_vencimiento }}</div>
+        </div>
+    </div>
+</template>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const placaUrlBase = "{% url 'consultas:api_internal_placa' placa='PLACEHOLDER' %}";
+    const dniUrlBase = "{% url 'consultas:api_internal_dni' dni='PLACEHOLDER' %}";
+
+    function activeRows(container) {
+        return Array.from(container.querySelectorAll('[data-form-row]')).filter(row => {
+            const del = row.querySelector('input[name$="-DELETE"]');
+            return !(del && del.checked);
+        });
+    }
+
+    function renumber(container, label) {
+        activeRows(container).forEach((row, index) => {
+            const number = row.querySelector('.incremento-row-number');
+            if (number) number.textContent = index + 1;
+            const remove = row.querySelector('.incremento-remove-row');
+            if (remove) remove.disabled = activeRows(container).length <= 1;
+        });
+    }
+
+    function addForm(containerId, templateId, totalId, label) {
+        const container = document.getElementById(containerId);
+        const template = document.getElementById(templateId);
+        const totalInput = document.getElementById(totalId);
+        if (!container || !template || !totalInput) return null;
+
+        const index = parseInt(totalInput.value, 10);
+        const html = template.innerHTML.replace(/__prefix__/g, index);
+        container.insertAdjacentHTML('beforeend', html);
+        totalInput.value = index + 1;
+        const row = container.querySelector('[data-form-row]:last-child');
+        initRow(row);
+        renumber(container, label);
+        return row;
+    }
+
+    function removeRow(button) {
+        const row = button.closest('[data-form-row]');
+        const container = row.parentElement;
+        if (activeRows(container).length <= 1) return;
+        const del = row.querySelector('input[name$="-DELETE"]');
+        if (del) del.checked = true;
+        row.style.display = 'none';
+        renumber(container, '');
+    }
+
+    async function cargarCarrocerias(row, categoriaId, selectedId = null) {
+        const carroceriaSelect = row.querySelector('select[name$="-carroceria"]');
+        if (!carroceriaSelect) return;
+        if (!categoriaId) {
+            carroceriaSelect.innerHTML = '<option value="">-- Seleccionar --</option>';
+            return;
+        }
+        try {
+            const response = await fetch(`/configuracion/api/carrocerias/?categoria_id=${categoriaId}`);
+            const data = await response.json();
+            carroceriaSelect.innerHTML = '<option value="">-- Seleccionar --</option>';
+            data.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = item.nombre;
+                if (selectedId && item.id == selectedId) option.selected = true;
+                carroceriaSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error al cargar carrocerias:', error);
+        }
+    }
+
+    function setRowValue(row, suffix, value) {
+        const field = row.querySelector(`[name$="-${suffix}"]`);
+        if (field && value !== undefined && value !== null) {
+            field.value = value;
+            field.dispatchEvent(new Event('change'));
+        }
+    }
+
+    function showResult(container, type, message) {
+        if (!container) return;
+        container.innerHTML = `<div class="alert alert-${type} py-2 mt-2 mb-0">${message}</div>`;
+    }
+
+    async function verificarPlaca(button) {
+        const row = button.closest('[data-form-row]');
+        const input = row.querySelector('input[name$="-placa"]');
+        const result = row.querySelector('.resultado-verificacion-placa');
+        const placa = (input?.value || '').trim();
+        if (!placa) {
+            showResult(result, 'warning', 'Ingrese una placa.');
+            return;
+        }
+
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        try {
+            const response = await fetch(placaUrlBase.replace('PLACEHOLDER', encodeURIComponent(placa)));
+            const data = await response.json();
+            if (data.found && data.data?.vehiculo) {
+                const v = data.data.vehiculo;
+                setRowValue(row, 'marca', v.marca);
+                setRowValue(row, 'modelo', v.modelo);
+                setRowValue(row, 'anio_fabricacion', v.anio_fabricacion);
+                setRowValue(row, 'peso_bruto', v.peso_bruto);
+                setRowValue(row, 'capacidad_sentados', v.capacidad_sentados);
+                setRowValue(row, 'fecha_venc_soat', v.fecha_venc_soat);
+                setRowValue(row, 'categoria', v.categoria_id);
+                await cargarCarrocerias(row, v.categoria_id, v.carroceria_id);
+                showResult(result, 'success', 'Vehiculo encontrado. Datos cargados.');
+            } else {
+                showResult(result, 'info', data.message || 'Vehiculo no registrado.');
+            }
+        } catch (error) {
+            showResult(result, 'danger', 'Error al verificar placa.');
+        } finally {
+            button.disabled = false;
+            button.innerHTML = '<i class="bi bi-search"></i> Verificar';
+        }
+    }
+
+    async function verificarDni(button) {
+        const row = button.closest('[data-form-row]');
+        const input = row.querySelector('input[name$="-dni"]');
+        const result = row.querySelector('.resultado-verificacion-dni');
+        const dni = (input?.value || '').trim();
+        if (!/^\d{8}$/.test(dni)) {
+            showResult(result, 'warning', 'Ingrese un DNI valido de 8 digitos.');
+            return;
+        }
+
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        try {
+            const response = await fetch(dniUrlBase.replace('PLACEHOLDER', encodeURIComponent(dni)));
+            const data = await response.json();
+            if (data.found && data.data?.conductor) {
+                const c = data.data.conductor;
+                setRowValue(row, 'nombres', c.nombres);
+                setRowValue(row, 'apellido_paterno', c.apellido_paterno);
+                setRowValue(row, 'apellido_materno', c.apellido_materno);
+                setRowValue(row, 'fecha_nacimiento', c.fecha_nacimiento);
+                if (c.licencia) {
+                    setRowValue(row, 'licencia_numero', c.licencia.numero);
+                    setRowValue(row, 'licencia_categoria', c.licencia.categoria);
+                    setRowValue(row, 'licencia_fecha_emision', c.licencia.fecha_emision);
+                    setRowValue(row, 'licencia_fecha_vencimiento', c.licencia.fecha_vencimiento);
+                }
+                showResult(result, 'success', 'Conductor encontrado. Datos cargados.');
+            } else {
+                showResult(result, 'info', 'Nuevo conductor. Complete los campos manualmente.');
+            }
+        } catch (error) {
+            showResult(result, 'danger', 'Error al verificar DNI.');
+        } finally {
+            button.disabled = false;
+            button.innerHTML = '<i class="bi bi-search"></i> Verificar';
+        }
+    }
+
+    function initRow(row) {
+        if (!row) return;
+
+        row.querySelectorAll('input[name$="-dni"]').forEach(input => {
+            input.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '').slice(0, 8);
+            });
+        });
+
+        const categoriaSelect = row.querySelector('select[name$="-categoria"]');
+        const carroceriaSelect = row.querySelector('select[name$="-carroceria"]');
+        if (categoriaSelect) {
+            categoriaSelect.addEventListener('change', function() {
+                cargarCarrocerias(row, this.value);
+            });
+            if (categoriaSelect.value) {
+                cargarCarrocerias(row, categoriaSelect.value, carroceriaSelect ? carroceriaSelect.value : null);
+            }
+        }
+
+        row.querySelectorAll('.incremento-remove-row').forEach(button => {
+            button.addEventListener('click', () => removeRow(button));
+        });
+        row.querySelectorAll('.btn-verificar-placa-row').forEach(button => {
+            button.addEventListener('click', () => verificarPlaca(button));
+        });
+        row.querySelectorAll('.btn-verificar-dni-row').forEach(button => {
+            button.addEventListener('click', () => verificarDni(button));
+        });
+    }
+
+    document.getElementById('agregar-vehiculo-incremento')?.addEventListener('click', () => {
+        addForm('incremento-vehiculos-formset', 'incremento-vehiculo-empty-form', 'id_vehiculos-TOTAL_FORMS', 'Vehiculo');
+    });
+    document.getElementById('agregar-conductor-incremento')?.addEventListener('click', () => {
+        addForm('incremento-conductores-formset', 'incremento-conductor-empty-form', 'id_conductores-TOTAL_FORMS', 'Conductor');
+    });
+
+    document.querySelectorAll('#incremento-vehiculos-formset [data-form-row], #incremento-conductores-formset [data-form-row]').forEach(initRow);
+    const vehiculosContainer = document.getElementById('incremento-vehiculos-formset');
+    const conductoresContainer = document.getElementById('incremento-conductores-formset');
+    if (vehiculosContainer) renumber(vehiculosContainer, 'Vehiculo');
+    if (conductoresContainer) renumber(conductoresContainer, 'Conductor');
+});
+</script>
+{% endif %}

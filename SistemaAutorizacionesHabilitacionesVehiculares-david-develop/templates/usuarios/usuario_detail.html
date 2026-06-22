@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }} - DRTC{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h1>{{ titulo }}</h1>
+    <div>
+        <a href="{% url 'usuarios:usuario_update' usuario_detalle.pk %}" class="btn btn-primary">
+            <i class="bi bi-pencil me-2"></i>Editar
+        </a>
+        <a href="{% url 'usuarios:usuario_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Volver
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-person me-2"></i>Datos del Usuario
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Usuario</label>
+                        <p class="mb-0"><strong>{{ usuario_detalle.username }}</strong></p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">DNI</label>
+                        <p class="mb-0">{{ usuario_detalle.dni }}</p>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Nombres</label>
+                        <p class="mb-0">{{ usuario_detalle.first_name|default:"-" }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Apellidos</label>
+                        <p class="mb-0">{{ usuario_detalle.last_name|default:"-" }}</p>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Email</label>
+                        <p class="mb-0">{{ usuario_detalle.email|default:"-" }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Teléfono</label>
+                        <p class="mb-0">{{ usuario_detalle.telefono|default:"-" }}</p>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Rol</label>
+                        <p class="mb-0">
+                            <span class="badge bg-primary">{{ usuario_detalle.get_rol_display }}</span>
+                        </p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Estado</label>
+                        <p class="mb-0">
+                            {% if usuario_detalle.is_active %}
+                            <span class="badge bg-success">Activo</span>
+                            {% else %}
+                            <span class="badge bg-danger">Inactivo</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Área/Oficina</label>
+                        <p class="mb-0">{{ usuario_detalle.area|default:"-" }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Cargo</label>
+                        <p class="mb-0">{{ usuario_detalle.cargo|default:"-" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-clock-history me-2"></i>Información del Sistema
+            </div>
+            <div class="card-body">
+                <table class="table table-sm table-borderless mb-0">
+                    <tr>
+                        <td class="text-muted">Fecha de registro:</td>
+                        <td class="text-end">{{ usuario_detalle.date_joined|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Último acceso:</td>
+                        <td class="text-end">{{ usuario_detalle.last_login|date:"d/m/Y H:i"|default:"Nunca" }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Última actualización:</td>
+                        <td class="text-end">{{ usuario_detalle.fecha_actualizacion|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Es staff:</td>
+                        <td class="text-end">
+                            {% if usuario_detalle.is_staff %}
+                            <i class="bi bi-check-circle text-success"></i>
+                            {% else %}
+                            <i class="bi bi-x-circle text-danger"></i>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Es superusuario:</td>
+                        <td class="text-end">
+                            {% if usuario_detalle.is_superuser %}
+                            <i class="bi bi-check-circle text-success"></i>
+                            {% else %}
+                            <i class="bi bi-x-circle text-danger"></i>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-shield-check me-2"></i>Permisos del Rol
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        {% if usuario_detalle.puede_crear_tramites %}
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        {% else %}
+                        <i class="bi bi-x-circle text-danger me-2"></i>
+                        {% endif %}
+                        Crear trámites
+                    </li>
+                    <li class="mb-2">
+                        {% if usuario_detalle.puede_evaluar_tecnicamente %}
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        {% else %}
+                        <i class="bi bi-x-circle text-danger me-2"></i>
+                        {% endif %}
+                        Evaluación técnica
+                    </li>
+                    <li class="mb-2">
+                        {% if usuario_detalle.puede_evaluar_legalmente %}
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        {% else %}
+                        <i class="bi bi-x-circle text-danger me-2"></i>
+                        {% endif %}
+                        Evaluación legal
+                    </li>
+                    <li class="mb-2">
+                        {% if usuario_detalle.puede_firmar %}
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        {% else %}
+                        <i class="bi bi-x-circle text-danger me-2"></i>
+                        {% endif %}
+                        Aprobar/firmar
+                    </li>
+                    <li>
+                        {% if usuario_detalle.solo_lectura %}
+                        <i class="bi bi-eye text-info me-2"></i>Solo lectura
+                        {% else %}
+                        <i class="bi bi-pencil text-primary me-2"></i>Lectura y escritura
+                        {% endif %}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

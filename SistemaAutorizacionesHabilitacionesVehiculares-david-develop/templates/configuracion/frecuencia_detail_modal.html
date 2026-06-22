@@ -1,0 +1,74 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <h6 class="border-bottom pb-2 mb-3">
+                <i class="bi bi-clock-history me-2"></i>
+                {{ frecuencia.codigo }} - {{ frecuencia.nombre }}
+                {% if frecuencia.activo %}
+                <span class="badge bg-success">Activo</span>
+                {% else %}
+                <span class="badge bg-secondary">Inactivo</span>
+                {% endif %}
+            </h6>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p>
+                        <strong>Hora Salida:</strong><br>
+                        {% if frecuencia.hora_salida %}{{ frecuencia.hora_salida|time:"H:i" }}{% else %}-{% endif %}
+                    </p>
+                    <p>
+                        <strong>Hora Llegada Estimada:</strong><br>
+                        {% if frecuencia.hora_llegada_estimada %}{{ frecuencia.hora_llegada_estimada|time:"H:i" }}{% else %}-{% endif %}
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <p>
+                        <strong>Días de Operación:</strong><br>
+                        {% if frecuencia.get_dias_operacion_display %}
+                        <span class="badge bg-info">{{ frecuencia.get_dias_operacion_display }}</span>
+                        {% else %}
+                        -
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            
+            {% if frecuencia.descripcion %}
+            <div class="mb-3">
+                <strong>Descripción:</strong>
+                <p class="text-muted mb-2">{{ frecuencia.descripcion }}</p>
+            </div>
+            {% endif %}
+            
+            {% if frecuencia.observaciones %}
+            <div class="mb-3">
+                <strong>Observaciones:</strong>
+                <p class="text-muted mb-0">{{ frecuencia.observaciones }}</p>
+            </div>
+            {% endif %}
+            
+            <hr>
+            <p class="text-muted small mb-0">
+                Creada el {{ frecuencia.fecha_creacion|date:"d/m/Y H:i" }}
+                {% if frecuencia.creado_por %}por {{ frecuencia.creado_por }}{% endif %}
+            </p>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-header">
+                    <h6 class="mb-0">Resumen</h6>
+                </div>
+                <div class="card-body small">
+                    <p class="mb-2">
+                        <strong>Código:</strong> {{ frecuencia.codigo }}
+                    </p>
+                    <p class="mb-0">
+                        <strong>Nombre:</strong> {{ frecuencia.nombre }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

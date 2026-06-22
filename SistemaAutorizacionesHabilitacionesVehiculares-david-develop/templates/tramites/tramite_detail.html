@@ -1,0 +1,837 @@
+{% extends 'base.html' %}
+{% load tramites_filters %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>{{ titulo }}</h2>
+    {% if return_url %}
+    <a href="{{ return_url }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Volver
+    </a>
+    {% else %}
+    <a href="{% url 'tramites:lista' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Volver
+    </a>
+    {% endif %}
+</div>
+
+<div class="row">
+    <!-- Información Principal -->
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    {{ tramite.numero_expediente }}
+                </h5>
+                {% if tramite.estado == 'RECIBIDO' %}
+                <span class="badge bg-info fs-6">{{ tramite.get_estado_display }}</span>
+                {% elif tramite.estado == 'EN_CONTROL_CALIDAD' %}
+                <span class="badge bg-success fs-6">{{ tramite.get_estado_display }}</span>
+                {% elif tramite.estado == 'EN_EVAL_TECNICA' %}
+                <span class="badge bg-primary fs-6">{{ tramite.get_estado_display }}</span>
+                {% elif tramite.estado == 'EN_DIRECCION_ADMINISTRATIVA' %}
+                <span class="badge bg-warning text-dark fs-6">{{ tramite.get_estado_display }}</span>
+                {% elif tramite.estado == 'EN_DIRECCION_GENERAL' %}
+                <span class="badge bg-info text-dark fs-6">{{ tramite.get_estado_display }}</span>
+                {% elif tramite.estado == 'OBSERVADO' %}
+                <span class="badge bg-warning text-dark fs-6">{{ tramite.get_estado_display }}</span>
+                {% elif tramite.estado == 'EN_REVISION_LEGAL' %}
+                <span class="badge bg-secondary fs-6">{{ tramite.get_estado_display }}</span>
+                {% elif tramite.estado == 'PENDIENTE_FIRMA' %}
+                <span class="badge bg-dark fs-6">{{ tramite.get_estado_display }}</span>
+                {% elif tramite.estado == 'APROBADO' %}
+                <span class="badge bg-success fs-6">{{ tramite.get_estado_display }}</span>
+                {% elif tramite.estado == 'DENEGADO' %}
+                <span class="badge bg-danger fs-6">{{ tramite.get_estado_display }}</span>
+                {% else %}
+                <span class="badge bg-secondary fs-6">{{ tramite.get_estado_display }}</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Tipo de Trámite:</strong><br>{{ tramite.get_tipo_tramite_display }}</p>
+                        {% if tramite.expediente_externo %}
+                        <p><strong>Expediente Hoja de Ruta:</strong><br>
+                            <span class="badge bg-secondary">{{ tramite.expediente_externo }}</span>
+                        </p>
+                        {% endif %}
+                        {% if tramite.empresa %}
+                        <p><strong>Empresa:</strong><br>
+                            <a href="{% url 'empresas:detalle' tramite.empresa.pk %}">{{ tramite.empresa.razon_social }}</a>
+                        </p>
+                        {% endif %}
+                        {% if tramite.solicitante_dni or tramite.solicitante_nombres %}
+                        <p><strong>Solicitante:</strong><br>
+                            {{ tramite.solicitante_nombres|default:"-" }} 
+                            {% if tramite.solicitante_dni %}(DNI: {{ tramite.solicitante_dni }}){% endif %}
+                        </p>
+                        {% endif %}
+                        {% if tramite.autorizacion %}
+                        <p><strong>Autorización:</strong><br>
+                            <a href="{% url 'autorizaciones:detalle' tramite.autorizacion.pk %}">{{ tramite.autorizacion.numero_resolucion }}</a>
+                        </p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {% if tramite.vehiculo %}
+                        <p><strong>Vehículo:</strong><br>
+                            <a href="{% url 'vehiculos:detalle' tramite.vehiculo.pk %}">{{ tramite.vehiculo.placa }}</a>
+                        </p>
+                        {% endif %}
+                        {% if tramite.conductor %}
+                        <p><strong>Conductor:</strong><br>
+                            <a href="{% url 'conductores:detalle' tramite.conductor.pk %}">{{ tramite.conductor.nombre_completo }}</a>
+                        </p>
+                        {% endif %}
+                        {% if tramite.plazo_subsanacion %}
+                        <p><strong>Plazo Subsanación:</strong><br>
+                            <span class="{% if tramite.plazo_subsanacion < today %}text-danger{% endif %}">
+                                {{ tramite.plazo_subsanacion|date:"d/m/Y" }}
+                            </span>
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <hr>
+                <p><strong>Descripción de la Solicitud:</strong></p>
+                <p class="bg-light p-3 rounded">{{ tramite.descripcion_solicitud|linebreaks }}</p>
+                
+                {% if tramite.estado == 'OBSERVADO' %}
+                <div class="alert alert-warning border-warning">
+                    <h5 class="alert-heading"><i class="bi bi-exclamation-triangle-fill me-2"></i>Trámite Observado</h5>
+                    <hr>
+                    <p class="mb-2"><strong>Observaciones:</strong></p>
+                    <div class="bg-white p-3 rounded border mb-3">
+                        {{ tramite.observaciones_tecnicas|default:tramite.observaciones_legales|format_comentario_rol|default:"No se registraron detalles de la observación." }}
+                    </div>
+                    {% if tramite.plazo_subsanacion %}
+                    <p class="mb-0"><strong>Plazo para subsanar:</strong> {{ tramite.plazo_subsanacion|date:"d/m/Y" }}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                {% if datos_tramite.autorizacion or datos_tramite.vehiculo or datos_tramite.conductor or datos_tramite.modificacion or datos_tramite.baja_vehiculo or datos_tramite.baja_conductor %}
+                <hr>
+                <p><strong>Datos Específicos del Trámite:</strong></p>
+                <div class="bg-light p-3 rounded">
+                    {% if datos_tramite.autorizacion %}
+                    <div class="mb-3">
+                        <h6 class="text-primary"><i class="bi bi-file-earmark-text"></i> Datos de Autorización</h6>
+                        <table class="table table-sm table-borderless mb-0">
+                            {% if datos_tramite.autorizacion.tipo_servicio %}
+                            <tr><td width="40%"><strong>Tipo de Servicio:</strong></td><td>{{ datos_tramite.autorizacion.tipo_servicio_display|default:datos_tramite.autorizacion.tipo_servicio }}</td></tr>
+                            {% endif %}
+                            {% if datos_tramite.autorizacion.modalidad %}
+                            <tr><td><strong>Modalidad:</strong></td><td>{{ datos_tramite.autorizacion.modalidad }}</td></tr>
+                            {% endif %}
+                            {% if datos_tramite.autorizacion.ambito %}
+                            <tr><td><strong>Ámbito:</strong></td><td>{{ datos_tramite.autorizacion.ambito_display|default:datos_tramite.autorizacion.ambito }}</td></tr>
+                            {% endif %}
+                            {% if datos_tramite.autorizacion.fecha_inicio_vigencia %}
+                            <tr><td><strong>Vigencia:</strong></td><td>{{ datos_tramite.autorizacion.fecha_inicio_vigencia }} al {{ datos_tramite.autorizacion.fecha_fin_vigencia }}</td></tr>
+                            {% endif %}
+                            {% if datos_tramite.autorizacion.descripcion_rutas %}
+                            <tr><td><strong>Rutas:</strong></td><td>{{ datos_tramite.autorizacion.descripcion_rutas }}</td></tr>
+                            {% endif %}
+                        </table>
+                    </div>
+                    {% endif %}
+                    
+                    {% if datos_tramite.vehiculo %}
+                    <div class="mb-3">
+                        <h6 class="text-success"><i class="bi bi-truck"></i> Datos del Vehículo</h6>
+                        <table class="table table-sm table-borderless mb-0">
+                            {% if datos_tramite.vehiculo.placa %}
+                            <tr><td width="40%"><strong>Placa:</strong></td><td>{{ datos_tramite.vehiculo.placa }}</td></tr>
+                            {% endif %}
+                            {% if datos_tramite.vehiculo.marca %}
+                            <tr><td><strong>Marca/Modelo:</strong></td><td>{{ datos_tramite.vehiculo.marca }} {{ datos_tramite.vehiculo.modelo }}</td></tr>
+                            {% endif %}
+                            {% if datos_tramite.vehiculo.anio_fabricacion %}
+                            <tr><td><strong>Año:</strong></td><td>{{ datos_tramite.vehiculo.anio_fabricacion }}</td></tr>
+                            {% endif %}
+                            {% if datos_tramite.vehiculo.carroceria or datos_tramite.vehiculo.tipo_vehiculo %}
+                            <tr><td><strong>Tipo:</strong></td><td>{{ datos_tramite.vehiculo.tipo_vehiculo_display|default:datos_tramite.vehiculo.carroceria }}</td></tr>
+                            {% endif %}
+                            {% if datos_tramite.vehiculo.capacidad_sentados %}
+                            <tr><td><strong>Capacidad:</strong></td><td>{{ datos_tramite.vehiculo.capacidad_sentados }} asientos</td></tr>
+                            {% endif %}
+                        </table>
+                    </div>
+                    {% endif %}
+                    
+                    {% if datos_tramite.conductor %}
+                    <div class="mb-3">
+                        <h6 class="text-info"><i class="bi bi-person"></i> Datos del Conductor</h6>
+                        <table class="table table-sm table-borderless mb-0">
+                            {% if datos_tramite.conductor.dni %}
+                            <tr><td width="40%"><strong>DNI:</strong></td><td>{{ datos_tramite.conductor.dni }}</td></tr>
+                            {% endif %}
+                            {% if datos_tramite.conductor.nombres %}
+                            <tr><td><strong>Nombres:</strong></td><td>{{ datos_tramite.conductor.nombres }} {{ datos_tramite.conductor.apellido_paterno }} {{ datos_tramite.conductor.apellido_materno }}</td></tr>
+                            {% endif %}
+                            {% if datos_tramite.conductor.licencia_numero %}
+                            <tr><td><strong>Licencia:</strong></td><td>{{ datos_tramite.conductor.licencia_numero }} ({{ datos_tramite.conductor.licencia_categoria }})</td></tr>
+                            {% endif %}
+                        </table>
+                    </div>
+                    {% endif %}
+                    
+                    {% if datos_tramite.modificacion %}
+                    <div class="mb-3">
+                        <h6 class="text-warning"><i class="bi bi-pencil-square"></i> Modificaciones Solicitadas</h6>
+                        <table class="table table-sm table-borderless mb-0">
+                            {% if datos_tramite.modificacion.motivo_modificacion %}
+                            <tr><td width="40%"><strong>Motivo:</strong></td><td>{{ datos_tramite.modificacion.motivo_modificacion }}</td></tr>
+                            {% endif %}
+                            {% if datos_tramite.modificacion.tipo_servicio %}
+                            <tr><td><strong>Nuevo Tipo Servicio:</strong></td><td>{{ datos_tramite.modificacion.tipo_servicio_display|default:datos_tramite.modificacion.tipo_servicio }}</td></tr>
+                            {% endif %}
+                            {% if datos_tramite.modificacion.ambito %}
+                            <tr><td><strong>Nuevo Ámbito:</strong></td><td>{{ datos_tramite.modificacion.ambito_display|default:datos_tramite.modificacion.ambito }}</td></tr>
+                            {% endif %}
+                        </table>
+                    </div>
+                    {% endif %}
+                    
+                    {% if datos_tramite.baja_vehiculo %}
+                    <div class="mb-3">
+                        <h6 class="text-danger"><i class="bi bi-x-circle"></i> Baja de Vehículo</h6>
+                        <p class="mb-0"><strong>Motivo:</strong> {{ datos_tramite.baja_vehiculo.motivo_baja }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if datos_tramite.baja_conductor %}
+                    <div class="mb-3">
+                        <h6 class="text-danger"><i class="bi bi-x-circle"></i> Baja de Conductor</h6>
+                        <p class="mb-0"><strong>Motivo:</strong> {{ datos_tramite.baja_conductor.motivo_baja }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-footer text-muted small">
+                Creado el {{ tramite.fecha_creacion|date:"d/m/Y H:i" }} por {{ tramite.creado_por }}
+            </div>
+        </div>
+        
+        <!-- Documentos Adjuntos -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Documentos Adjuntos</h5>
+                {% if 'agregar_documento' in acciones %}
+                <a href="{% url 'tramites:agregar_documento' tramite.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-plus-lg"></i> Agregar Documento
+                </a>
+                {% endif %}
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Nombre</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for doc in documentos %}
+                        <tr>
+                            <td>{{ doc.get_tipo_documento_display }}</td>
+                            <td>
+                                {{ doc.nombre }}
+                                {% if doc.verificado %}
+                                <span class="badge bg-success">✓</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ doc.fecha_subida|date:"d/m/Y" }}</td>
+                            <td>
+                                <a href="{% url 'tramites:documento_descargar' tramite.pk doc.pk %}" class="btn btn-sm btn-outline-primary" title="Descargar">
+                                    <i class="bi bi-download"></i>
+                                </a>
+                                <a href="{% url 'tramites:documento_eliminar' tramite.pk doc.pk %}" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">Sin documentos</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Recibos de Pago -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-receipt me-2"></i>Recibos de Pago</h5>
+                <a href="{% url 'tramites:recibo_agregar' tramite.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-success" title="Puede agregarrecibos incluso después de cerrar el trámite">
+                    <i class="bi bi-plus-lg"></i> Agregar Recibo
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Serie-Documento</th>
+                            <th>Fecha</th>
+                            <th>Descripción</th>
+                            <th>Cantidad</th>
+                            <th>P. Unit.</th>
+                            <th>Total</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for recibo in tramite.recibos_pago.all %}
+                        <tr>
+                            <td>{{ recibo.numero_serie }}-{{ recibo.numero_documento }}</td>
+                            <td>{{ recibo.fecha_pago|date:"d/m/Y" }}</td>
+                            <td>{{ recibo.descripcion_tarifa|truncatechars:30 }}</td>
+                            <td>{{ recibo.cantidad }}</td>
+                            <td>S/ {{ recibo.precio_unitario }}</td>
+                            <td><strong>S/ {{ recibo.total }}</strong></td>
+                            <td>
+                                <a href="{% url 'tramites:recibo_eliminar' recibo.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">Sin recibos de pago registrados</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Vehículos del Trámite (solo para tipos que lo requieren) -->
+        {% if tramite.tipo_tramite == 'AUTORIZACION_INICIAL' or tramite.tipo_tramite == 'INCREMENTO_FLOTA' or tramite.tipo_tramite == 'SUSTITUCION_VEHICULO' or tramite.tipo_tramite == 'BAJA_VEHICULO' or tramite.tipo_tramite == 'RENOVACION_TUC' %}
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-truck me-2"></i>Vehículos del Trámite</h5>
+                {% if puede_gestionar_vehiculos and tramite.estado != 'CERRADO' %}
+                <a href="{% url 'tramites:vehiculo_agregar' tramite.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-plus-lg"></i> Agregar Vehículo
+                </a>
+                {% elif puede_gestionar_vehiculos %}
+                <button class="btn btn-sm btn-outline-secondary" disabled title="No se puede agregar vehículos cuando el trámite está cerrado">
+                    <i class="bi bi-plus-lg"></i> Agregar Vehículo
+                </button>
+                {% endif %}
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Placa</th>
+                            <th>Marca/Modelo</th>
+                            <th>Año/Color</th>
+                            <th>Cat./Carr.</th>
+                            <th>Motor/Serie</th>
+                            <th>Fechas Venc.</th>
+                            <th>N° TUC</th>
+                            <th>Estado</th>
+                            {% if puede_gestionar_vehiculos and tramite.estado != 'CERRADO' %}<th>Acciones</th>{% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for veh in tramite.vehiculos_tramite.all %}
+                        <tr>
+                            <td><strong>{% if veh.placa_nueva %}{{ veh.placa_nueva }}{% elif veh.vehiculo_existente %}{{ veh.vehiculo_existente.placa }}{% else %}-{% endif %}</strong></td>
+                            <td>{% if veh.marca %}{{ veh.marca }} {{ veh.modelo }}{% elif veh.vehiculo_existente %}{{ veh.vehiculo_existente.marca }} {{ veh.vehiculo_existente.modelo }}{% else %}-{% endif %}</td>
+                            <td>
+                                {{ veh.final_anio_fabricacion|default:"-" }}<br>
+                                <small class="text-muted">{{ veh.final_color|default:"-" }}</small>
+                            </td>
+                            <td>
+                                {{ veh.final_categoria.nombre|default:"-" }}<br>
+                                <small class="text-muted">{{ veh.final_carroceria.nombre|default:veh.final_carroceria|default:"-" }}</small>
+                            </td>
+                            <td>
+                                <small>
+                                    M: {{ veh.final_numero_motor|default:"-" }}<br>
+                                    S: {{ veh.final_numero_serie|default:"-" }}
+                                </small>
+                            </td>
+                            <td>
+                                <small>
+                                    SOAT: {{ veh.final_fecha_venc_soat|date:"d/m/Y"|default:"-" }}<br>
+                                    CITV: {{ veh.final_fecha_venc_citv|date:"d/m/Y"|default:"-" }}
+                                </small>
+                            </td>
+                            <td>
+                                {% if veh.final_numero_tuc %}
+                                <span class="badge bg-primary">{{ veh.final_numero_tuc }}</span>
+                                <br><small class="text-muted" title="Fecha Expedición">Exp: {{ veh.final_fecha_expedicion_tuc|date:"d/m/Y"|default:"-" }}</small>
+                                {% if veh.final_fecha_expiracion_transportista %}
+                                <br><small class="text-danger" title="Vencimiento Transportista">Venc: {{ veh.final_fecha_expiracion_transportista|date:"d/m/Y"|default:"-" }}</small>
+                                {% endif %}
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if veh.estado_proceso == 'PENDIENTE' %}
+                                <span class="badge bg-warning text-dark">Pendiente</span>
+                                {% elif veh.estado_proceso == 'APROBADO' %}
+                                <span class="badge bg-success">Aprobado</span>
+                                {% else %}
+                                <span class="badge bg-danger">Rechazado</span>
+                                {% endif %}
+                            </td>
+                            {% if puede_gestionar_vehiculos and tramite.estado != 'CERRADO' %}
+                            <td>
+                                <a href="{% url 'tramites:vehiculo_editar' veh.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-secondary" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'tramites:vehiculo_eliminar' veh.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">No hay vehículos registrados</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Conductores del Trámite (solo para tipos que lo requieren) -->
+        {% if tramite.tipo_tramite == 'AUTORIZACION_INICIAL' or tramite.tipo_tramite == 'INCREMENTO_FLOTA' or tramite.tipo_tramite == 'HABILITACION_CONDUCTOR' or tramite.tipo_tramite == 'BAJA_CONDUCTOR' %}
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-person-badge me-2"></i>Conductores del Trámite</h5>
+                {% if tramite.estado != 'CERRADO' %}
+                <a href="{% url 'tramites:conductor_agregar' tramite.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-info">
+                    <i class="bi bi-plus-lg"></i> Agregar Conductor
+                </a>
+                {% else %}
+                <button class="btn btn-sm btn-outline-secondary" disabled title="No se puede agregar conductores cuando el trámite está cerrado">
+                    <i class="bi bi-plus-lg"></i> Agregar Conductor
+                </button>
+                {% endif %}
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>DNI</th>
+                            <th>Nombres</th>
+                            <th>Datos Contacto</th>
+                            <th>Licencia</th>
+                            <th>Estado</th>
+                            {% if tramite.estado != 'CERRADO' %}<th>Acciones</th>{% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cond in tramite.conductores_tramite.all %}
+                        <tr>
+                            <td><strong>{{ cond.dni_display }}</strong></td>
+                            <td>
+                                {{ cond.nombre_completo_display }}
+                                <br><small class="text-muted">Nac: {{ cond.fecha_nacimiento_display|date:"d/m/Y"|default:"-" }}</small>
+                            </td>
+                            <td>
+                                <small>
+                                    <i class="bi bi-telephone"></i> {{ cond.final_telefono|default:"-" }}<br>
+                                    <i class="bi bi-envelope"></i> {{ cond.final_email|default:"-" }}<br>
+                                    <i class="bi bi-geo-alt"></i> {{ cond.final_direccion|truncatechars:20|default:"-" }}
+                                </small>
+                            </td>
+                            <td>
+                                {{ cond.final_licencia_numero|default:"-" }} ({{ cond.final_licencia_categoria|default:"-" }})
+                                <br><small class="text-muted">Venc: {{ cond.final_licencia_fecha_vencimiento|date:"d/m/Y"|default:"-" }}</small>
+                            </td>
+                            <td>
+                                {% if cond.estado_proceso == 'PENDIENTE' %}
+                                <span class="badge bg-warning text-dark">Pendiente</span>
+                                {% elif cond.estado_proceso == 'APROBADO' %}
+                                <span class="badge bg-success">Aprobado</span>
+                                {% else %}
+                                <span class="badge bg-danger">Rechazado</span>
+                                {% endif %}
+                            </td>
+                            {% if tramite.estado != 'CERRADO' %}
+                            <td>
+                                <a href="{% url 'tramites:conductor_editar' cond.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-secondary" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'tramites:conductor_eliminar' cond.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="{% if tramite.estado != 'CERRADO' %}6{% else %}5{% endif %}" class="text-center text-muted">No hay conductores registrados</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Expedientes Hoja de Ruta -->
+        {% if tramite.expedientes_hoja_ruta.exists %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-journal-text me-2"></i>Expedientes Hoja de Ruta</h5>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for exp in tramite.expedientes_hoja_ruta.all %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>{{ exp.numero_expediente_externo }}</strong>
+                        <small class="text-muted d-block">{{ exp.get_estado_tramite_display }}</small>
+                    </div>
+                    <small class="text-muted">{{ exp.fecha_registro|date:"d/m/Y H:i" }}</small>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        
+        <!-- Historial -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Historial de Estados</h5>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for h in historial %}
+                <li class="list-group-item">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <strong>{{ h.get_estado_nuevo_display }}</strong>
+                            {% if h.estado_anterior %}
+                            <small class="text-muted">(desde {{ h.get_estado_anterior_display }})</small>
+                            {% endif %}
+                            {% if h.comentario %}
+                            <p class="mb-0 mt-1 small">{{ h.comentario|format_comentario_rol }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted">{{ h.fecha|date:"d/m/Y H:i" }}</small>
+                            <br>
+                            <small>{{ h.usuario }}</small>
+                        </div>
+                    </div>
+                </li>
+                {% empty %}
+                <li class="list-group-item text-center text-muted">Sin historial</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Panel de Acciones -->
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">Acciones Disponibles</h6>
+            </div>
+            <div class="card-body d-grid gap-2">
+                {% if 'editar' in acciones %}
+                <a href="{% url 'tramites:editar' tramite.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-pencil"></i> Editar
+                </a>
+                {% endif %}
+                
+                {% if 'enviar_evaluacion' in acciones %}
+                <a href="{% url 'tramites:enviar_evaluacion' tramite.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-primary">
+                    <i class="bi bi-send"></i>
+                    {% if tramite.tipo_tramite == 'RENOVACION_TUC' or tramite.tipo_tramite == 'BAJA_VEHICULO' %}
+                    Enviar a Control de Calidad
+                    {% else %}
+                    Enviar a Evaluación
+                    {% endif %}
+                </a>
+                {% endif %}
+                
+                {% if 'aprobar_evaluacion' in acciones %}
+                <a href="{% url 'tramites:aprobar_evaluacion' tramite.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-success">
+                    <i class="bi bi-check-lg"></i>
+                    {% if tramite.tipo_tramite == 'BAJA_VEHICULO' and tramite.estado == 'EN_CONTROL_CALIDAD' %}
+                    Derivar a Evaluación Técnica
+                    {% elif tramite.tipo_tramite == 'AUTORIZACION_INICIAL' or tramite.tipo_tramite == 'AUTORIZACION_RUTA' %}
+                    Derivar a Dirección Administrativa
+                    {% elif tramite.tipo_tramite == 'INCREMENTO_FLOTA' %}
+                    Derivar a Dirección Administrativa
+                    {% elif tramite.tipo_tramite == 'RENOVACION_TUC' %}
+                    Derivar a Control de Calidad
+                    {% else %}
+                    Aprobar Evaluación
+                    {% endif %}
+                </a>
+                {% endif %}
+
+                {% if 'enviar_direccion_administrativa' in acciones %}
+                <a href="{% url 'tramites:enviar_direccion_administrativa' tramite.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-primary">
+                    <i class="bi bi-send"></i> Derivar a Dirección Administrativa
+                </a>
+                {% endif %}
+
+                {% if 'firmar_derivar_tecnico' in acciones %}
+                <a href="{% url 'tramites:firmar_derivar_tecnico' tramite.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-success">
+                    <i class="bi bi-pen"></i> Firmar y Derivar
+                </a>
+                {% endif %}
+
+                {% if 'enviar_direccion_general' in acciones %}
+                <a href="{% url 'tramites:enviar_direccion_general' tramite.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-primary">
+                    <i class="bi bi-send"></i> Derivar a Dirección General
+                </a>
+                {% endif %}
+
+                {% if 'enviar_legal' in acciones %}
+                <a href="{% url 'tramites:enviar_legal' tramite.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-primary">
+                    <i class="bi bi-send"></i> Derivar a Asesoría Legal
+                </a>
+                {% endif %}
+                
+                {% if 'observar' in acciones %}
+                <a href="{% url 'tramites:observar' tramite.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-warning">
+                    <i class="bi bi-exclamation-triangle"></i> Observar
+                </a>
+                {% endif %}
+                
+                {% if 'subsanar' in acciones %}
+                <a href="{% url 'tramites:subsanar' tramite.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-info">
+                    <i class="bi bi-arrow-repeat"></i> Subsanar
+                </a>
+                {% endif %}
+                
+                {% if 'aprobar_legal' in acciones %}
+                <a href="{% url 'tramites:aprobar_legal' tramite.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-success">
+                    <i class="bi bi-check-lg"></i>
+                    {% if tramite.tipo_tramite == 'AUTORIZACION_INICIAL' or tramite.tipo_tramite == 'AUTORIZACION_RUTA' %}
+                    Derivar a Dirección General
+                    {% else %}
+                    Aprobar Legal
+                    {% endif %}
+                </a>
+                {% endif %}
+                
+                {% if 'observar_legal' in acciones %}
+                <a href="{% url 'tramites:observar_legal' tramite.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-warning">
+                    <i class="bi bi-exclamation-triangle"></i> Observar (Legal)
+                </a>
+                {% endif %}
+                
+                {% if 'aprobar' in acciones %}
+                <a href="{% url 'tramites:aprobar' tramite.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-success btn-lg">
+                    <i class="bi bi-check-circle"></i>
+                    {% if tramite.tipo_tramite == 'AUTORIZACION_INICIAL' or tramite.tipo_tramite == 'AUTORIZACION_RUTA' %}
+                    Aprobar con Resolución
+                    {% else %}
+                    APROBAR
+                    {% endif %}
+                </a>
+                {% endif %}
+                
+                {% if 'denegar' in acciones %}
+                <a href="{% url 'tramites:denegar' tramite.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-danger">
+                    <i class="bi bi-x-circle"></i> Denegar
+                </a>
+                {% endif %}
+                
+                {% if 'cerrar' in acciones %}
+                <a href="{% url 'tramites:cerrar' tramite.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-secondary">
+                    <i class="bi bi-archive"></i> Cerrar
+                </a>
+                {% endif %}
+                
+                {% if not acciones %}
+                <p class="text-muted text-center mb-0">No hay acciones disponibles</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Flujo del Trámite -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Flujo del Trámite</h6>
+            </div>
+            <div class="card-body">
+                {% if tramite.tipo_tramite == 'AUTORIZACION_INICIAL' %}
+                <div class="d-flex flex-column">
+                    <div class="p-2 {% if tramite.estado == 'RECIBIDO' %}bg-info text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        1. Mesa de Partes
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'EN_EVAL_TECNICA' or tramite.estado == 'OBSERVADO' and not observado_desde_legal %}bg-primary text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        2. Especialista Técnico
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'EN_DIRECCION_ADMINISTRATIVA' %}bg-warning text-dark{% else %}bg-light{% endif %} rounded mb-2">
+                        3. Director Administrativo
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'EN_DIRECCION_GENERAL' and not autorizacion_inicial_retorno_legal %}bg-info text-dark{% else %}bg-light{% endif %} rounded mb-2">
+                        4. Director General
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'EN_REVISION_LEGAL' or tramite.estado == 'OBSERVADO' and observado_desde_legal %}bg-secondary text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        5. Asesoría Legal
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'EN_DIRECCION_GENERAL' and autorizacion_inicial_retorno_legal %}bg-dark text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        6. Director General - Aprobación
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'APROBADO' %}bg-success text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        7. Control de Calidad - Registro de TUC
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'CERRADO' %}bg-secondary text-white{% elif tramite.estado == 'DENEGADO' %}bg-danger text-white{% else %}bg-light{% endif %} rounded">
+                        8. Cerrado
+                    </div>
+                </div>
+                {% elif tramite.tipo_tramite == 'AUTORIZACION_RUTA' %}
+                <div class="d-flex flex-column">
+                    <div class="p-2 {% if tramite.estado == 'RECIBIDO' %}bg-info text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        1. Mesa de Partes
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'EN_EVAL_TECNICA' or tramite.estado == 'OBSERVADO' and not observado_desde_legal %}bg-primary text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        2. Especialista Tecnico
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'EN_DIRECCION_ADMINISTRATIVA' %}bg-warning text-dark{% else %}bg-light{% endif %} rounded mb-2">
+                        3. Director Administrativo
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'EN_DIRECCION_GENERAL' and not autorizacion_inicial_retorno_legal %}bg-info text-dark{% else %}bg-light{% endif %} rounded mb-2">
+                        4. Director General
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'EN_REVISION_LEGAL' or tramite.estado == 'OBSERVADO' and observado_desde_legal %}bg-secondary text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        5. Asesoria Legal
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'EN_DIRECCION_GENERAL' and autorizacion_inicial_retorno_legal %}bg-dark text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        6. Director General - Aprobacion
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'CERRADO' %}bg-success text-white{% elif tramite.estado == 'DENEGADO' %}bg-danger text-white{% elif tramite.estado == 'APROBADO' %}bg-success text-white{% else %}bg-light{% endif %} rounded">
+                        7. Cerrado
+                    </div>
+                </div>
+                {% elif tramite.tipo_tramite == 'INCREMENTO_FLOTA' %}
+                <div class="d-flex flex-column">
+                    <div class="p-2 {% if tramite.estado == 'RECIBIDO' %}bg-info text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        1. Mesa de Partes
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'EN_EVAL_TECNICA' %}bg-primary text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        2. Especialista Técnico
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'EN_DIRECCION_ADMINISTRATIVA' %}bg-warning text-dark{% else %}bg-light{% endif %} rounded mb-2">
+                        3. Director Administrativo
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'EN_DIRECCION_GENERAL' %}bg-info text-dark{% elif tramite.estado == 'PENDIENTE_FIRMA' %}bg-dark text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        4. Director General
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'EN_REVISION_LEGAL' %}bg-secondary text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        5. Asesoría Legal
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'APROBADO' %}bg-success text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        6. Control de Calidad
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'CERRADO' %}bg-secondary text-white{% elif tramite.estado == 'DENEGADO' %}bg-danger text-white{% else %}bg-light{% endif %} rounded">
+                        7. Cerrado
+                    </div>
+                </div>
+                {% elif tramite.tipo_tramite == 'RENOVACION_TUC' %}
+                <div class="d-flex flex-column">
+                    <div class="p-2 {% if tramite.estado == 'RECIBIDO' %}bg-info text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        1. Mesa de Partes
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'PENDIENTE_FIRMA' or tramite.estado == 'OBSERVADO' %}bg-success text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        2. Control de Calidad
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'EN_DIRECCION_ADMINISTRATIVA' %}bg-warning text-dark{% else %}bg-light{% endif %} rounded mb-2">
+                        3. Director Administrativo
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'EN_EVAL_TECNICA' %}bg-primary text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        4. Especialista Tecnico
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'APROBADO' %}bg-success text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        5. Control de Calidad - Renovar TUC
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'CERRADO' %}bg-secondary text-white{% elif tramite.estado == 'DENEGADO' %}bg-danger text-white{% else %}bg-light{% endif %} rounded">
+                        6. Cerrado
+                    </div>
+                </div>
+                {% elif tramite.tipo_tramite == 'BAJA_VEHICULO' %}
+                <div class="d-flex flex-column">
+                    <div class="p-2 {% if tramite.estado == 'RECIBIDO' %}bg-info text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        1. Mesa de Partes
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'EN_CONTROL_CALIDAD' or tramite.estado == 'OBSERVADO' %}bg-success text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        2. Control de Calidad
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'EN_EVAL_TECNICA' %}bg-primary text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        3. Evaluación Técnica
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'EN_REVISION_LEGAL' %}bg-secondary text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        4. Revisión Legal
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'PENDIENTE_FIRMA' %}bg-dark text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        5. Firma
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'APROBADO' %}bg-success text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        6. Aprobado
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'CERRADO' %}bg-secondary text-white{% elif tramite.estado == 'DENEGADO' %}bg-danger text-white{% else %}bg-light{% endif %} rounded">
+                        7. Cerrado
+                    </div>
+                </div>
+                {% else %}
+                <div class="d-flex flex-column">
+                    <div class="p-2 {% if tramite.estado == 'RECIBIDO' %}bg-info text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        1. Recibido
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'EN_EVAL_TECNICA' %}bg-primary text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        2. Evaluación Técnica
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'EN_REVISION_LEGAL' %}bg-secondary text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        3. Revisión Legal
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'PENDIENTE_FIRMA' %}bg-dark text-white{% else %}bg-light{% endif %} rounded mb-2">
+                        4. Pendiente Firma
+                    </div>
+                    <div class="p-2 {% if tramite.estado == 'APROBADO' %}bg-success text-white{% elif tramite.estado == 'DENEGADO' %}bg-danger text-white{% elif tramite.estado == 'CERRADO' %}bg-secondary text-white{% else %}bg-light{% endif %} rounded">
+                        5. Resuelto
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Buscar todos los párrafos en el historial que contengan el rol
+    const paragrafos = document.querySelectorAll('.list-group-item p.small');
+    
+    paragrafos.forEach(function(p) {
+        const texto = p.innerText || p.textContent;
+        
+        // Buscar el patrón [PRÓXIMO ROL RESPONSABLE: ...]
+        if (texto.includes('[PRÓXIMO ROL RESPONSABLE:')) {
+            // Usar regex para encontrar y reemplazar
+            const regex = /(\[PRÓXIMO ROL RESPONSABLE:[^\]]+\])/g;
+            const htmlConFormato = texto
+                .replace(/\n/g, '<br>')
+                .replace(regex, '<strong>$1</strong>');
+            
+            p.innerHTML = htmlConFormato;
+        }
+    });
+});
+</script>
+
+{% endblock %}

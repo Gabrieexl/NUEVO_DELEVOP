@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="title desc">
+  <title id="title">Marca DRTC Madre de Dios</title>
+  <desc id="desc">Sello institucional referencial para la Direccion Regional de Transportes y Comunicaciones de Madre de Dios.</desc>
+  <defs>
+    <linearGradient id="forest" x1="32" y1="18" x2="128" y2="142" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#19734f"/>
+      <stop offset=".55" stop-color="#0f5b43"/>
+      <stop offset="1" stop-color="#0a3d32"/>
+    </linearGradient>
+    <linearGradient id="road" x1="80" y1="48" x2="80" y2="132" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f7d36a"/>
+      <stop offset="1" stop-color="#bd8423"/>
+    </linearGradient>
+  </defs>
+  <circle cx="80" cy="80" r="75" fill="#fbfff9"/>
+  <circle cx="80" cy="80" r="70" fill="url(#forest)"/>
+  <circle cx="80" cy="80" r="63" fill="none" stroke="#f2c75c" stroke-width="5"/>
+  <path d="M34 96c12-20 26-30 42-30 22 0 31 17 50 6" fill="none" stroke="#b9e3d1" stroke-width="8" stroke-linecap="round"/>
+  <path d="M39 103c12-13 27-20 43-20 19 0 30 9 42 4" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity=".72"/>
+  <path d="M66 131c5-19 9-36 10-52 1-12-1-23-4-34" fill="none" stroke="url(#road)" stroke-width="13" stroke-linecap="round"/>
+  <path d="M94 131c-5-19-9-36-10-52-1-12 1-23 4-34" fill="none" stroke="url(#road)" stroke-width="13" stroke-linecap="round"/>
+  <path d="M80 47v80" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-dasharray="8 9" stroke-linecap="round" opacity=".85"/>
+  <path d="M41 51c8-9 17-14 28-16 13-2 24 1 35 8 5 3 11 5 18 4-11-13-25-21-42-21-17 0-31 8-39 25z" fill="#d9efe4" opacity=".92"/>
+  <text x="80" y="78" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="800" fill="#ffffff" letter-spacing="1">DRTC</text>
+  <text x="80" y="99" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" fill="#f8d576" letter-spacing="1.6">MADRE DE DIOS</text>
+  <circle cx="80" cy="80" r="75" fill="none" stroke="#ffffff" stroke-width="3"/>
+</svg>

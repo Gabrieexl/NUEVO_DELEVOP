@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Vehículos - DRTC{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-truck me-2"></i>Vehículos
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Vehículos</li>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Lista de Vehículos</h5>
+        {% if perms.vehiculos.add_vehiculo %}
+        <a href="{% url 'vehiculos:crear' %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg me-1"></i>Nuevo Vehículo
+        </a>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        <!-- Filtros -->
+        <form method="get" class="row g-3 mb-4">
+            <div class="col-md-3">
+                <input type="text" name="q" value="{{ filtro_q }}" 
+                       class="form-control" placeholder="Buscar por placa, marca...">
+            </div>
+            <div class="col-md-3">
+                <select name="estado" class="form-select">
+                    <option value="">Todos los estados</option>
+                    <option value="PROPUESTO" {% if filtro_estado == 'PROPUESTO' %}selected{% endif %}>Propuesto</option>
+                    <option value="HABILITADO" {% if filtro_estado == 'HABILITADO' %}selected{% endif %}>Habilitado</option>
+                    <option value="BAJA" {% if filtro_estado == 'BAJA' %}selected{% endif %}>Baja</option>
+                    <option value="NO_HABILITADO" {% if filtro_estado == 'NO_HABILITADO' %}selected{% endif %}>No Habilitado</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="categoria" class="form-select">
+                    <option value="">Todas las categorías</option>
+                    {% for cat in form_busqueda.fields.categoria.queryset %}
+                    <option value="{{ cat.id }}" {% if request.GET.categoria == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="carroceria" class="form-select">
+                    <option value="">Todas las carrocerías</option>
+                    {% for car in form_busqueda.fields.carroceria.queryset %}
+                    <option value="{{ car.id }}" {% if request.GET.carroceria == car.id|stringformat:"s" %}selected{% endif %}>{{ car.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-secondary w-100">
+                    <i class="bi bi-search me-1"></i>Filtrar
+                </button>
+            </div>
+        </form>
+
+        <!-- Tabla -->
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Placa</th>
+                        <th>Marca/Modelo</th>
+                        <!-- <th>N° Resolución</th> -->
+                        <th>Año</th>
+                        <th>Categoría</th>
+                        <th>Carrocería</th>
+                        <th>Capacidad</th>
+                        <th>Empresa</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vehiculo in object_list %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'vehiculos:detalle' vehiculo.pk %}" class="text-decoration-none fw-medium">
+                                {{ vehiculo.placa }}
+                            </a>
+                        </td>
+                        <td>{{ vehiculo.marca }} {{ vehiculo.modelo }}</td>
+                        <!-- <th>N° Resolución</th> -->
+                        <td>{{ vehiculo.anio_fabricacion }}</td>
+                        <td>{{ vehiculo.categoria.nombre|default:"-" }}</td>
+                        <td>{{ vehiculo.carroceria.nombre|default:"-" }}</td>
+                        <td>{{ vehiculo.capacidad_sentados }}</td>
+                        <td>
+                            {% if vehiculo.empresa_propietaria %}
+                            <a href="{% url 'empresas:detalle' vehiculo.empresa_propietaria.pk %}" class="text-decoration-none">
+                                {{ vehiculo.empresa_propietaria.razon_social|truncatechars:20 }}
+                            </a>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if vehiculo.estado == 'HABILITADO' %}
+                            <span class="badge bg-success">Habilitado</span>
+                            {% elif vehiculo.estado == 'PROPUESTO' %}
+                            <span class="badge bg-info">Propuesto</span>
+                            {% elif vehiculo.estado == 'BAJA' %}
+                            <span class="badge bg-danger">Baja</span>
+                            {% else %}
+                            <span class="badge bg-secondary">No Habilitado</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'vehiculos:detalle' vehiculo.pk %}" 
+                                   class="btn btn-outline-primary" title="Ver detalle">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                {% if perms.vehiculos.change_vehiculo %}
+                                <a href="{% url 'vehiculos:editar' vehiculo.pk %}" 
+                                   class="btn btn-outline-secondary" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            No se encontraron vehículos
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        {% if page_obj %}
+        <nav aria-label="Paginación">
+            <ul class="pagination justify-content-center mb-0">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query_params %}&{{ query_params }}{% endif %}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+                
+                <li class="page-item disabled">
+                    <span class="page-link">
+                        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
+                
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query_params %}&{{ query_params }}{% endif %}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

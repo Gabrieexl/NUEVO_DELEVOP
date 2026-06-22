@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }} - DRTC{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-clock me-2"></i>{{ titulo }}
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'configuracion:home' %}">Configuración</a></li>
+<li class="breadcrumb-item"><a href="{% url 'configuracion:frecuencias_lista' %}">Frecuencias</a></li>
+<li class="breadcrumb-item active">{{ accion }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">{{ titulo }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ request.path }}" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.codigo.id_for_label }}" class="form-label">Código *</label>
+                            {{ form.codigo }}
+                            {% if form.codigo.errors %}
+                            <div class="invalid-feedback d-block">{{ form.codigo.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8 mb-3">
+                            <label for="{{ form.nombre.id_for_label }}" class="form-label">Nombre *</label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}
+                            <div class="invalid-feedback d-block">{{ form.nombre.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.hora_salida.id_for_label }}" class="form-label">Hora de Salida *</label>
+                            {{ form.hora_salida }}
+                            {% if form.hora_salida.errors %}
+                            <div class="invalid-feedback d-block">{{ form.hora_salida.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.hora_llegada_estimada.id_for_label }}" class="form-label">Hora Llegada Estimada</label>
+                            {{ form.hora_llegada_estimada }}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Días de Operación *</label>
+                        <div class="row">
+                            {% for choice in form.dias_operacion_lista %}
+                            <div class="col-md-3 col-6">
+                                <div class="form-check">
+                                    {{ choice.tag }}
+                                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                        {{ choice.choice_label }}
+                                    </label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% if form.dias_operacion_lista.errors %}
+                        <div class="invalid-feedback d-block">{{ form.dias_operacion_lista.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.descripcion.id_for_label }}" class="form-label">Descripción</label>
+                        {{ form.descripcion }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.observaciones.id_for_label }}" class="form-label">Observaciones</label>
+                        {{ form.observaciones }}
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        {{ form.activo }}
+                        <label class="form-check-label" for="{{ form.activo.id_for_label }}">
+                            Frecuencia Activa
+                        </label>
+                    </div>
+                    
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        {% if is_modal %}
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg me-1"></i>Cancelar
+                        </button>
+                        {% else %}
+                        <a href="{% url 'configuracion:frecuencias_lista' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Cancelar
+                        </a>
+                        {% endif %}
+                        {% if is_modal %}
+                        <button type="button" class="btn btn-success js-modal-submit">
+                            <i class="bi bi-check-lg me-1"></i>{{ accion }}
+                        </button>
+                        {% else %}
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-lg me-1"></i>{{ accion }}
+                        </button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

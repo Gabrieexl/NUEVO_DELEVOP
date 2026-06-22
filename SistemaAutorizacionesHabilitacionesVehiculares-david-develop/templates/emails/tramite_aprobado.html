@@ -1,0 +1,60 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<div class="alert-box alert-success">
+    <h2>✅ Trámite Aprobado</h2>
+    <p>¡Felicitaciones! Su trámite ha sido aprobado satisfactoriamente.</p>
+</div>
+
+<p>Estimado(a) <strong>{{ nombre_solicitante }}</strong>,</p>
+
+<p>Nos complace comunicarle que su trámite ha sido <strong>APROBADO</strong>.</p>
+
+<div class="info-card">
+    <div class="info-row">
+        <span class="info-label">N° Expediente:</span>
+        <span class="info-value"><strong>{{ numero_expediente }}</strong></span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Tipo de Trámite:</span>
+        <span class="info-value">{{ tipo_tramite }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Estado:</span>
+        <span class="info-value"><span style="color: #28a745; font-weight: bold;">{{ estado }}</span></span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Fecha de Aprobación:</span>
+        <span class="info-value">{{ fecha }}</span>
+    </div>
+</div>
+
+{% if comentario %}
+<div class="info-card">
+    <h3 style="margin-top: 0; color: #28a745;">📝 Observaciones:</h3>
+    <p>{{ comentario }}</p>
+</div>
+{% endif %}
+
+<div class="divider"></div>
+
+<h3>📋 Próximos Pasos:</h3>
+<ul>
+    <li>Acérquese a nuestras oficinas para recoger su resolución y documentos correspondientes.</li>
+    <li>Presente su DNI o documento de identidad vigente.</li>
+    <li>Si es representante legal, presente el poder correspondiente.</li>
+</ul>
+
+<p style="background: #d4edda; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745;">
+    <strong>Horario de Atención:</strong><br>
+    Lunes a Viernes: 8:00 AM - 4:30 PM
+</p>
+
+<div class="divider"></div>
+
+<p>Agradecemos su confianza en nuestra institución.</p>
+
+<p>Atentamente,</p>
+<p><strong>Dirección de Transporte Terrestre</strong><br>
+DRTC</p>
+{% endblock %}

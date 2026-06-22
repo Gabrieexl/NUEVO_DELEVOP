@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }} - DRTC{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-receipt me-2"></i>{{ titulo }}
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'tramites:lista' %}">Trámites</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'tramites:detalle' tramite.pk %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">{{ tramite.numero_expediente }}</a></li>
+<li class="breadcrumb-item active">Agregar Recibo</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-receipt me-2"></i>Agregar Recibo de Pago</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <strong>Trámite:</strong> {{ tramite.numero_expediente }} - {{ tramite.get_tipo_tramite_display }}
+                </div>
+                
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">N° Serie <span class="text-danger">*</span></label>
+                            {{ form.numero_serie }}
+                            {% if form.numero_serie.errors %}
+                            <div class="invalid-feedback d-block">{{ form.numero_serie.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">N° Documento <span class="text-danger">*</span></label>
+                            {{ form.numero_documento }}
+                            {% if form.numero_documento.errors %}
+                            <div class="invalid-feedback d-block">{{ form.numero_documento.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Fecha de Pago <span class="text-danger">*</span></label>
+                            {{ form.fecha_pago }}
+                            {% if form.fecha_pago.errors %}
+                            <div class="invalid-feedback d-block">{{ form.fecha_pago.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Descripción/Tarifa <span class="text-danger">*</span></label>
+                            {{ form.descripcion_tarifa }}
+                            {% if form.descripcion_tarifa.errors %}
+                            <div class="invalid-feedback d-block">{{ form.descripcion_tarifa.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Cantidad <span class="text-danger">*</span></label>
+                            {{ form.cantidad }}
+                            {% if form.cantidad.errors %}
+                            <div class="invalid-feedback d-block">{{ form.cantidad.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Precio Unitario <span class="text-danger">*</span></label>
+                            {{ form.precio_unitario }}
+                            {% if form.precio_unitario.errors %}
+                            <div class="invalid-feedback d-block">{{ form.precio_unitario.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Total</label>
+                            <input type="text" class="form-control" id="total_display" readonly>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'tramites:detalle' tramite.pk %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>Guardar Recibo
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cantidad = document.querySelector('[name="cantidad"]');
+    const precio = document.querySelector('[name="precio_unitario"]');
+    const total = document.getElementById('total_display');
+    
+    // Validar que precio_unitario solo acepte números y puntos decimales
+    function configurarCampoNumerico(input) {
+        if (!input) return;
+        
+        input.addEventListener('input', function(e) {
+            // Reemplazar cualquier carácter que no sea número o punto decimal
+            this.value = this.value.replace(/[^0-9.]/g, '');
+            // Permitir solo un punto decimal
+            const parts = this.value.split('.');
+            if (parts.length > 2) {
+                this.value = parts[0] + '.' + parts[1];
+            }
+            calcularTotal();
+        });
+        
+        input.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const pasteText = (e.clipboardData || window.clipboardData).getData('text');
+            // Solo permitir números y puntos decimales
+            const numericText = pasteText.replace(/[^0-9.]/g, '');
+            // Permitir solo un punto decimal
+            const parts = numericText.split('.');
+            if (parts.length > 2) {
+                this.value = parts[0] + '.' + parts[1];
+            } else {
+                this.value = numericText;
+            }
+            calcularTotal();
+        });
+    }
+    
+    function calcularTotal() {
+        const cant = parseFloat(cantidad.value) || 0;
+        const prec = parseFloat(precio.value) || 0;
+        total.value = 'S/ ' + (cant * prec).toFixed(2);
+    }
+    
+    // Aplicar validación al campo de precio
+    configurarCampoNumerico(precio);
+    
+    // También validar cantidad si es numérica
+    if (cantidad) {
+        cantidad.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9.]/g, '');
+            calcularTotal();
+        });
+    }
+    
+    calcularTotal();
+});
+</script>
+{% endblock %}

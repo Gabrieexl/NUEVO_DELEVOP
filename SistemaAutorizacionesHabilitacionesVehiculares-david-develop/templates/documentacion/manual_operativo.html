@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Manual Operativo - DRTC{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-journal-text me-2"></i>Manual Operativo (Paso a Paso)
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'documentacion:index' %}">Documentación</a></li>
+<li class="breadcrumb-item active">Operativo</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="card shadow-sm sticky-top" style="top: 80px;">
+            <div class="card-header bg-light text-primary fw-bold">
+                Operaciones
+            </div>
+            <div class="list-group list-group-flush small">
+                <a href="#registrar-empresa" class="list-group-item list-group-item-action">1. Registrar Empresa</a>
+                <a href="#registrar-autorizacion" class="list-group-item list-group-item-action">2. Registrar Autorización</a>
+                <a href="#registrar-vehiculo" class="list-group-item list-group-item-action">3. Registrar Vehículo</a>
+                <a href="#registrar-conductor" class="list-group-item list-group-item-action">4. Registrar Conductor</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body p-4">
+                <section id="registrar-empresa" class="mb-5">
+                    <h4 class="border-bottom pb-2 text-primary">1. Cómo Registrar una Empresa</h4>
+                    <p>Este es el primer paso antes de habilitar vehículos o rutas.</p>
+                    <div class="card bg-light border-0 mb-3">
+                        <div class="card-body">
+                            <ol>
+                                <li class="mb-2">Vaya a <strong>Gestión > Empresas</strong> en el menú lateral.</li>
+                                <li class="mb-2">Haga clic en el botón verde <strong>Nueva Empresa</strong>.</li>
+                                <li class="mb-2"><strong>RUC:</strong> Ingrese los 11 dígitos. El sistema verificará si ya está registrada.</li>
+                                <li class="mb-2"><strong>Datos Legales:</strong> Ingrese Razón Social, Dirección y el nombre del Representante Legal (DNI incluido).</li>
+                                <li class="mb-2"><strong>Estado:</strong> Asegúrese de que esté en "ACTIVA" para poder asociarle trámites después.</li>
+                                <li class="mb-2">Presione <strong>Guardar Empresa</strong>.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="registrar-autorizacion" class="mb-5">
+                    <h4 class="border-bottom pb-2 text-primary">2. Cómo Registrar una Autorización</h4>
+                    <p>La autorización es el permiso legal (Resolución) que se le da a la empresa.</p>
+                    <div class="card bg-light border-0 mb-3">
+                        <div class="card-body">
+                            <ol>
+                                <li class="mb-2">Seleccione una empresa de la lista general para ver su <strong>Detalle</strong>.</li>
+                                <li class="mb-2">Busque la sección <strong>Autorizaciones</strong> y haga clic en <strong>Agregar Autorización</strong>.</li>
+                                <li class="mb-2"><strong>Resolución:</strong> Ingrese el número oficial (ej: 123-2025-DRTC) y adjunte el PDF si lo tiene.</li>
+                                <li class="mb-2"><strong>Vigencia:</strong> Defina fecha de inicio y fin (el sistema le avisará automáticamente 30 días antes del vencimiento).</li>
+                                <li class="mb-2"><strong>Rutas:</strong> Marque las rutas que la empresa tiene permitido recorrer (previamente configuradas en el módulo de Configuración).</li>
+                                <li class="mb-2">Presione <strong>Guardar</strong>.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="registrar-vehiculo" class="mb-5">
+                    <h4 class="border-bottom pb-2 text-primary">3. Cómo Registrar un Vehículo y su TUC</h4>
+                    <div class="card bg-light border-0 mb-3">
+                        <div class="card-body">
+                            <ol>
+                                <li class="mb-2">En el detalle de la Empresa, busque la pestaña o sección <strong>Vehículos</strong>.</li>
+                                <li class="mb-2">Haga clic en <strong>Habilitar Vehículo</strong>.</li>
+                                <li class="mb-2"><strong>Placa:</strong> Ingrese la placa (Ej: ABC-123). Si el vehículo ya existe en otra empresa, el sistema le lanzará una alerta para evitar duplicidades.</li>
+                                <li class="mb-2"><strong>Datos Técnicos:</strong> Ingrese Motor, Serie, Año y seleccione la <strong>Carrocería</strong>.</li>
+                                <li class="mb-2"><strong>Documentación:</strong> Ingrese el número de TUC y la fecha de vencimiento del SOAT y CITV.</li>
+                                <li class="mb-2">Haga clic en <strong>Guardar</strong>. El estado cambiará a "HABILITADO" automáticamente.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="registrar-conductor" class="mb-5">
+                    <h4 class="border-bottom pb-2 text-primary">4. Cómo Registrar un Conductor</h4>
+                    <div class="card bg-light border-0 mb-3">
+                        <div class="card-body">
+                            <ol>
+                                <li class="mb-2">En el detalle de la Empresa, busque la sección <strong>Conductores</strong>.</li>
+                                <li class="mb-2">Presione <strong>Agregar Conductor</strong>.</li>
+                                <li class="mb-2"><strong>DNI:</strong> Ingrese el número para que el sistema complete los datos si ya fue registrado antes.</li>
+                                <li class="mb-2"><strong>Licencia:</strong> Ingrese Número, Categoría (AII, AIII, etc.) y la fecha de vencimiento.</li>
+                                <li class="mb-2">Haga clic en <strong>Guardar</strong>.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

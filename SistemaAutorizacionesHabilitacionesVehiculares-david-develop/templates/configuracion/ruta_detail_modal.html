@@ -1,0 +1,56 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <h6 class="border-bottom pb-2 mb-3">
+                <i class="bi bi-signpost-2 me-2"></i>
+                {{ ruta.codigo }} - {{ ruta.nombre }}
+                {% if ruta.activo %}
+                <span class="badge bg-success">Activo</span>
+                {% else %}
+                <span class="badge bg-secondary">Inactivo</span>
+                {% endif %}
+            </h6>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p><strong>Origen:</strong><br>{{ ruta.origen }}</p>
+                    <p><strong>Destino:</strong><br>{{ ruta.destino }}</p>
+                    {% if ruta.puntos_intermedios %}
+                    <p><strong>Puntos Intermedios:</strong><br>{{ ruta.puntos_intermedios }}</p>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Distancia:</strong><br>
+                        {% if ruta.distancia_km %}{{ ruta.distancia_km }} km{% else %}-{% endif %}
+                    </p>
+                    <p><strong>Tiempo Estimado:</strong><br>{{ ruta.tiempo_estimado_display }}</p>
+                    <p><strong>Ámbito:</strong><br>{{ ruta.get_ambito_display }}</p>
+                </div>
+            </div>
+            
+            {% if ruta.observaciones %}
+            <div class="mb-3">
+                <strong>Observaciones:</strong>
+                <p class="text-muted mb-0">{{ ruta.observaciones }}</p>
+            </div>
+            {% endif %}
+            
+            <hr>
+            <p class="text-muted small mb-0">
+                Creado el {{ ruta.fecha_creacion|date:"d/m/Y H:i" }}
+                {% if ruta.creado_por %}por {{ ruta.creado_por }}{% endif %}
+            </p>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-header">
+                    <h6 class="mb-0">Ruta Completa</h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0 small">{{ ruta.ruta_completa }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

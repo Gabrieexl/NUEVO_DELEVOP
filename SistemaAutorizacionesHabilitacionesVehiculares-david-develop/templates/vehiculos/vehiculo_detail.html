@@ -1,0 +1,350 @@
+{% extends 'base.html' %}
+
+{% block title %}Vehículo {{ object.placa }} - DRTC{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-truck me-2"></i>Vehículo {{ object.placa }}
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'vehiculos:lista' %}">Vehículos</a></li>
+<li class="breadcrumb-item active">{{ object.placa }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Información Principal -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Información del Vehículos</h5>
+                {% if perms.vehiculos.change_vehiculo %}
+                <a href="{% url 'vehiculos:editar' object.pk %}" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-pencil me-1"></i>Editar
+                </a>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label text-muted small">Placa</label>
+                        <p class="fw-bold fs-4 mb-0">{{ object.placa }}</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label text-muted small">Marca</label>
+                        <p class="mb-0">{{ object.marca }}</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label text-muted small">Modelo</label>
+                        <p class="mb-0">{{ object.modelo }}</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label text-muted small">Año de Fabricación</label>
+                        <p class="mb-0">{{ object.anio_fabricacion }}</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label text-muted small">Categoría</label>
+                        <p class="mb-0">{{ object.categoria.nombre|default:"-" }}</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label text-muted small">Carrocería</label>
+                        <p class="mb-0">{{ object.carroceria.nombre|default:"-" }}</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label text-muted small">Capacidad</label>
+                        <p class="mb-0">{{ object.capacidad_sentados }} asientos</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label text-muted small">N° Resolución</label>
+                        <p class="mb-0">
+                            {{ object.numero_resolucion|default:"-" }}
+                            {% if object.archivo_resolucion %}
+                            <a href="{{ object.archivo_resolucion.url }}" target="_blank" class="ms-1 text-danger" title="Ver Resolución">
+                                <i class="bi bi-file-earmark-pdf"></i>
+                            </a>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Documentos del Vehículo -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-file-earmark me-2"></i>Documentos</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label text-muted small">N° TIV</label>
+                        <p class="mb-0">{{ object.numero_tiv|default:"-" }}</p>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label text-muted small">N° TUC Vigente</label>
+                        <p class="mb-0">
+                            {% if object.numero_tuc_vigente %}
+                            <span class="badge bg-primary fs-6">{{ object.numero_tuc_vigente }}</span>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label text-muted small">Venc. SOAT</label>
+                        <p class="mb-0 {% if object.soat_vencido %}text-danger fw-bold{% endif %}">
+                            {{ object.fecha_venc_soat|date:"d/m/Y"|default:"-" }}
+                            {% if object.soat_vencido %}
+                            <span class="badge bg-danger ms-1">Vencido</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label text-muted small">Venc. CITV</label>
+                        <p class="mb-0 {% if object.citv_vencido %}text-danger fw-bold{% endif %}">
+                            {{ object.fecha_venc_citv|date:"d/m/Y"|default:"-" }}
+                            {% if object.citv_vencido %}
+                            <span class="badge bg-danger ms-1">Vencido</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historial de Habilitaciones -->
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Historial de Habilitaciones</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Autorización</th>
+                                <th>N° TUC</th>
+                                <th>Fecha Inicio</th>
+                                <th>Fecha Fin</th>
+                                <th>Estado</th>
+                                <th>Vigencia Transportista</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for hab in habilitaciones %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'autorizaciones:detalle' hab.autorizacion.pk %}">
+                                        {{ hab.autorizacion.numero_resolucion }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {% if hab.numero_tuc %}
+                                    <span class="badge bg-primary">{{ hab.numero_tuc }}</span>
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ hab.fecha_inicio|date:"d/m/Y" }}</td>
+                                <td>{{ hab.fecha_fin|date:"d/m/Y"|default:"-" }}</td>
+                                <td>
+                                    {% if hab.estado_mostrar == 'VIGENTE' %}
+                                    <span class="badge bg-success">Vigente</span>
+                                    {% elif hab.estado_mostrar == 'BAJA' %}
+                                    <span class="badge bg-danger">Baja</span>
+                                    {% elif hab.estado_mostrar == 'SUSPENDIDA' %}
+                                    <span class="badge bg-warning text-dark">Suspendida</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{{ hab.get_estado_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if hab.fecha_autorizacion_transportista and hab.fecha_expiracion_transportista %}
+                                    {{ hab.fecha_autorizacion_transportista|date:"d/m/Y" }} - {{ hab.fecha_expiracion_transportista|date:"d/m/Y" }}
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-3">
+                                    Sin historial de habilitaciones
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historial de Trámites -->
+        <div class="card shadow-sm mt-4 mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Historial de Trámites</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Expediente</th>
+                                <th>Resolución</th>
+                                <th>Tipo de Trámite</th>
+                                <th>Estado</th>
+                                <th>Fecha</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tramite in historial_tramites %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'tramites:detalle' tramite.pk %}?next={{ request.get_full_path|urlencode }}" class="fw-bold">
+                                        {{ tramite.numero_expediente }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {{ tramite.numero_resolucion|default:"-" }}
+                                    {% if tramite.archivo_resolucion %}
+                                    <a href="{{ tramite.archivo_resolucion.url }}" target="_blank" class="text-danger ms-1" title="Ver Resolución">
+                                        <i class="bi bi-file-earmark-pdf"></i>
+                                    </a>
+                                    {% endif %}
+                                </td>
+                                <td>{{ tramite.get_tipo_tramite_display }}</td>
+                                <td>
+                                    {% if tramite.estado == 'APROBADO' %}
+                                    <span class="badge bg-success">{{ tramite.get_estado_display }}</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{{ tramite.get_estado_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ tramite.fecha_creacion|date:"d/m/Y" }}</td>
+                                <td>
+                                    <a href="{% url 'tramites:detalle' tramite.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-info" title="Ver Trámite">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-3">
+                                    No hay trámites registrados para este vehículo.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel Lateral -->
+    <div class="col-lg-4">
+        <!-- Estado -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body text-center">
+                {% if object.estado == 'HABILITADO' %}
+                <span class="badge bg-success fs-5 px-4 py-2">HABILITADO</span>
+                {% elif object.estado == 'PROPUESTO' %}
+                <span class="badge bg-info fs-5 px-4 py-2">PROPUESTO</span>
+                {% elif object.estado == 'BAJA' %}
+                <span class="badge bg-danger fs-5 px-4 py-2">BAJA</span>
+                {% else %}
+                <span class="badge bg-secondary fs-5 px-4 py-2">NO HABILITADO</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Empresa Propietaria -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-building me-2"></i>Empresa Propietaria</h6>
+            </div>
+            <div class="card-body">
+                {% if object.empresa_propietaria %}
+                <h6 class="fw-bold mb-1">
+                    <a href="{% url 'empresas:detalle' object.empresa_propietaria.pk %}" class="text-decoration-none">
+                        {{ object.empresa_propietaria.razon_social }}
+                    </a>
+                </h6>
+                <p class="text-muted small mb-2">RUC: {{ object.empresa_propietaria.ruc }}</p>
+                <p class="mb-0">
+                    {% if object.empresa_propietaria.estado == 'ACTIVA' %}
+                    <span class="badge bg-success">Activa</span>
+                    {% else %}
+                    <span class="badge bg-danger">Inactiva</span>
+                    {% endif %}
+                </p>
+                {% else %}
+                <p class="text-muted mb-0">Sin empresa asignada</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Autorización Principal -->
+        {% if object.autorizacion_principal %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-file-earmark-check me-2"></i>Autorización Principal</h6>
+            </div>
+            <div class="card-body">
+                <a href="{% url 'autorizaciones:detalle' object.autorizacion_principal.pk %}" class="text-decoration-none">
+                    {{ object.autorizacion_principal.numero_resolucion }}
+                </a>
+                <p class="text-muted small mb-0 mt-1">
+                    {{ object.autorizacion_principal.empresa.razon_social }}
+                </p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Vehículo Sustituido -->
+        {% if object.vehiculo_sustituido %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-arrow-left-right me-2"></i>Sustituyó a</h6>
+            </div>
+            <div class="card-body">
+                <a href="{% url 'vehiculos:detalle' object.vehiculo_sustituido.pk %}" class="text-decoration-none">
+                    {{ object.vehiculo_sustituido.placa }}
+                </a>
+                <p class="text-muted small mb-0 mt-1">
+                    {{ object.vehiculo_sustituido.marca }} {{ object.vehiculo_sustituido.modelo }}
+                </p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Información de Auditoría -->
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-clock-history me-2"></i>Auditoría</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <small class="text-muted">Creado por:</small>
+                    <p class="mb-0">
+                        {% if object.creado_por %}
+                            {{ object.creado_por.get_full_name|default:object.creado_por.username }}
+                        {% else %}
+                            Sistema
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Fecha creación:</small>
+                    <p class="mb-0">{{ object.fecha_creacion|date:"d/m/Y H:i" }}</p>
+                </div>
+                <div>
+                    <small class="text-muted">Última actualización:</small>
+                    <p class="mb-0">{{ object.fecha_actualizacion|date:"d/m/Y H:i" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

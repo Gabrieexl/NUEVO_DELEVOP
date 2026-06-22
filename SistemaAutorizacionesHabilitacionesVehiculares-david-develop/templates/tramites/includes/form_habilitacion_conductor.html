@@ -1,0 +1,142 @@
+{% if tipo_tramite == 'HABILITACION_CONDUCTOR' %}
+<h6 class="border-bottom pb-2 mb-3"><i class="bi bi-person-badge"></i> Datos del Conductor</h6>
+
+{% if form_especifico.warnings %}
+<div class="alert alert-warning">
+    <ul class="mb-0">
+        {% for warning in form_especifico.warnings %}
+        <li><i class="bi bi-exclamation-triangle me-2"></i>{{ warning }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<div class="mb-3 form-check">
+    {{ form_especifico.usar_conductor_existente }}
+    <label class="form-check-label" for="usar_conductor_existente">
+        ¿Usar un conductor ya registrado en el sistema?
+    </label>
+</div>
+
+<div id="div_conductor_existente" style="display: none;">
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> 
+        Seleccione un conductor que ya esté registrado para habilitarlo en esta empresa.
+    </div>
+    <div class="row g-2 align-items-end mb-2">
+        <div class="col-12">
+            <label class="form-label">Buscar por DNI o nombre</label>
+            <input type="search" class="form-control" id="conductor_filtro" placeholder="Ej: 12345678 o Juan P?rez">
+            <div class="form-text" id="conductor_filtro_resultados"></div>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Seleccionar Conductor Existente</label>
+        {{ form_especifico.conductor_existente }}
+        {% if form_especifico.conductor_existente.errors %}
+        <div class="text-danger small">{{ form_especifico.conductor_existente.errors.0 }}</div>
+        {% endif %}
+    </div>
+</div>
+
+<div id="div_conductor_nuevo">
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label class="form-label">DNI *</label>
+            <div class="input-group">
+                {{ form_especifico.dni }}
+                <button class="btn btn-outline-secondary" type="button" id="btn-verificar-dni" title="Verificar si el conductor ya existe">
+                    <i class="bi bi-search"></i> Verificar
+                </button>
+            </div>
+            {% if form_especifico.dni.errors %}
+            <div class="text-danger small">{{ form_especifico.dni.errors.0 }}</div>
+            {% endif %}
+        </div>
+        <div class="col-md-8">
+            <label class="form-label">Nombres *</label>
+            {{ form_especifico.nombres }}
+            {% if form_especifico.nombres.errors %}
+            <div class="text-danger small">{{ form_especifico.nombres.errors.0 }}</div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Apellido Paterno *</label>
+            {{ form_especifico.apellido_paterno }}
+            {% if form_especifico.apellido_paterno.errors %}
+            <div class="text-danger small">{{ form_especifico.apellido_paterno.errors.0 }}</div>
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Apellido Materno *</label>
+            {{ form_especifico.apellido_materno }}
+            {% if form_especifico.apellido_materno.errors %}
+            <div class="text-danger small">{{ form_especifico.apellido_materno.errors.0 }}</div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label class="form-label">Fecha de Nacimiento *</label>
+            {{ form_especifico.fecha_nacimiento }}
+            {% if form_especifico.fecha_nacimiento.errors %}
+            <div class="text-danger small">{{ form_especifico.fecha_nacimiento.errors.0 }}</div>
+            {% endif %}
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Teléfono</label>
+            {{ form_especifico.telefono }}
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Email</label>
+            {{ form_especifico.email }}
+        </div>
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Dirección</label>
+        {{ form_especifico.direccion }}
+    </div>
+    
+    <h6 class="border-bottom pb-2 mb-3 mt-4"><i class="bi bi-card-heading"></i> Datos de Licencia</h6>
+    
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Número de Licencia *</label>
+            {{ form_especifico.licencia_numero }}
+            {% if form_especifico.licencia_numero.errors %}
+            <div class="text-danger small">{{ form_especifico.licencia_numero.errors.0 }}</div>
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Categoría *</label>
+            {{ form_especifico.licencia_categoria }}
+            {% if form_especifico.licencia_categoria.errors %}
+            <div class="text-danger small">{{ form_especifico.licencia_categoria.errors.0 }}</div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Fecha de Emisión *</label>
+            {{ form_especifico.licencia_fecha_emision }}
+            {% if form_especifico.licencia_fecha_emision.errors %}
+            <div class="text-danger small">{{ form_especifico.licencia_fecha_emision.errors.0 }}</div>
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Fecha de Vencimiento *</label>
+            {{ form_especifico.licencia_fecha_vencimiento }}
+            {% if form_especifico.licencia_fecha_vencimiento.errors %}
+            <div class="text-danger small">{{ form_especifico.licencia_fecha_vencimiento.errors.0 }}</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endif %}

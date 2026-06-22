@@ -1,0 +1,331 @@
+{% if tipo_tramite == 'RENOVACION_TUC' %}
+<h6 class="border-bottom pb-2 mb-3"><i class="bi bi-credit-card"></i> Renovacion de TUC</h6>
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i>
+    Busque la placa de cada vehiculo que renovara TUC. La autorizacion ya fue seleccionada en el paso anterior.
+</div>
+
+{% if renovacion_tuc_formset.non_form_errors %}
+<div class="alert alert-danger">
+    {% for error in renovacion_tuc_formset.non_form_errors %}
+    <p class="mb-0">{{ error }}</p>
+    {% endfor %}
+</div>
+{% endif %}
+
+{{ renovacion_tuc_formset.management_form }}
+
+<div id="renovacion-tuc-list" class="d-grid gap-3">
+    {% for vehiculo_form in renovacion_tuc_formset.forms %}
+    <div class="border rounded p-3 renovacion-tuc-row" data-form-row>
+        {{ vehiculo_form.vehiculo }}
+        <div class="d-none">
+            {{ vehiculo_form.DELETE }}
+        </div>
+
+        {% if vehiculo_form.non_field_errors %}
+        <div class="alert alert-danger py-2">
+            {% for error in vehiculo_form.non_field_errors %}
+            <p class="mb-0">{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="row align-items-end">
+            <div class="col-md-4 mb-3">
+                <label class="form-label">{{ vehiculo_form.placa.label }} <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    {{ vehiculo_form.placa }}
+                    <button type="button" class="btn btn-outline-secondary" data-renovacion-tuc-verificar>
+                        <i class="bi bi-search"></i> Verificar
+                    </button>
+                </div>
+                {% if vehiculo_form.placa.errors %}
+                <div class="text-danger small">{{ vehiculo_form.placa.errors.0 }}</div>
+                {% endif %}
+                <div class="small mt-1 text-muted" data-renovacion-tuc-resultado></div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label class="form-label">{{ vehiculo_form.numero_tuc.label }}</label>
+                {{ vehiculo_form.numero_tuc }}
+                {% if vehiculo_form.numero_tuc.errors %}
+                <div class="text-danger small">{{ vehiculo_form.numero_tuc.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label class="form-label">{{ vehiculo_form.fecha_expedicion_tuc.label }} <span class="text-danger">*</span></label>
+                {{ vehiculo_form.fecha_expedicion_tuc }}
+                {% if vehiculo_form.fecha_expedicion_tuc.errors %}
+                <div class="text-danger small">{{ vehiculo_form.fecha_expedicion_tuc.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-2 mb-3 text-md-end">
+                <button type="button" class="btn btn-outline-danger" data-renovacion-tuc-remove>
+                    <i class="bi bi-trash"></i> Quitar
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<template id="renovacion-tuc-empty-form">
+    <div class="border rounded p-3 renovacion-tuc-row" data-form-row>
+        {{ renovacion_tuc_formset.empty_form.vehiculo }}
+        <div class="d-none">
+            {{ renovacion_tuc_formset.empty_form.DELETE }}
+        </div>
+
+        <div class="row align-items-end">
+            <div class="col-md-4 mb-3">
+                <label class="form-label">{{ renovacion_tuc_formset.empty_form.placa.label }} <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    {{ renovacion_tuc_formset.empty_form.placa }}
+                    <button type="button" class="btn btn-outline-secondary" data-renovacion-tuc-verificar>
+                        <i class="bi bi-search"></i> Verificar
+                    </button>
+                </div>
+                <div class="small mt-1 text-muted" data-renovacion-tuc-resultado></div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label class="form-label">{{ renovacion_tuc_formset.empty_form.numero_tuc.label }}</label>
+                {{ renovacion_tuc_formset.empty_form.numero_tuc }}
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label class="form-label">{{ renovacion_tuc_formset.empty_form.fecha_expedicion_tuc.label }} <span class="text-danger">*</span></label>
+                {{ renovacion_tuc_formset.empty_form.fecha_expedicion_tuc }}
+            </div>
+
+            <div class="col-md-2 mb-3 text-md-end">
+                <button type="button" class="btn btn-outline-danger" data-renovacion-tuc-remove>
+                    <i class="bi bi-trash"></i> Quitar
+                </button>
+            </div>
+        </div>
+    </div>
+</template>
+
+<div class="mt-3 mb-4">
+    <button type="button" class="btn btn-outline-primary" id="agregar-vehiculo-renovacion-tuc">
+        <i class="bi bi-plus-circle"></i> Agregar vehiculo
+    </button>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const autorizacionId = "{{ datos_basicos.autorizacion|default:'' }}";
+    const lista = document.getElementById('renovacion-tuc-list');
+    const agregarBtn = document.getElementById('agregar-vehiculo-renovacion-tuc');
+    const template = document.getElementById('renovacion-tuc-empty-form');
+    const totalFormsInput = document.getElementById('id_renovacion_tuc-TOTAL_FORMS');
+    const urlBase = "{% url 'consultas:api_internal_placa' placa='PLACEHOLDER' %}";
+
+    if (!lista || !agregarBtn || !template || !totalFormsInput) return;
+
+    function normalizar(txt) {
+        return (txt || '').toUpperCase().replace(/[-\s]/g, '');
+    }
+
+    function getFilasVisibles() {
+        return Array.from(lista.querySelectorAll('[data-form-row]')).filter(function(row) {
+            return !row.classList.contains('d-none');
+        });
+    }
+
+    function mostrarResultado(row, clase, texto) {
+        const resultado = row.querySelector('[data-renovacion-tuc-resultado]');
+        if (!resultado) return;
+        resultado.className = `small mt-1 ${clase}`;
+        resultado.textContent = texto;
+    }
+
+    function bloquearBoton(boton, cargando) {
+        boton.disabled = cargando;
+        boton.innerHTML = cargando
+            ? '<span class="spinner-border spinner-border-sm"></span> Verificando...'
+            : '<i class="bi bi-search"></i> Verificar';
+    }
+
+    function limpiarSeleccion(row) {
+        const vehiculoHidden = row.querySelector('input[name$="-vehiculo"]');
+        const numeroTuc = row.querySelector('input[name$="-numero_tuc"]');
+        const fechaExpedicion = row.querySelector('input[name$="-fecha_expedicion_tuc"]');
+
+        if (vehiculoHidden) vehiculoHidden.value = '';
+        if (numeroTuc) numeroTuc.value = '';
+        if (fechaExpedicion) fechaExpedicion.value = '';
+    }
+
+    function aplicarResultadoExitoso(row, data) {
+        const placaInput = row.querySelector('input[name$="-placa"]');
+        const vehiculoHidden = row.querySelector('input[name$="-vehiculo"]');
+        const numeroTuc = row.querySelector('input[name$="-numero_tuc"]');
+        const fechaExpedicion = row.querySelector('input[name$="-fecha_expedicion_tuc"]');
+        const infoVehiculo = data && data.vehiculo ? data.vehiculo : null;
+        const infoHab = data && data.habilitacion_vehicular ? data.habilitacion_vehicular : null;
+
+        if (!infoVehiculo || !vehiculoHidden) return;
+
+        placaInput.value = infoVehiculo.placa || placaInput.value;
+        vehiculoHidden.value = infoVehiculo.id || '';
+
+        if (numeroTuc && infoHab) {
+            numeroTuc.value = infoHab.numero_tuc || '';
+        }
+        if (fechaExpedicion && infoHab) {
+            fechaExpedicion.value = infoHab.fecha_expedicion_tuc || '';
+        }
+
+        const detalles = [];
+        if (numeroTuc && numeroTuc.value) detalles.push(`TUC: ${numeroTuc.value}`);
+        if (fechaExpedicion && fechaExpedicion.value) detalles.push(`Expedicion: ${fechaExpedicion.value}`);
+
+        mostrarResultado(row, 'text-success', detalles.length ? `Placa encontrada - ${detalles.join(', ')}.` : 'Placa encontrada.');
+    }
+
+    function verificarPlaca(row, boton) {
+        const placaInput = row.querySelector('input[name$="-placa"]');
+        const vehiculoHidden = row.querySelector('input[name$="-vehiculo"]');
+        const placa = normalizar(placaInput ? placaInput.value : '');
+
+        if (!placa) {
+            limpiarSeleccion(row);
+            mostrarResultado(row, 'text-danger', 'Ingrese una placa.');
+            return;
+        }
+
+        if (!autorizacionId) {
+            limpiarSeleccion(row);
+            mostrarResultado(row, 'text-danger', 'No se encontro la autorizacion seleccionada en el paso anterior.');
+            return;
+        }
+
+        bloquearBoton(boton, true);
+        mostrarResultado(row, 'text-muted', 'Buscando en base de datos...');
+
+        const url = urlBase.replace('PLACEHOLDER', encodeURIComponent(placa)) + `?autorizacion_id=${autorizacionId}`;
+
+        fetch(url)
+            .then(async function(response) {
+                let payload = null;
+                try {
+                    payload = await response.json();
+                } catch (_) {
+                    payload = null;
+                }
+                if (!response.ok) {
+                    const msg = payload && payload.message ? payload.message : `Error HTTP ${response.status} al verificar placa.`;
+                    throw new Error(msg);
+                }
+                if (!payload || typeof payload.found === 'undefined') {
+                    throw new Error('Respuesta invalida del servidor.');
+                }
+                return payload;
+            })
+            .then(function(payload) {
+                if (!payload.found || !payload.data || !payload.data.vehiculo) {
+                    limpiarSeleccion(row);
+                    mostrarResultado(row, 'text-danger', payload.message || 'Placa no registrada.');
+                    return;
+                }
+
+                const estado = payload.data.vehiculo.estado;
+                if (estado !== 'HABILITADO') {
+                    limpiarSeleccion(row);
+                    mostrarResultado(row, 'text-danger', `La placa existe pero su estado es ${payload.data.vehiculo.estado_display || estado}. Debe estar Habilitado.`);
+                    return;
+                }
+
+                if (!payload.data.autorizacion || payload.data.autorizacion.id != autorizacionId) {
+                    limpiarSeleccion(row);
+                    mostrarResultado(row, 'text-danger', 'La placa no pertenece a la autorizacion seleccionada.');
+                    return;
+                }
+
+                aplicarResultadoExitoso(row, payload.data);
+            })
+            .catch(function(error) {
+                if (vehiculoHidden) vehiculoHidden.value = '';
+                mostrarResultado(row, 'text-danger', error.message || 'Ocurrio un error al verificar la placa.');
+            })
+            .finally(function() {
+                bloquearBoton(boton, false);
+            });
+    }
+
+    function actualizarBotonesQuitar() {
+        const filas = getFilasVisibles();
+        filas.forEach(function(row) {
+            const boton = row.querySelector('[data-renovacion-tuc-remove]');
+            if (boton) boton.disabled = filas.length <= 1;
+        });
+    }
+
+    function configurarFila(row) {
+        const placaInput = row.querySelector('input[name$="-placa"]');
+        const numeroTuc = row.querySelector('input[name$="-numero_tuc"]');
+        const fechaExpedicion = row.querySelector('input[name$="-fecha_expedicion_tuc"]');
+        const verificarBtn = row.querySelector('[data-renovacion-tuc-verificar]');
+        const quitarBtn = row.querySelector('[data-renovacion-tuc-remove]');
+        const deleteInput = row.querySelector('input[name$="-DELETE"]');
+
+        if (numeroTuc) numeroTuc.readOnly = true;
+        if (fechaExpedicion) fechaExpedicion.readOnly = true;
+
+        if (verificarBtn) {
+            verificarBtn.addEventListener('click', function(evento) {
+                evento.preventDefault();
+                verificarPlaca(row, verificarBtn);
+            });
+        }
+
+        if (quitarBtn) {
+            quitarBtn.addEventListener('click', function(evento) {
+                evento.preventDefault();
+                if (getFilasVisibles().length <= 1) return;
+                if (deleteInput) deleteInput.checked = true;
+                row.classList.add('d-none');
+                actualizarBotonesQuitar();
+            });
+        }
+
+        if (placaInput) {
+            placaInput.addEventListener('input', function() {
+                limpiarSeleccion(row);
+                if (!placaInput.value.trim()) {
+                    mostrarResultado(row, 'text-muted', '');
+                }
+            });
+
+            placaInput.addEventListener('keydown', function(evento) {
+                if (evento.key === 'Enter') {
+                    evento.preventDefault();
+                    verificarPlaca(row, verificarBtn);
+                }
+            });
+        }
+    }
+
+    agregarBtn.addEventListener('click', function() {
+        const index = parseInt(totalFormsInput.value, 10);
+        const html = template.innerHTML.replace(/__prefix__/g, index);
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = html.trim();
+        const nuevaFila = wrapper.firstElementChild;
+
+        lista.appendChild(nuevaFila);
+        totalFormsInput.value = index + 1;
+        configurarFila(nuevaFila);
+        actualizarBotonesQuitar();
+    });
+
+    lista.querySelectorAll('[data-form-row]').forEach(configurarFila);
+    actualizarBotonesQuitar();
+});
+</script>
+{% endif %}

@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Manual de Reportes - DRTC{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-file-earmark-bar-graph me-2"></i>Manual de Reportes y Tablas
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'documentacion:index' %}">Documentación</a></li>
+<li class="breadcrumb-item active">Reportes</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="card shadow-sm sticky-top" style="top: 80px;">
+            <div class="card-header bg-light text-primary fw-bold">
+                Manual de Reportes
+            </div>
+            <div class="list-group list-group-flush small">
+                <a href="#uso-filtros" class="list-group-item list-group-item-action">1. Cómo Usar Filtros</a>
+                <a href="#paso-excel" class="list-group-item list-group-item-action">2. Obtener Reporte Excel</a>
+                <a href="#paso-pdf" class="list-group-item list-group-item-action">3. Generar PDF (Vencimientos)</a>
+                <a href="#paso-stats" class="list-group-item list-group-item-action">4. Gráficos Estadísticos</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body p-4">
+                <section id="uso-filtros" class="mb-5">
+                    <h4 class="border-bottom pb-2 text-primary">1. Cómo Filtrar la Información</h4>
+                    <p>Antes de descargar un reporte, debe decidir qué quiere ver:</p>
+                    <ol>
+                        <li>Vaya al módulo <strong>Reportes</strong>.</li>
+                        <li>En cada tarjeta (Empresas, Vehículos, etc.), verá campos como "Estado" o "Año".</li>
+                        <li>Seleccione, por ejemplo, <strong>Estado: VIGENTE</strong> para ocultar los registros antiguos.</li>
+                        <li>Los botones de descarga tomarán automáticamente estos filtros.</li>
+                    </ol>
+                </section>
+
+                <section id="paso-excel" class="mb-5">
+                    <h4 class="border-bottom pb-2 text-primary">2. Paso a Paso: Exportar a Excel</h4>
+                    <div class="card bg-light border-0">
+                        <div class="card-body">
+                            <ol>
+                                <li class="mb-2">Ubique la sección <strong>"Exportación de Datos (Excel)"</strong>.</li>
+                                <li class="mb-2">Haga clic en el botón que necesite (ej: "Exportar Flota de Vehículos").</li>
+                                <li class="mb-2">El archivo se descargará automáticamente. Contendrá columnas detalladas: Placa, Empresa, Vencimientos, etc.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="paso-pdf" class="mb-5">
+                    <h4 class="border-bottom pb-2 text-primary">3. Paso a Paso: Reporte de Vencimientos (PDF)</h4>
+                    <p>Ideal para operativos en carretera o revisiones administrativas:</p>
+                    <ol>
+                        <li>En el panel de Reportes, busque <strong>"Reportes Oficiales (PDF)"</strong>.</li>
+                        <li>Haga clic en <strong>"Reporte de Próximos Vencimientos"</strong>.</li>
+                        <li>Se abrirá una nueva pestaña con un documento listo para imprimir que resalta en rojo los vehículos con SOAT o CITV vencidos.</li>
+                    </ol>
+                </section>
+
+                <section id="paso-stats" class="mb-5">
+                    <h4 class="border-bottom pb-2 text-primary">4. Cómo Interpretar las Estadísticas</h4>
+                    <ol>
+                        <li>Vaya al menú: <strong>Reportes > Estadísticas</strong>.</li>
+                        <li>Verá gráficos circulares y de barras.</li>
+                        <li><strong>Pase el mouse</strong> sobre las barras para ver el número exacto (ej: cuántas camionetas M1 hay habilitadas en total).</li>
+                        <li>Estos gráficos se alimentan en tiempo real cada vez que registra un vehículo o empresa.</li>
+                    </ol>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}Habilitación Vehicular - DRTC{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-card-checklist me-2"></i>{{ titulo }}
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'vehiculos:lista' %}">Vehículos</a></li>
+<li class="breadcrumb-item active">Habilitaciones</li>
+{% endblock %}
+
+{% block content %}
+<!-- Resumen -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h3 class="mb-0">{{ vigentes }}</h3>
+                <small>Vigentes</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h3 class="mb-0">{{ habilitaciones.paginator.count }}</h3>
+                <small>Total Registros</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small">Estado</label>
+                <select name="estado" class="form-select">
+                    <option value="">Todos los estados</option>
+                    <option value="VIGENTE" {% if request.GET.estado == 'VIGENTE' %}selected{% endif %}>Vigente</option>
+                    <option value="BAJA" {% if request.GET.estado == 'BAJA' %}selected{% endif %}>Baja</option>
+                    <option value="SUSPENDIDA" {% if request.GET.estado == 'SUSPENDIDA' %}selected{% endif %}>Suspendida</option>
+                    <option value="CANCELADA" {% if request.GET.estado == 'CANCELADA' %}selected{% endif %}>Cancelada</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search me-1"></i>Filtrar
+                </button>
+            </div>
+            <div class="col-md-2">
+                <a href="{% url 'vehiculos:habilitaciones' %}" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-x-circle me-1"></i>Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista de Habilitaciones -->
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Vehículo</th>
+                        <th>Empresa</th>
+                        <th>Autorización</th>
+                        <th>N° TUC</th>
+                        <th>Fecha Inicio</th>
+                        <th>Vigencia Transportista</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for hab in habilitaciones %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'vehiculos:detalle' hab.vehiculo.pk %}" class="fw-bold text-decoration-none">
+                                {{ hab.vehiculo.placa }}
+                            </a>
+                            <br>
+                            <small class="text-muted">{{ hab.vehiculo.marca }} {{ hab.vehiculo.modelo }}</small>
+                        </td>
+                        <td>
+                            <a href="{% url 'empresas:detalle' hab.autorizacion.empresa.pk %}" class="text-decoration-none">
+                                {{ hab.autorizacion.empresa.razon_social|truncatechars:25 }}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{% url 'autorizaciones:detalle' hab.autorizacion.pk %}" class="text-decoration-none">
+                                {{ hab.autorizacion.numero_resolucion }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if hab.numero_tuc %}
+                            <span class="badge bg-primary">{{ hab.numero_tuc }}</span>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ hab.fecha_inicio|date:"d/m/Y" }}</td>
+                        <td>
+                            {% if hab.fecha_autorizacion_transportista and hab.fecha_expiracion_transportista %}
+                            <small>
+                                {{ hab.fecha_autorizacion_transportista|date:"d/m/Y" }}<br>
+                                al {{ hab.fecha_expiracion_transportista|date:"d/m/Y" }}
+                            </small>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if hab.estado == 'VIGENTE' %}
+                            <span class="badge bg-success">Vigente</span>
+                            {% elif hab.estado == 'BAJA' %}
+                            <span class="badge bg-danger">Baja</span>
+                            {% elif hab.estado == 'SUSPENDIDA' %}
+                            <span class="badge bg-warning text-dark">Suspendida</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ hab.get_estado_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <a href="{% url 'vehiculos:detalle' hab.vehiculo.pk %}" 
+                               class="btn btn-sm btn-outline-primary" title="Ver vehículo">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            No se encontró habilitación vehicular
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Paginación -->
+{% if habilitaciones.has_other_pages %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if habilitaciones.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ habilitaciones.previous_page_number }}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+        </li>
+        {% endif %}
+        
+        {% for num in habilitaciones.paginator.page_range %}
+            {% if habilitaciones.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num > habilitaciones.number|add:'-3' and num < habilitaciones.number|add:'3' %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ num }}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">{{ num }}</a>
+            </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if habilitaciones.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ habilitaciones.next_page_number }}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

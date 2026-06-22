@@ -1,0 +1,18 @@
+{% if tipo_tramite == 'BAJA_CONDUCTOR' %}
+<h6 class="border-bottom pb-2 mb-3"><i class="bi bi-person-x text-danger"></i> Baja de Conductor</h6>
+
+<div class="alert alert-warning mb-3">
+    <i class="bi bi-exclamation-triangle"></i>
+    <strong>Importante:</strong> Este trámite retirará la habilitación del conductor seleccionado.
+    Asegúrese de haber seleccionado el conductor correcto en el paso anterior.
+</div>
+
+<div class="mb-3">
+    <label class="form-label">Motivo de la Baja *</label>
+    {{ form_especifico.motivo_baja }}
+    {% if form_especifico.motivo_baja.errors %}
+    <div class="text-danger small">{{ form_especifico.motivo_baja.errors.0 }}</div>
+    {% endif %}
+    <small class="text-muted">Indique el motivo por el cual se solicita la baja del conductor</small>
+</div>
+{% endif %}

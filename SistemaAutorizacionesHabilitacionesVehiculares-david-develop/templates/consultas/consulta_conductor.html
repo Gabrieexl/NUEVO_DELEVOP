@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="text-center mb-4">
+            <h2 class="text-primary">{{ titulo }}</h2>
+            <p class="text-muted">Sistema de Consulta de Habilitación de Conductores - DRTC Madre de Dios</p>
+        </div>
+        
+        <div class="card">
+            <div class="card-body p-4">
+                <form method="post" class="mb-4">
+                    {% csrf_token %}
+                    <div class="input-group input-group-lg">
+                        {{ form.dni }}
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i> Consultar
+                        </button>
+                    </div>
+                    <small class="text-muted">{{ form.dni.help_text }}</small>
+                </form>
+                
+                {% if error %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> {{ error }}
+                </div>
+                {% endif %}
+                
+                {% if resultado %}
+                <!-- Resultado de la consulta -->
+                <div class="border-top pt-4">
+                    <h4 class="mb-3">
+                        <i class="bi bi-person"></i> Conductor: {{ resultado.conductor.nombre_completo }}
+                    </h4>
+                    
+                    <!-- Mensaje de estado -->
+                    <div class="alert {% if 'ALERTA' in resultado.mensaje %}alert-danger{% elif 'sin' in resultado.mensaje|lower or 'no tiene' in resultado.mensaje|lower %}alert-warning{% else %}alert-success{% endif %}">
+                        <strong>{{ resultado.mensaje }}</strong>
+                    </div>
+                    
+                    <div class="row">
+                        <!-- Datos del Conductor -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-primary text-white">
+                                    <i class="bi bi-person-badge"></i> Datos del Conductor
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-sm table-borderless mb-0">
+                                        <tr>
+                                            <td><strong>DNI:</strong></td>
+                                            <td>{{ resultado.conductor.dni }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Nombre:</strong></td>
+                                            <td>{{ resultado.conductor.nombre_completo }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Estado:</strong></td>
+                                            <td>
+                                                {% if resultado.conductor.estado == 'Activo' %}
+                                                <span class="badge bg-success">{{ resultado.conductor.estado }}</span>
+                                                {% else %}
+                                                <span class="badge bg-secondary">{{ resultado.conductor.estado }}</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Datos de la Licencia -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-info text-white">
+                                    <i class="bi bi-card-heading"></i> Licencia de Conducir
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-sm table-borderless mb-0">
+                                        <tr>
+                                            <td><strong>Número:</strong></td>
+                                            <td>{{ resultado.conductor.licencia.numero }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Categoría:</strong></td>
+                                            <td>
+                                                <span class="badge bg-primary fs-6">
+                                                    {{ resultado.conductor.licencia.categoria }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        {% if resultado.conductor.licencia.fecha_emision %}
+                                        <tr>
+                                            <td><strong>Emitida:</strong></td>
+                                            <td>{{ resultado.conductor.licencia.fecha_emision }}</td>
+                                        </tr>
+                                        {% endif %}
+                                        {% if resultado.conductor.licencia.fecha_vencimiento %}
+                                        <tr>
+                                            <td><strong>Vencimiento:</strong></td>
+                                            <td>
+                                                {% if resultado.conductor.licencia.vigente %}
+                                                <span class="text-success">{{ resultado.conductor.licencia.fecha_vencimiento }}</span>
+                                                {% else %}
+                                                <span class="text-danger">{{ resultado.conductor.licencia.fecha_vencimiento }} (VENCIDA)</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endif %}
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if resultado.habilitacion_vigente %}
+                    <div class="row">
+                        <!-- Empresa donde está habilitado -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-secondary text-white">
+                                    <i class="bi bi-building"></i> Empresa donde está Habilitado
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-sm table-borderless mb-0">
+                                        <tr>
+                                            <td><strong>RUC:</strong></td>
+                                            <td>{{ resultado.habilitacion_vigente.empresa.ruc }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Razón Social:</strong></td>
+                                            <td>{{ resultado.habilitacion_vigente.empresa.razon_social }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Estado Empresa:</strong></td>
+                                            <td>
+                                                {% if resultado.habilitacion_vigente.empresa.estado == 'Activa' %}
+                                                <span class="badge bg-success">{{ resultado.habilitacion_vigente.empresa.estado }}</span>
+                                                {% else %}
+                                                <span class="badge bg-secondary">{{ resultado.habilitacion_vigente.empresa.estado }}</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Habilitación Vigente -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-success text-white">
+                                    <i class="bi bi-shield-check"></i> Habilitación Vigente
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-sm table-borderless mb-0">
+                                        <tr>
+                                            <td><strong>Estado:</strong></td>
+                                            <td>
+                                                <span class="badge bg-success fs-6">{{ resultado.habilitacion_vigente.estado }}</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Desde:</strong></td>
+                                            <td>{{ resultado.habilitacion_vigente.fecha_inicio }}</td>
+                                        </tr>
+                                        {% if resultado.habilitacion_vigente.fecha_fin %}
+                                        <tr>
+                                            <td><strong>Hasta:</strong></td>
+                                            <td>{{ resultado.habilitacion_vigente.fecha_fin }}</td>
+                                        </tr>
+                                        {% endif %}
+                                        {% if resultado.habilitacion_vigente.autorizacion %}
+                                        <tr>
+                                            <td><strong>Autorización:</strong></td>
+                                            <td>
+                                                {{ resultado.habilitacion_vigente.autorizacion.numero_resolucion }}
+                                                {% if resultado.habilitacion_vigente.autorizacion.tipo_servicio %}
+                                                <br><small class="text-muted">{{ resultado.habilitacion_vigente.autorizacion.tipo_servicio }}</small>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endif %}
+                                        {% if resultado.conductor.numero_resolucion %}
+                                        <tr>
+                                            <td><strong>N.° Resolución:</strong></td>
+                                            <td>{{ resultado.conductor.numero_resolucion }}</td>
+                                        </tr>
+                                        {% endif %}
+
+                                        {% if resultado.conductor.fecha_resolucion %}
+                                        <tr>
+                                            <td><strong>Fecha Resolución:</strong></td>
+                                            <td>{{ resultado.conductor.fecha_resolucion }}</td>
+                                        </tr>
+                                        {% endif %}
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> 
+                        Este conductor no tiene habilitación vigente en ninguna empresa de transporte.
+                    </div>
+                    {% endif %}
+                    
+                    {% if resultado.historial_habilitaciones %}
+                    <!-- Historial de Habilitaciones -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-dark text-white">
+                            <i class="bi bi-clock-history"></i> Historial de Habilitaciones
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Empresa</th>
+                                        <th>Desde</th>
+                                        <th>Hasta</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for hab in resultado.historial_habilitaciones %}
+                                    <tr>
+                                        <td>{{ hab.empresa.razon_social }}</td>
+                                        <td>{{ hab.fecha_inicio }}</td>
+                                        <td>{{ hab.fecha_fin|default:"-" }}</td>
+                                        <td>
+                                            {% if hab.estado == 'Vigente' %}
+                                            <span class="badge bg-success">{{ hab.estado }}</span>
+                                            {% elif hab.estado == 'Baja' %}
+                                            <span class="badge bg-secondary">{{ hab.estado }}</span>
+                                            {% else %}
+                                            <span class="badge bg-warning">{{ hab.estado }}</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="text-muted small text-end">
+                        Consulta realizada: {{ resultado.fecha_consulta }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="text-center mt-4 text-muted small">
+            <p>Dirección Regional de Transportes y Comunicaciones de Madre de Dios</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

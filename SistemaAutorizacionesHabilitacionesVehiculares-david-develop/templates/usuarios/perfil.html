@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Mi Perfil - DRTC{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{{ titulo }}</h1>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-person me-2"></i>Editar Perfil
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_first_name" class="form-label">Nombres</label>
+                            {{ form.first_name }}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="id_last_name" class="form-label">Apellidos</label>
+                            {{ form.last_name }}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_email" class="form-label">Email</label>
+                            {{ form.email }}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="id_telefono" class="form-label">Teléfono</label>
+                            {{ form.telefono }}
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'usuarios:dashboard' %}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-2"></i>Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-info-circle me-2"></i>Mi Información
+            </div>
+            <div class="card-body">
+                <table class="table table-sm table-borderless mb-0">
+                    <tr>
+                        <td class="text-muted">Usuario:</td>
+                        <td class="text-end"><strong>{{ user.username }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">DNI:</td>
+                        <td class="text-end">{{ user.dni }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Rol:</td>
+                        <td class="text-end">
+                            <span class="badge bg-primary">{{ user.get_rol_display }}</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Área:</td>
+                        <td class="text-end">{{ user.area|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Cargo:</td>
+                        <td class="text-end">{{ user.cargo|default:"-" }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-key me-2"></i>Seguridad
+            </div>
+            <div class="card-body">
+                <p class="text-muted small mb-3">
+                    Para cambiar tu contraseña, usa el siguiente enlace:
+                </p>
+                <a href="{% url 'usuarios:cambiar_password' %}" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-key me-2"></i>Cambiar Contraseña
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

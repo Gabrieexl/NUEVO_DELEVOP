@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block title %}Configuración - DRTC{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-gear me-2"></i>{{ titulo }}
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Configuración</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Tipos de Servicio -->
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-tags me-2"></i>Tipos de Servicio</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center mb-3">
+                    <div class="col-6">
+                        <h3 class="text-info">{{ total_tipos_servicio }}</h3>
+                        <small class="text-muted">Total</small>
+                    </div>
+                    <div class="col-6">
+                        <h3 class="text-success">{{ tipos_servicio_activos }}</h3>
+                        <small class="text-muted">Activos</small>
+                    </div>
+                </div>
+                <p class="text-muted small">
+                    Regular, Especial, Turístico, Trabajadores, etc.
+                </p>
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'configuracion:tiposervicio_lista' %}" class="btn btn-sm btn-info">
+                    <i class="bi bi-list"></i> Ver
+                </a>
+                <a href="{% url 'configuracion:tiposervicio_crear' %}" class="btn btn-sm btn-outline-info">
+                    <i class="bi bi-plus-lg"></i> Nuevo
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carrocerías -->
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="bi bi-truck me-2"></i>Carrocerías</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center mb-3">
+                    <div class="col-6">
+                        <h3 class="text-warning">{{ total_carrocerias }}</h3>
+                        <small class="text-muted">Total</small>
+                    </div>
+                    <div class="col-6">
+                        <h3 class="text-success">{{ carrocerias_activas }}</h3>
+                        <small class="text-muted">Activas</small>
+                    </div>
+                </div>
+                <p class="text-muted small">
+                    Sedán, SUV, Microbús, Ómnibus, etc.
+                </p>
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'configuracion:carroceria_lista' %}" class="btn btn-sm btn-warning">
+                    <i class="bi bi-list"></i> Ver
+                </a>
+                <a href="{% url 'configuracion:carroceria_crear' %}" class="btn btn-sm btn-outline-warning">
+                    <i class="bi bi-plus-lg"></i> Nuevo
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rutas -->
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-signpost-2 me-2"></i>Rutas</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center mb-3">
+                    <div class="col-6">
+                        <h3 class="text-primary">{{ total_rutas }}</h3>
+                        <small class="text-muted">Total</small>
+                    </div>
+                    <div class="col-6">
+                        <h3 class="text-success">{{ rutas_activas }}</h3>
+                        <small class="text-muted">Activas</small>
+                    </div>
+                </div>
+                <p class="text-muted small">
+                    Origen, destino y puntos intermedios.
+                </p>
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'configuracion:rutas_lista' %}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-list"></i> Ver
+                </a>
+                <a href="{% url 'configuracion:rutas_crear' %}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-plus-lg"></i> Nueva
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Frecuencias -->
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-clock me-2"></i>Frecuencias</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center mb-3">
+                    <div class="col-6">
+                        <h3 class="text-success">{{ total_frecuencias }}</h3>
+                        <small class="text-muted">Total</small>
+                    </div>
+                    <div class="col-6">
+                        <h3 class="text-success">{{ frecuencias_activas }}</h3>
+                        <small class="text-muted">Activas</small>
+                    </div>
+                </div>
+                <p class="text-muted small">
+                    Horarios y días de operación.
+                </p>
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'configuracion:frecuencias_lista' %}" class="btn btn-sm btn-success">
+                    <i class="bi bi-list"></i> Ver
+                </a>
+                <a href="{% url 'configuracion:frecuencias_crear' %}" class="btn btn-sm btn-outline-success">
+                    <i class="bi bi-plus-lg"></i> Nueva
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Información adicional -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Información</h5>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info mb-0">
+            <h6><i class="bi bi-lightbulb me-2"></i>¿Cómo funciona?</h6>
+            <ul class="mb-0">
+                <li><strong>Tipos de Servicio:</strong> Define los tipos de servicio disponibles (Regular, Especial, Turístico, Trabajadores, etc.).</li>
+                <li><strong>Tipos de Vehículo:</strong> Define las categorías de vehículos disponibles (Auto, Minivan, Bus, Multipropósito, etc.).</li>
+                <li><strong>Rutas:</strong> Define las rutas de transporte con origen, destino y puntos intermedios.</li>
+                <li><strong>Frecuencias:</strong> Configura los horarios de salida y los días de operación.</li>
+                <li>Estos datos se utilizan al crear autorizaciones, vehículos y otros registros del sistema.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Mis Notificaciones - DRTC{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">
+                <i class="bi bi-bell me-2"></i>Mis Notificaciones
+            </h1>
+            <p class="text-muted mb-0">
+                {% if no_leidas > 0 %}
+                    Tienes <span class="badge bg-danger">{{ no_leidas }}</span> notificaciones sin leer
+                {% else %}
+                    No tienes notificaciones pendientes
+                {% endif %}
+            </p>
+        </div>
+        <div>
+            {% if no_leidas > 0 %}
+            <button type="button" class="btn btn-outline-primary" id="btn-marcar-todas">
+                <i class="bi bi-check2-all me-1"></i>Marcar todas como leídas
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Lista de notificaciones -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            {% if notificaciones %}
+            <div class="list-group list-group-flush">
+                {% for notificacion in notificaciones %}
+                <div class="list-group-item list-group-item-action {% if not notificacion.leida %}bg-light{% endif %} py-3"
+                     data-notificacion-id="{{ notificacion.id }}">
+                    <div class="d-flex w-100 justify-content-between align-items-start">
+                        <div class="d-flex align-items-start">
+                            <!-- Icono según tipo -->
+                            <div class="me-3">
+                                {% if notificacion.tipo == 'tramite_aprobado' %}
+                                    <span class="badge bg-success rounded-circle p-2">
+                                        <i class="bi bi-check-lg"></i>
+                                    </span>
+                                {% elif notificacion.tipo == 'tramite_denegado' %}
+                                    <span class="badge bg-danger rounded-circle p-2">
+                                        <i class="bi bi-x-lg"></i>
+                                    </span>
+                                {% elif notificacion.tipo == 'tramite_observado' %}
+                                    <span class="badge bg-warning rounded-circle p-2">
+                                        <i class="bi bi-exclamation-lg"></i>
+                                    </span>
+                                {% elif 'venc_' in notificacion.tipo %}
+                                    <span class="badge bg-warning rounded-circle p-2">
+                                        <i class="bi bi-clock"></i>
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-info rounded-circle p-2">
+                                        <i class="bi bi-bell"></i>
+                                    </span>
+                                {% endif %}
+                            </div>
+                            
+                            <div>
+                                <h6 class="mb-1 {% if not notificacion.leida %}fw-bold{% endif %}">
+                                    {{ notificacion.titulo }}
+                                    {% if not notificacion.leida %}
+                                        <span class="badge bg-primary ms-2">Nueva</span>
+                                    {% endif %}
+                                </h6>
+                                <p class="mb-1 text-muted small">{{ notificacion.mensaje|truncatewords:30 }}</p>
+                                <small class="text-muted">
+                                    <i class="bi bi-clock me-1"></i>{{ notificacion.fecha_creacion|timesince }} atrás
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-center">
+                            {% if notificacion.url %}
+                            <a href="{{ notificacion.url }}" class="btn btn-sm btn-outline-primary me-2"
+                               onclick="marcarLeida({{ notificacion.id }})">
+                                <i class="bi bi-eye me-1"></i>Ver
+                            </a>
+                            {% endif %}
+                            {% if not notificacion.leida %}
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="marcarLeida({{ notificacion.id }})">
+                                <i class="bi bi-check"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-bell-slash text-muted" style="font-size: 4rem;"></i>
+                <h5 class="mt-3 text-muted">No tienes notificaciones</h5>
+                <p class="text-muted">Las notificaciones aparecerán aquí cuando haya actividad relevante.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Paginación -->
+    {% if page_obj.has_other_pages %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                    <i class="bi bi-chevron-left"></i> Anterior
+                </a>
+            </li>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                    Siguiente <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function marcarLeida(notificacionId) {
+    fetch(`/notificaciones/api/marcar-leida/${notificacionId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Actualizar UI
+            const item = document.querySelector(`[data-notificacion-id="${notificacionId}"]`);
+            if (item) {
+                item.classList.remove('bg-light');
+                const badge = item.querySelector('.badge.bg-primary');
+                if (badge) badge.remove();
+                const titulo = item.querySelector('h6');
+                if (titulo) titulo.classList.remove('fw-bold');
+            }
+            // Actualizar contador en campanita
+            actualizarContador();
+        }
+    });
+}
+
+document.getElementById('btn-marcar-todas')?.addEventListener('click', function() {
+    fetch('/notificaciones/api/marcar-todas-leidas/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Recargar página
+            location.reload();
+        }
+    });
+});
+
+function actualizarContador() {
+    fetch('/notificaciones/api/no-leidas/')
+    .then(response => response.json())
+    .then(data => {
+        const badge = document.querySelector('.notificaciones-badge');
+        if (badge) {
+            if (data.count > 0) {
+                badge.textContent = data.count;
+                badge.style.display = 'inline';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

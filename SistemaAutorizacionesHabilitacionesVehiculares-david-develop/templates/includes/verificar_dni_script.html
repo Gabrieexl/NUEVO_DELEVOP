@@ -1,0 +1,116 @@
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const btnVerificarDni = document.getElementById('btn-verificar-dni');
+    const inputDni = document.getElementById('id_dni');
+    
+    function mostrarAlertaDni(tipo, mensaje, timeout = 5000) {
+        let alertDiv = document.getElementById('alerta-dni');
+        if (!alertDiv) {
+            alertDiv = document.createElement('div');
+            alertDiv.id = 'alerta-dni';
+            alertDiv.className = `alert alert-${tipo} alert-dismissible fade show mt-2`;
+            alertDiv.innerHTML = `
+                <span id="alerta-dni-msg">${mensaje}</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            const container = inputDni.closest('.mb-3') || inputDni.parentElement;
+            container.appendChild(alertDiv);
+        } else {
+            alertDiv.className = `alert alert-${tipo} alert-dismissible fade show mt-2`;
+            document.getElementById('alerta-dni-msg').innerText = mensaje;
+            alertDiv.style.display = 'block';
+        }
+
+        // Auto-dismiss using Bootstrap 5 API if available
+        setTimeout(() => {
+            if (alertDiv) {
+                const bsAlert = bootstrap.Alert.getInstance(alertDiv) || new bootstrap.Alert(alertDiv);
+                if (bsAlert) bsAlert.close();
+            }
+        }, timeout);
+    }
+
+    function setVal(id, val) {
+        const el = document.getElementById(id);
+        if (el && val !== undefined && val !== null) {
+            el.value = val;
+            el.dispatchEvent(new Event('change'));
+        }
+    }
+
+    async function verificarDni() {
+        const dni = inputDni.value.trim();
+        if (!dni || dni.length < 8) {
+            mostrarAlertaDni('warning', 'Ingrese un DNI válido (8 dígitos).');
+            return;
+        }
+
+        btnVerificarDni.disabled = true;
+        btnVerificarDni.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+        try {
+            const urlBase = "{% url 'consultas:api_internal_dni' dni='PLACEHOLDER' %}";
+            const url = urlBase.replace('PLACEHOLDER', encodeURIComponent(dni));
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.found) {
+                const info = data.data;
+                const conductor = info.conductor;
+                const hab = info.habilitacion_vigente;
+
+                // Bloquear si tiene habilitación vigente en OTRA empresa
+                if (hab && hab.esta_vigente) {
+                    mostrarAlertaDni('danger', `⚠️ BLOQUEADO: El conductor ya tiene una habilitación VIGENTE en la empresa "${hab.empresa.razon_social}". No puede habilitarse en otra empresa simultáneamente.`, 15000);
+                    btnVerificarDni.disabled = false;
+                    btnVerificarDni.innerHTML = '<i class="bi bi-search"></i> Verificar';
+                    return;
+                }
+
+                mostrarAlertaDni('success', 'Conductor encontrado. Los datos se han cargado automáticamente.', 5000);
+                
+                // Llenar campos
+                setVal('id_nombres', conductor.nombres);
+                setVal('id_apellido_paterno', conductor.apellido_paterno);
+                setVal('id_apellido_materno', conductor.apellido_materno);
+                setVal('id_fecha_nacimiento', conductor.fecha_nacimiento);
+                
+                if (conductor.licencia) {
+                    setVal('id_licencia_numero', conductor.licencia.numero);
+                    setVal('id_licencia_categoria', conductor.licencia.categoria);
+                    setVal('id_licencia_fecha_emision', conductor.licencia.fecha_emision);
+                    setVal('id_licencia_fecha_vencimiento', conductor.licencia.fecha_vencimiento);
+                }
+
+                setVal('id_telefono', conductor.telefono);
+                setVal('id_email', conductor.email);
+
+            } else {
+                mostrarAlertaDni('info', 'Nuevo conductor: Complete los campos manualmente.', 5000);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            mostrarAlertaDni('danger', 'Error al verificar DNI.', 5000);
+        } finally {
+            btnVerificarDni.disabled = false;
+            btnVerificarDni.innerHTML = '<i class="bi bi-search"></i> Verificar';
+        }
+    }
+
+    if (btnVerificarDni) {
+        btnVerificarDni.addEventListener('click', verificarDni);
+    }
+
+    if (inputDni) {
+        inputDni.addEventListener('blur', function() {
+            if (this.value && this.value.length === 8) {
+                // Solo verificar si no se ha verificado ya o si los campos están vacíos
+                const nombres = document.getElementById('id_nombres');
+                if (nombres && !nombres.value) {
+                    verificarDni();
+                }
+            }
+        });
+    }
+});
+</script>

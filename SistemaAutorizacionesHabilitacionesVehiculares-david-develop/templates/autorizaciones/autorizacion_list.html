@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Autorizaciones - DRTC{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-file-earmark-text me-2"></i>Autorizaciones de Transporte
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Autorizaciones</li>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Lista de Autorizaciones</h5>
+        {% if perms.autorizaciones.add_autorizacion %}
+        <a href="{% url 'autorizaciones:crear' %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg me-1"></i>Nueva Autorización
+        </a>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        <!-- Filtros -->
+        <form method="get" class="row g-3 mb-4">
+            <div class="col-md-4">
+                <input type="text" name="q" value="{{ filtro_q }}" 
+                       class="form-control" placeholder="Buscar por número de resolución, empresa...">
+            </div>
+            <div class="col-md-3">
+                <select name="estado" class="form-select">
+                    <option value="">Todos los estados</option>
+                    <option value="VIGENTE" {% if filtro_estado == 'VIGENTE' %}selected{% endif %}>Vigente</option>
+                    <option value="VENCIDA" {% if filtro_estado == 'VENCIDA' %}selected{% endif %}>Vencida</option>
+                    <option value="SUSPENDIDA" {% if filtro_estado == 'SUSPENDIDA' %}selected{% endif %}>Suspendida</option>
+                    <option value="CANCELADA" {% if filtro_estado == 'CANCELADA' %}selected{% endif %}>Cancelada</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-secondary w-100">
+                    <i class="bi bi-search me-1"></i>Filtrar
+                </button>
+            </div>
+        </form>
+
+        <!-- Tabla -->
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>N° Resolución</th>
+                        <th>Empresa</th>
+                        <th>Tipo Servicio</th>
+                        <th>Ámbito</th>
+                        <th>Vigencia</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for autorizacion in object_list %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'autorizaciones:detalle' autorizacion.pk %}" class="text-decoration-none fw-medium">
+                                {{ autorizacion.numero_resolucion }}
+                            </a>
+                        </td>
+                        <td>{{ autorizacion.empresa.razon_social|truncatechars:30 }}</td>
+                        <td>{{ autorizacion.tipo_servicio.nombre|default:"-" }}</td>
+                        <td>{{ autorizacion.get_ambito_display }}</td>
+                        <td>
+                            <small>
+                                {{ autorizacion.fecha_inicio_vigencia|date:"d/m/Y" }} -
+                                {{ autorizacion.fecha_fin_vigencia|date:"d/m/Y" }}
+                            </small>
+                        </td>
+                        <td>
+                            {% if autorizacion.estado == 'VIGENTE' %}
+                            <span class="badge bg-success">Vigente</span>
+                            {% elif autorizacion.estado == 'VENCIDA' %}
+                            <span class="badge bg-secondary">Vencida</span>
+                            {% elif autorizacion.estado == 'SUSPENDIDA' %}
+                            <span class="badge bg-warning text-dark">Suspendida</span>
+                            {% else %}
+                            <span class="badge bg-danger">Cancelada</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'autorizaciones:detalle' autorizacion.pk %}" 
+                                   class="btn btn-outline-primary" title="Ver detalle">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                {% if perms.autorizaciones.change_autorizacion %}
+                                <a href="{% url 'autorizaciones:editar' autorizacion.pk %}" 
+                                   class="btn btn-outline-secondary" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            No se encontraron autorizaciones
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        {% if page_obj %}
+        <nav aria-label="Paginación">
+            <ul class="pagination justify-content-center mb-0">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query_params %}&{{ query_params }}{% endif %}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+                
+                <li class="page-item disabled">
+                    <span class="page-link">
+                        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
+                
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query_params %}&{{ query_params }}{% endif %}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

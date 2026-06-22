@@ -1,0 +1,641 @@
+{% extends 'base.html' %}
+
+{% block title %}Reportes - DRTC{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-file-earmark-bar-graph me-2"></i>Módulo de Reportes
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Reportes</li>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <!-- Tarjetas de estadísticas rápidas -->
+    <div class="col-md-3 mb-3">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-0">Empresas Activas</h6>
+                        <h2 class="mb-0">{{ stats.empresas_activas }}</h2>
+                    </div>
+                    <i class="bi bi-building fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card bg-success text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-0">Autorizaciones Vigentes</h6>
+                        <h2 class="mb-0">{{ stats.autorizaciones_vigentes }}</h2>
+                    </div>
+                    <i class="bi bi-file-earmark-check fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card bg-info text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-0">Vehículos Habilitados</h6>
+                        <h2 class="mb-0">{{ stats.vehiculos_habilitados }}</h2>
+                    </div>
+                    <i class="bi bi-truck fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card bg-secondary text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-0">Conductores Activos</h6>
+                        <h2 class="mb-0">{{ stats.conductores_activos }}</h2>
+                    </div>
+                    <i class="bi bi-person-badge fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alertas de vencimientos -->
+{% if stats.soat_por_vencer or stats.citv_por_vencer or stats.licencias_por_vencer or stats.autorizaciones_por_vencer %}
+<div class="alert alert-warning mb-4">
+    <h5 class="alert-heading"><i class="bi bi-exclamation-triangle me-2"></i>Alertas de Vencimientos (próximos 30 días)</h5>
+    <div class="row">
+        {% if stats.soat_por_vencer %}
+        <div class="col-md-3">
+            <strong>{{ stats.soat_por_vencer }}</strong> vehículos con SOAT por vencer
+        </div>
+        {% endif %}
+        {% if stats.citv_por_vencer %}
+        <div class="col-md-3">
+            <strong>{{ stats.citv_por_vencer }}</strong> vehículos con CITV por vencer
+        </div>
+        {% endif %}
+        {% if stats.licencias_por_vencer %}
+        <div class="col-md-3">
+            <strong>{{ stats.licencias_por_vencer }}</strong> licencias por vencer
+        </div>
+        {% endif %}
+        {% if stats.autorizaciones_por_vencer %}
+        <div class="col-md-3">
+            <strong>{{ stats.autorizaciones_por_vencer }}</strong> autorizaciones por vencer
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<div class="row">
+    <!-- Columna izquierda: Padrones -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-journal-text me-2"></i>Padrones (Fiscalización)</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small">Reportes para SUTRAN, Contraloría, MTC y otras entidades fiscalizadoras.</p>
+                
+                <div class="list-group list-group-flush">
+                    <!-- Padrón de Empresas -->
+                    <div class="list-group-item px-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1"><i class="bi bi-building me-2 text-primary"></i>Padrón de Empresas</h6>
+                                <small class="text-muted">Listado de empresas de transporte autorizadas</small>
+                            </div>
+                            <div class="btn-group btn-group-sm">
+                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalEmpresas" title="Filtrar y Exportar">
+                                    <i class="bi bi-funnel"></i>
+                                </button>
+                                <a href="{% url 'reportes:pdf_empresas' %}" class="btn btn-outline-danger" title="Exportar PDF">
+                                    <i class="bi bi-file-pdf"></i>
+                                </a>
+                                <a href="{% url 'reportes:excel_empresas' %}" class="btn btn-outline-success" title="Exportar Excel">
+                                    <i class="bi bi-file-excel"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Padrón de Autorizaciones -->
+                    <div class="list-group-item px-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1"><i class="bi bi-file-earmark-check me-2 text-success"></i>Padrón de Autorizaciones</h6>
+                                <small class="text-muted">Autorizaciones de servicio vigentes</small>
+                            </div>
+                            <div class="btn-group btn-group-sm">
+                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalAutorizaciones" title="Filtrar y Exportar">
+                                    <i class="bi bi-funnel"></i>
+                                </button>
+                                <a href="{% url 'reportes:pdf_autorizaciones' %}?estado=VIGENTE" class="btn btn-outline-danger" title="PDF Vigentes">
+                                    <i class="bi bi-file-pdf"></i>
+                                </a>
+                                <a href="{% url 'reportes:excel_autorizaciones' %}?estado=VIGENTE" class="btn btn-outline-success" title="Excel Vigentes">
+                                    <i class="bi bi-file-excel"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Padrón de Vehículos -->
+                    <div class="list-group-item px-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1"><i class="bi bi-truck me-2 text-info"></i>Padrón de Flota Vehicular</h6>
+                                <small class="text-muted">Vehículos habilitados para servicio</small>
+                            </div>
+                            <div class="btn-group btn-group-sm">
+                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalVehiculos" title="Filtrar y Exportar">
+                                    <i class="bi bi-funnel"></i>
+                                </button>
+                                <a href="{% url 'reportes:pdf_vehiculos' %}?estado=HABILITADO" class="btn btn-outline-danger" title="PDF Habilitados">
+                                    <i class="bi bi-file-pdf"></i>
+                                </a>
+                                <a href="{% url 'reportes:excel_vehiculos' %}?estado=HABILITADO" class="btn btn-outline-success" title="Excel Habilitados">
+                                    <i class="bi bi-file-excel"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Padrón de Conductores -->
+                    <div class="list-group-item px-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1"><i class="bi bi-person-badge me-2 text-secondary"></i>Padrón de Conductores</h6>
+                                <small class="text-muted">Conductores habilitados para servicio</small>
+                            </div>
+                            <div class="btn-group btn-group-sm">
+                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalConductores" title="Filtrar y Exportar">
+                                    <i class="bi bi-funnel"></i>
+                                </button>
+                                <a href="{% url 'reportes:pdf_conductores' %}?estado=ACTIVO" class="btn btn-outline-danger" title="PDF Activos">
+                                    <i class="bi bi-file-pdf"></i>
+                                </a>
+                                <a href="{% url 'reportes:excel_conductores' %}?estado=ACTIVO" class="btn btn-outline-success" title="Excel Activos">
+                                    <i class="bi bi-file-excel"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Resoluciones Emitidas -->
+                    <div class="list-group-item px-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1"><i class="bi bi-file-earmark-ruled me-2 text-warning"></i>Resoluciones Emitidas</h6>
+                                <small class="text-muted">Historial de resoluciones por período</small>
+                            </div>
+                            <div class="btn-group btn-group-sm">
+                                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalResoluciones" title="Generar PDF">
+                                    <i class="bi bi-file-pdf"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Columna derecha: Vencimientos y Trámites -->
+    <div class="col-lg-6 mb-4">
+        <!-- Reportes de Vencimientos -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="bi bi-calendar-x me-2"></i>Reportes de Vencimientos</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small">Control de documentos y habilitaciones próximas a vencer.</p>
+                
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="card h-100">
+                            <div class="card-body text-center py-3">
+                                <i class="bi bi-shield-check fs-3 text-danger"></i>
+                                <h6 class="mt-2 mb-1">SOAT por Vencer</h6>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'reportes:pdf_vencimientos' %}?tipo=soat&dias=30" class="btn btn-outline-danger btn-sm">30 días</a>
+                                    <a href="{% url 'reportes:pdf_vencimientos' %}?tipo=soat&dias=60" class="btn btn-outline-warning btn-sm">60 días</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="card h-100">
+                            <div class="card-body text-center py-3">
+                                <i class="bi bi-clipboard-check fs-3 text-info"></i>
+                                <h6 class="mt-2 mb-1">CITV por Vencer</h6>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'reportes:pdf_vencimientos' %}?tipo=citv&dias=30" class="btn btn-outline-danger btn-sm">30 días</a>
+                                    <a href="{% url 'reportes:pdf_vencimientos' %}?tipo=citv&dias=60" class="btn btn-outline-warning btn-sm">60 días</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="card h-100">
+                            <div class="card-body text-center py-3">
+                                <i class="bi bi-person-vcard fs-3 text-primary"></i>
+                                <h6 class="mt-2 mb-1">Licencias por Vencer</h6>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'reportes:pdf_vencimientos' %}?tipo=licencia&dias=30" class="btn btn-outline-danger btn-sm">30 días</a>
+                                    <a href="{% url 'reportes:pdf_vencimientos' %}?tipo=licencia&dias=60" class="btn btn-outline-warning btn-sm">60 días</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="card h-100">
+                            <div class="card-body text-center py-3">
+                                <i class="bi bi-file-earmark-x fs-3 text-secondary"></i>
+                                <h6 class="mt-2 mb-1">Autoriz. por Vencer</h6>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'reportes:pdf_vencimientos' %}?tipo=autorizacion&dias=30" class="btn btn-outline-danger btn-sm">30 días</a>
+                                    <a href="{% url 'reportes:pdf_vencimientos' %}?tipo=autorizacion&dias=90" class="btn btn-outline-warning btn-sm">90 días</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Reportes de Trámites -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-folder2-open me-2"></i>Reportes de Gestión</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small">Reportes de trámites y gestión administrativa.</p>
+                
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item px-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1"><i class="bi bi-clock-history me-2"></i>Trámites Pendientes</h6>
+                                <small class="text-muted">Expedientes en proceso</small>
+                            </div>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'reportes:pdf_tramites' %}?estado=RECIBIDO" class="btn btn-outline-danger" title="PDF">
+                                    <i class="bi bi-file-pdf"></i>
+                                </a>
+                                <a href="{% url 'reportes:excel_tramites' %}?estado=RECIBIDO" class="btn btn-outline-success" title="Excel">
+                                    <i class="bi bi-file-excel"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="list-group-item px-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1"><i class="bi bi-calendar-range me-2"></i>Trámites por Período</h6>
+                                <small class="text-muted">Filtrar por rango de fechas</small>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalTramites">
+                                <i class="bi bi-funnel"></i> Filtrar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="list-group-item px-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1"><i class="bi bi-graph-up me-2"></i>Estadísticas</h6>
+                                <small class="text-muted">Gráficos e indicadores</small>
+                            </div>
+                            <a href="{% url 'reportes:estadisticas' %}" class="btn btn-outline-info btn-sm">
+                                <i class="bi bi-bar-chart"></i> Ver
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="list-group-item px-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1"><i class="bi bi-file-person me-2 text-primary"></i>Ficha de Empresa</h6>
+                                <small class="text-muted">Información completa de una empresa</small>
+                            </div>
+                            <a href="{% url 'reportes:seleccionar_empresa_ficha' %}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-file-earmark-pdf"></i> Generar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Empresas -->
+<div class="modal fade" id="modalEmpresas" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-building me-2"></i>Filtrar Padrón de Empresas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="get" action="{% url 'reportes:pdf_empresas' %}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Año de Registro</label>
+                        <select name="anio" class="form-select">
+                            <option value="">-- Todos --</option>
+                            {% for anio in anios_empresas %}
+                            <option value="{{ anio }}">{{ anio }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de Servicio</label>
+                        <select name="tipo_servicio" class="form-select">
+                            <option value="">-- Todos --</option>
+                            {% for tipo in tipos_servicio %}
+                            <option value="{{ tipo.id }}">{{ tipo.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Estado</label>
+                        <select name="estado" class="form-select">
+                            <option value="">-- Todos --</option>
+                            {% for valor, etiqueta in estados_empresa %}
+                            <option value="{{ valor }}">{{ etiqueta }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-file-pdf me-1"></i>PDF</button>
+                    <button type="submit" class="btn btn-success" formaction="{% url 'reportes:excel_empresas' %}"><i class="bi bi-file-excel me-1"></i>Excel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Autorizaciones -->
+<div class="modal fade" id="modalAutorizaciones" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-file-earmark-check me-2"></i>Filtrar Padrón de Autorizaciones</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="get" action="{% url 'reportes:pdf_autorizaciones' %}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Año de Resolución</label>
+                        <select name="anio" class="form-select">
+                            <option value="">-- Todos --</option>
+                            {% for anio in anios_autorizaciones %}
+                            <option value="{{ anio }}">{{ anio }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Estado</label>
+                        <select name="estado" class="form-select">
+                            <option value="">-- Todos --</option>
+                            {% for valor, etiqueta in estados_autorizacion %}
+                            <option value="{{ valor }}">{{ etiqueta }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-file-pdf me-1"></i>PDF</button>
+                    <button type="submit" class="btn btn-success" formaction="{% url 'reportes:excel_autorizaciones' %}"><i class="bi bi-file-excel me-1"></i>Excel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Vehículos -->
+<div class="modal fade" id="modalVehiculos" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-truck me-2"></i>Filtrar Padrón de Vehículos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="get" action="{% url 'reportes:pdf_vehiculos' %}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Año de Registro</label>
+                        <select name="anio" class="form-select">
+                            <option value="">-- Todos --</option>
+                            {% for anio in anios_vehiculos_registro %}
+                            <option value="{{ anio }}">{{ anio }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Año de Fabricación</label>
+                        <select name="anio_fabricacion" class="form-select">
+                            <option value="">-- Todos --</option>
+                            {% for anio in anios_vehiculos_fabricacion %}
+                            <option value="{{ anio }}">{{ anio }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de Servicio</label>
+                        <select name="tipo_servicio" class="form-select">
+                            <option value="">-- Todos --</option>
+                            {% for tipo in tipos_servicio %}
+                            <option value="{{ tipo.id }}">{{ tipo.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Estado</label>
+                        <select name="estado" class="form-select">
+                            <option value="">-- Todos --</option>
+                            {% for valor, etiqueta in estados_vehiculo %}
+                            <option value="{{ valor }}">{{ etiqueta }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Estado de Autorización</label>
+                        <select name="estado_autorizacion" class="form-select">
+                            <option value="">-- Todos --</option>
+                            {% for valor, etiqueta in estados_autorizacion %}
+                            <option value="{{ valor }}">{{ etiqueta }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Estado de Empresa</label>
+                        <select name="estado_empresa" class="form-select">
+                            <option value="">-- Todos --</option>
+                            {% for valor, etiqueta in estados_empresa %}
+                            <option value="{{ valor }}">{{ etiqueta }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-file-pdf me-1"></i>PDF</button>
+                    <button type="submit" class="btn btn-success" formaction="{% url 'reportes:excel_vehiculos' %}"><i class="bi bi-file-excel me-1"></i>Excel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Conductores -->
+<div class="modal fade" id="modalConductores" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-person-badge me-2"></i>Filtrar Padrón de Conductores</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="get" action="{% url 'reportes:pdf_conductores' %}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Año de Registro</label>
+                        <select name="anio" class="form-select">
+                            <option value="">-- Todos --</option>
+                            {% for anio in anios_conductores %}
+                            <option value="{{ anio }}">{{ anio }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Estado</label>
+                        <select name="estado" class="form-select">
+                            <option value="">-- Todos --</option>
+                            {% for valor, etiqueta in estados_conductor %}
+                            <option value="{{ valor }}">{{ etiqueta }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-file-pdf me-1"></i>PDF</button>
+                    <button type="submit" class="btn btn-success" formaction="{% url 'reportes:excel_conductores' %}"><i class="bi bi-file-excel me-1"></i>Excel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Resoluciones -->
+<div class="modal fade" id="modalResoluciones" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-file-earmark-ruled me-2"></i>Reporte de Resoluciones</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formResoluciones" method="get" action="{% url 'reportes:pdf_resoluciones' %}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Fecha Desde</label>
+                        <input type="date" name="fecha_desde" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Fecha Hasta</label>
+                        <input type="date" name="fecha_hasta" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de Trámite (opcional)</label>
+                        <select name="tipo" class="form-select">
+                            <option value="">-- Todos --</option>
+                            <option value="AUTORIZACION_INICIAL">Autorización Inicial</option>
+                            <option value="MODIFICACION_AUTORIZACION">Actualización de Empresa y Autorización</option>
+                            <option value="INCREMENTO_FLOTA">Incremento de Flota</option>
+                            <option value="SUSTITUCION_VEHICULO">Sustitución de Vehículo</option>
+                            <option value="RENOVACION_TUC">Renovación de TUC</option>
+                            <option value="BAJA_VEHICULO">Baja de Vehículo</option>
+                            <option value="HABILITACION_CONDUCTOR">Habilitación de Conductor</option>
+                            <option value="BAJA_CONDUCTOR">Baja de Conductor</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-file-pdf me-1"></i>Generar PDF</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Trámites por Período -->
+<div class="modal fade" id="modalTramites" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-folder2-open me-2"></i>Reporte de Trámites</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formTramites" method="get" action="{% url 'reportes:pdf_tramites' %}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Fecha Desde</label>
+                        <input type="date" name="fecha_desde" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Fecha Hasta</label>
+                        <input type="date" name="fecha_hasta" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Estado (opcional)</label>
+                        <select name="estado" class="form-select">
+                            <option value="">-- Todos --</option>
+                            <option value="RECIBIDO">Recibido</option>
+                            <option value="EN_EVAL_TECNICA">En Evaluación Técnica</option>
+                            <option value="EN_REVISION_LEGAL">En Revisión Legal</option>
+                            <option value="PENDIENTE_FIRMA">Pendiente de Firma</option>
+                            <option value="APROBADO">Aprobado</option>
+                            <option value="DENEGADO">Denegado</option>
+                            <option value="OBSERVADO">Observado</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de Trámite (opcional)</label>
+                        <select name="tipo" class="form-select">
+                            <option value="">-- Todos --</option>
+                            <option value="AUTORIZACION_INICIAL">Autorización Inicial</option>
+                            <option value="MODIFICACION_AUTORIZACION">Actualización de Empresa y Autorización</option>
+                            <option value="INCREMENTO_FLOTA">Incremento de Flota</option>
+                            <option value="SUSTITUCION_VEHICULO">Sustitución de Vehículo</option>
+                            <option value="RENOVACION_TUC">Renovación de TUC</option>
+                            <option value="BAJA_VEHICULO">Baja de Vehículo</option>
+                            <option value="HABILITACION_CONDUCTOR">Habilitación de Conductor</option>
+                            <option value="BAJA_CONDUCTOR">Baja de Conductor</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger" name="formato" value="pdf"><i class="bi bi-file-pdf me-1"></i>PDF</button>
+                    <button type="submit" class="btn btn-success" formaction="{% url 'reportes:excel_tramites' %}"><i class="bi bi-file-excel me-1"></i>Excel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

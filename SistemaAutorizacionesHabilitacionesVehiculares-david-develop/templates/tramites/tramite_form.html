@@ -1,0 +1,672 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>{{ titulo }}</h2>
+    {% if return_url %}
+    <a href="{{ return_url }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Volver
+    </a>
+    {% else %}
+    <a href="{% url 'tramites:lista' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Volver
+    </a>
+    {% endif %}
+</div>
+
+<!-- Indicador de pasos -->
+{% if paso %}
+<div class="mb-4">
+    <div class="d-flex justify-content-center">
+        <div class="d-flex align-items-center">
+            <div class="rounded-circle bg-{% if paso == '1' %}primary{% else %}success{% endif %} text-white d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                {% if paso == '2' %}<i class="bi bi-check"></i>{% else %}1{% endif %}
+            </div>
+            <span class="ms-2 me-4 {% if paso == '1' %}fw-bold{% endif %}">Datos Básicos</span>
+            <div class="border-top" style="width: 50px;"></div>
+            <div class="rounded-circle bg-{% if paso == '2' %}primary{% else %}secondary{% endif %} text-white d-flex align-items-center justify-content-center ms-3" style="width: 35px; height: 35px;">
+                2
+            </div>
+            <span class="ms-2 {% if paso == '2' %}fw-bold{% endif %}">Datos Específicos</span>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-{% if paso == '2' %}12{% else %}8{% endif %}">
+        <div class="card">
+            <div class="card-header">
+                {% if paso == '2' %}
+                <h5 class="mb-0">
+                    <i class="bi bi-file-earmark-text"></i>
+                    Datos para: {{ tipo_tramite_display }}
+                </h5>
+                {% else %}
+                <h5 class="mb-0">{{ accion }} Trámite</h5>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if paso == '1' or not paso %}
+                <!-- ============== PASO 1: FORMULARIO BÁSICO ============== -->
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ return_url }}">
+                    <input type="hidden" name="paso" value="1">
+                    
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                        <p class="mb-0">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Tipo de Trámite *</label>
+                            {{ form.tipo_tramite }}
+                            {% if form.tipo_tramite.errors %}
+                            <div class="text-danger small">{{ form.tipo_tramite.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Empresa *</label>
+                            {{ form.empresa }}
+                            {% if form.empresa.errors %}
+                            <div class="text-danger small">{{ form.empresa.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3" id="campos_dependientes">
+                        <div class="col-md-6" id="div_autorizacion">
+                            <label class="form-label">Autorización (si aplica)</label>
+                            {{ form.autorizacion }}
+                            {% if form.autorizacion.errors %}
+                            <div class="text-danger small">{{ form.autorizacion.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6" id="div_vehiculo">
+                            <label class="form-label">Vehículo (si aplica)</label>
+                            {{ form.vehiculo }}
+                            {% if form.vehiculo.errors %}
+                            <div class="text-danger small">{{ form.vehiculo.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6" id="div_conductor">
+                            <label class="form-label">Conductor (si aplica)</label>
+                            {{ form.conductor }}
+                            {% if form.conductor.errors %}
+                            <div class="text-danger small">{{ form.conductor.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6" id="div_expediente_externo">
+                            <label class="form-label"><i class="bi bi-file-earmark-text"></i> Expediente Hoja de Ruta</label>
+                            {{ form.expediente_externo }}
+                            {% if form.expediente_externo.errors %}
+                            <div class="text-danger small">{{ form.expediente_externo.errors.0 }}</div>
+                            {% endif %}
+                            <small class="text-muted">Número de expediente externo (opcional)</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Datos del Solicitante -->
+                    <div class="card bg-light mb-3">
+                        <div class="card-header py-2">
+                            <h6 class="mb-0"><i class="bi bi-person-vcard"></i> Datos del Solicitante</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">DNI del Solicitante *</label>
+                                    {{ form.solicitante_dni }}
+                                    {% if form.solicitante_dni.errors %}
+                                    <div class="text-danger small">{{ form.solicitante_dni.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-8">
+                                    <label class="form-label">Nombres Completos *</label>
+                                    {{ form.solicitante_nombres }}
+                                    {% if form.solicitante_nombres.errors %}
+                                    <div class="text-danger small">{{ form.solicitante_nombres.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label class="form-label">Teléfono</label>
+                                    {{ form.solicitante_telefono }}
+                                    {% if form.solicitante_telefono.errors %}
+                                    <div class="text-danger small">{{ form.solicitante_telefono.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-8">
+                                    <label class="form-label">Correo Electrónico</label>
+                                    {{ form.solicitante_email }}
+                                    {% if form.solicitante_email.errors %}
+                                    <div class="text-danger small">{{ form.solicitante_email.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <small class="text-muted d-block mt-2">
+                                <i class="bi bi-info-circle"></i> 
+                                El DNI permitirá al solicitante consultar el estado de su trámite en línea.
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Descripción de la Solicitud *</label>
+                        {{ form.descripcion_solicitud }}
+                        {% if form.descripcion_solicitud.errors %}
+                        <div class="text-danger small">{{ form.descripcion_solicitud.errors.0 }}</div>
+                        {% endif %}
+                        <small class="text-muted">Describa detalladamente el motivo del trámite</small>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-arrow-right"></i> Continuar
+                        </button>
+                        {% if return_url %}
+                        <a href="{{ return_url }}" class="btn btn-outline-secondary">Cancelar</a>
+                        {% else %}
+                        <a href="{% url 'tramites:lista' %}" class="btn btn-outline-secondary">Cancelar</a>
+                        {% endif %}
+                    </div>
+                </form>
+                
+                {% elif paso == '2' %}
+                <!-- ============== PASO 2: FORMULARIO ESPECÍFICO ============== -->
+                
+                <!-- Resumen de datos básicos -->
+                <div class="alert alert-info mb-4">
+                    <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Datos del trámite:</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Empresa:</strong> {{ datos_basicos.empresa_nombre|default:"N/A" }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Tipo:</strong> {{ tipo_tramite_display }}
+                        </div>
+                    </div>
+                    {% if datos_basicos.autorizacion %}
+                    <div class="row mt-2">
+                        <div class="col-md-12">
+                            <strong>Autorización:</strong> 
+                            {% if datos_basicos.autorizacion_numero_resolucion %}
+                                {{ datos_basicos.autorizacion_numero_resolucion }}
+                            {% else %}
+                                {{ datos_basicos.autorizacion }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <input type="hidden" name="paso" value="2">
+                    
+                    {% if form_especifico.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form_especifico.non_field_errors %}
+                        <p class="mb-0">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    {% include 'tramites/includes/form_autorizacion_inicial.html' %}
+                    {% include 'tramites/includes/form_incremento_flota.html' %}
+                    {% include 'tramites/includes/form_sustitucion_vehiculo.html' %}
+                    {% include 'tramites/includes/form_habilitacion_conductor.html' %}
+                    {% include 'tramites/includes/form_modificacion_autorizacion.html' %}
+                    {% include 'tramites/includes/form_renovacion_tuc.html' %}
+                    {% include 'tramites/includes/form_baja_vehiculo.html' %}
+                    {% include 'tramites/includes/form_baja_conductor.html' %}
+                    
+                    {% if tipo_tramite == 'RENOVACION_AUTORIZACION' %}
+                        <h6 class="border-bottom pb-2 mb-3"><i class="bi bi-calendar-plus"></i> Datos de Renovación</h6>
+                        <div class="mb-3">
+                            <label class="form-label">{{ form_especifico.nueva_fecha_fin_vigencia.label }}</label>
+                            {{ form_especifico.nueva_fecha_fin_vigencia }}
+                            {% if form_especifico.nueva_fecha_fin_vigencia.help_text %}
+                            <div class="form-text">{{ form_especifico.nueva_fecha_fin_vigencia.help_text }}</div>
+                            {% endif %}
+                            {% if form_especifico.nueva_fecha_fin_vigencia.errors %}
+                            <div class="text-danger small">{{ form_especifico.nueva_fecha_fin_vigencia.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    {% if tipo_tramite == 'BAJA_AUTORIZACION' %}
+                        <h6 class="border-bottom pb-2 mb-3 text-danger"><i class="bi bi-x-circle"></i> Datos de Baja de Autorización</h6>
+                        
+                        {% if form_especifico.warning_tramites_pendientes %}
+                        <div class="alert alert-warning">
+                            <h6 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> ¡Atención! Trámites Pendientes</h6>
+                            <p class="mb-1">Existen trámites en curso para esta autorización que podrían verse afectados:</p>
+                            <ul class="mb-0">
+                                {% for t in form_especifico.warning_tramites_pendientes %}
+                                <li>{{ t }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        <div class="card border-danger mb-3">
+                            <div class="card-header bg-danger text-white py-2">
+                                <h6 class="mb-0 small"><i class="bi bi-info-circle"></i> Entidades que se desactivarán automáticamente:</h6>
+                            </div>
+                            <div class="card-body py-2">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Vehículos ({{ form_especifico.vehiculos_afectados|length }}):</strong></p>
+                                        <ul class="small mb-2">
+                                            {% for hv in form_especifico.vehiculos_afectados %}
+                                            <li>{{ hv.vehiculo.placa }} - {{ hv.vehiculo.marca }} {{ hv.vehiculo.modelo }}</li>
+                                            {% empty %}
+                                            <li class="text-muted">Ninguno</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Conductores ({{ form_especifico.conductores_afectados|length }}):</strong></p>
+                                        <ul class="small mb-2">
+                                            {% for hc in form_especifico.conductores_afectados %}
+                                            <li>{{ hc.conductor.dni }} - {{ hc.conductor.nombre_completo }}</li>
+                                            {% empty %}
+                                            <li class="text-muted">Ninguno</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                                <p class="text-danger small mb-0">
+                                    <i class="bi bi-exclamation-circle"></i> 
+                                    Al aprobar este trámite, la autorización pasará a estado <strong>CANCELADA</strong> y todas las habilitaciones vigentes serán dadas de baja.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">{{ form_especifico.motivo.label }}</label>
+                            {{ form_especifico.motivo }}
+                            {% if form_especifico.motivo.errors %}
+                            <div class="text-danger small">{{ form_especifico.motivo.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    {% if tipo_tramite == 'SUSPENSION_AUTORIZACION' %}
+                        <h6 class="border-bottom pb-2 mb-3"><i class="bi bi-pause-circle"></i> Datos de Suspensión</h6>
+                        <div class="mb-3">
+                            <label class="form-label">{{ form_especifico.motivo.label }}</label>
+                            {{ form_especifico.motivo }}
+                            {% if form_especifico.motivo.errors %}
+                            <div class="text-danger small">{{ form_especifico.motivo.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                    
+                    <hr>
+                    
+                    <div class="d-flex gap-2 justify-content-between">
+                        {% if volver_paso1_url %}
+                        <a href="{{ volver_paso1_url }}" class="btn btn-outline-secondary" id="volver_paso1_btn">
+                            <i class="bi bi-arrow-left"></i> Volver al Paso 1
+                        </a>
+                        {% else %}
+                        <a href="{% url 'tramites:crear' %}" class="btn btn-outline-secondary" id="volver_paso1_btn">
+                            <i class="bi bi-arrow-left"></i> Volver al Paso 1
+                        </a>
+                        {% endif %}
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-lg"></i> Crear Trámite
+                        </button>
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    {% if paso == '1' or not paso %}
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-info-circle"></i> Tipos de Trámite</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled small">
+                    <li class="mb-2">
+                        <strong class="text-primary">Autorización Inicial:</strong><br>
+                        Nueva autorización. Se solicitarán rutas, frecuencias y vigencia.
+                    </li>
+                    <li class="mb-2">
+                        <strong class="text-info">Modificación:</strong><br>
+                        Cambios en autorización existente.
+                    </li>
+                    <li class="mb-2">
+                        <strong class="text-primary">Renovación TUC:</strong><br>
+                        Renovar TUC de vehículos habilitados.
+                    </li>
+                    <li class="mb-2">
+                        <strong class="text-success">Incremento de Flota:</strong><br>
+                        Agregar vehículos con datos completos.
+                    </li>
+                    <li class="mb-2">
+                        <strong class="text-warning">Sustitución:</strong><br>
+                        Reemplazar vehículo existente.
+                    </li>
+                    <li class="mb-2">
+                        <strong class="text-danger">Baja Vehículo:</strong><br>
+                        Retirar vehículo de autorización.
+                    </li>
+                    <li class="mb-2">
+                        <strong class="text-primary">Habilitación Conductor:</strong><br>
+                        Habilitar conductor con datos personales.
+                    </li>
+                    <li class="mb-2">
+                        <strong class="text-danger">Baja Conductor:</strong><br>
+                        Retirar habilitación de conductor.
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% include 'includes/verificar_placa_script.html' %}
+{% include 'includes/verificar_dni_script.html' %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tipoTramite = document.getElementById('tipo_tramite');
+    const empresaSelect = document.getElementById('id_empresa');
+    const autorizacionSelect = document.getElementById('id_autorizacion');
+    const vehiculoSelect = document.getElementById('id_vehiculo');
+    const conductorSelect = document.getElementById('id_conductor');
+    const solicitanteDniInput = document.getElementById('id_solicitante_dni');
+    
+    const divAutorizacion = document.getElementById('div_autorizacion');
+    const divVehiculo = document.getElementById('div_vehiculo');
+    
+    // ===== FILTROS EN CASCADA =====
+    
+    // Inicializar selectores en cascada usando el helper global
+    CascadingSelects.init({
+        empresaSelectId: 'id_empresa',
+        autorizacionSelectId: 'id_autorizacion',
+        vehiculoSelectId: 'id_vehiculo',
+        conductorSelectId: 'id_conductor'
+    });
+    
+    // ===== MOSTRAR/OCULTAR CAMPOS SEGÚN TIPO DE TRÁMITE =====
+    
+    if (tipoTramite) {
+        tipoTramite.addEventListener('change', function() {
+            const tipo = this.value;
+            const divConductor = document.getElementById('div_conductor');
+            
+            // Mostrar todos por defecto
+            if (divAutorizacion) divAutorizacion.style.display = 'block';
+            if (divVehiculo) divVehiculo.style.display = 'block';
+            if (divConductor) divConductor.style.display = 'block';
+            
+            // Ocultar según tipo
+            if (tipo === 'AUTORIZACION_INICIAL' || tipo === 'AUTORIZACION_RUTA') {
+                // Solo empresa + expediente
+                if (divAutorizacion) divAutorizacion.style.display = 'none';
+                if (divVehiculo) divVehiculo.style.display = 'none';
+                if (divConductor) divConductor.style.display = 'none';
+            } else if (tipo === 'MODIFICACION_AUTORIZACION') {
+                // Empresa + Autorización
+                if (divVehiculo) divVehiculo.style.display = 'none';
+                if (divConductor) divConductor.style.display = 'none';
+            } else if (tipo === 'INCREMENTO_FLOTA') {
+                // Empresa + Autorización (vehículos se agregan después)
+                if (divVehiculo) divVehiculo.style.display = 'none';
+                if (divConductor) divConductor.style.display = 'none';
+            } else if (tipo === 'RENOVACION_TUC') {
+                // Empresa + Autorización (vehículos se agregan después)
+                if (divVehiculo) divVehiculo.style.display = 'none';
+                if (divConductor) divConductor.style.display = 'none';
+            } else if (tipo === 'SUSTITUCION_VEHICULO' || tipo === 'BAJA_VEHICULO') {
+                // Empresa + Autorización + Vehículo
+                if (divConductor) divConductor.style.display = 'none';
+            } else if (tipo === 'HABILITACION_CONDUCTOR') {
+                // Empresa + Autorización (conductores se agregan después)
+                if (divVehiculo) divVehiculo.style.display = 'none';
+                if (divConductor) divConductor.style.display = 'none';
+            } else if (tipo === 'BAJA_CONDUCTOR') {
+                // Empresa + Autorización + Conductor
+                if (divVehiculo) divVehiculo.style.display = 'none';
+            }
+        });
+        // Disparar evento inicial
+        tipoTramite.dispatchEvent(new Event('change'));
+    }
+    
+    
+// ===== CHECKBOX CONDUCTOR EXISTENTE =====
+
+    // ===== FILTRO CONDUCTOR EXISTENTE =====
+    const conductorSelectExistente = document.getElementById('conductor_existente_select');
+    const conductorFiltro = document.getElementById('conductor_filtro');
+    const conductorResultados = document.getElementById('conductor_filtro_resultados');
+    let conductorOptionsCache = null;
+
+    function cacheConductorOptions() {
+        if (!conductorSelectExistente) return;
+        conductorOptionsCache = Array.from(conductorSelectExistente.options).map(opt => ({
+            value: opt.value,
+            text: opt.text,
+            isPlaceholder: opt.value === '' || opt.text === '---------'
+        }));
+    }
+
+    function renderConductorOptions(filtro) {
+        if (!conductorSelectExistente) return;
+        if (!conductorOptionsCache) cacheConductorOptions();
+        const currentValue = conductorSelectExistente.value;
+        const q = (filtro || '').trim();
+        const normalize = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+        const qn = normalize(q);
+
+        const total = conductorOptionsCache.filter(o => !o.isPlaceholder).length;
+        const filtered = conductorOptionsCache.filter(o => {
+            if (o.isPlaceholder) return false;
+            if (!qn) return true;
+
+            if (/^\d+$/.test(qn)) {
+                const dniMatch = o.text.match(/\d+/);
+                const dni = dniMatch ? dniMatch[0] : '';
+                return dni.startsWith(qn);
+            }
+
+            return normalize(o.text).includes(qn);
+        });
+
+        conductorSelectExistente.innerHTML = '';
+        // Placeholder siempre visible
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = '---------';
+        conductorSelectExistente.appendChild(placeholder);
+
+        if (filtered.length === 0) {
+            const empty = document.createElement('option');
+            empty.value = '';
+            empty.textContent = 'Sin resultados';
+            empty.disabled = true;
+            conductorSelectExistente.appendChild(empty);
+        } else {
+            filtered.forEach(o => {
+                const option = document.createElement('option');
+                option.value = o.value;
+                option.textContent = o.text;
+                if (o.value === currentValue) option.selected = true;
+                conductorSelectExistente.appendChild(option);
+            });
+        }
+
+        // Si el valor actual no existe en el filtro, volver al placeholder
+        const stillSelected = filtered.some(o => o.value === currentValue);
+        if (!stillSelected) {
+            // Auto-seleccionar el primer resultado si existe
+            if (filtered.length > 0) {
+                conductorSelectExistente.value = filtered[0].value;
+            } else {
+                conductorSelectExistente.value = '';
+            }
+        }
+
+        const shown = filtered.length;
+        if (conductorResultados) {
+            conductorResultados.textContent = `Mostrando ${shown} de ${total} conductores.`;
+        }
+    }
+
+    if (conductorFiltro && conductorSelectExistente) {
+        cacheConductorOptions();
+        renderConductorOptions(conductorFiltro.value);
+
+        conductorFiltro.addEventListener('input', function() {
+            renderConductorOptions(this.value);
+        });
+    }
+
+const usarExistente = document.getElementById('usar_conductor_existente');
+    if (usarExistente) {
+        usarExistente.addEventListener('change', function() {
+            document.getElementById('div_conductor_existente').style.display = this.checked ? 'block' : 'none';
+            document.getElementById('div_conductor_nuevo').style.display = this.checked ? 'none' : 'block';
+            if (this.checked && conductorFiltro) {
+                conductorFiltro.focus();
+            }
+        });
+    }
+    if (solicitanteDniInput) {
+        const bloquearTeclas = new Set(['e', 'E', '+', '-', '.', ',']);
+
+        solicitanteDniInput.addEventListener('keydown', function(event) {
+            if (bloquearTeclas.has(event.key)) {
+                event.preventDefault();
+            }
+        });
+
+        solicitanteDniInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 8);
+        });
+    }
+
+    // ===== VALIDAR TELÉFONO - SOLO NÚMEROS =====
+    const solicitanteTelefonoInput = document.getElementById('id_solicitante_telefono');
+    if (solicitanteTelefonoInput) {
+        solicitanteTelefonoInput.addEventListener('input', function(e) {
+            // Remover caracteres no numéricos
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+        
+        // Bloquear pegado de caracteres no numéricos
+        solicitanteTelefonoInput.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const pasteText = (e.clipboardData || window.clipboardData).getData('text');
+            const numericText = pasteText.replace(/[^0-9]/g, '');
+            this.value = numericText;
+        });
+    }
+
+    const capacidadInput = document.querySelector('input[name="capacidad_sentados"]');
+    const pesoInput = document.querySelector('input[name="peso_bruto"]');
+    const categoriaSelect = document.querySelector('select[name="categoria"]');
+    const carroceriaSelect = document.querySelector('select[name="carroceria"]');
+
+    // ===== INFERIR CATEGORÍA Y CARGAR CARROCERÍAS =====
+
+    async function cargarCarrocerias(categoriaId, carroceriaSeleccionada = null) {
+        if (!carroceriaSelect) return;
+        
+        if (!categoriaId) {
+            carroceriaSelect.innerHTML = '<option value="">---------</option>';
+            return;
+        }
+
+        try {
+            const response = await fetch(`/configuracion/api/carrocerias/?categoria_id=${categoriaId}`);
+            const data = await response.json();
+            
+            carroceriaSelect.innerHTML = '<option value="">---------</option>';
+            data.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = item.nombre;
+                if (carroceriaSeleccionada && item.id == carroceriaSeleccionada) {
+                    option.selected = true;
+                }
+                carroceriaSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error al cargar carrocerías:', error);
+        }
+    }
+
+    if (categoriaSelect) {
+        categoriaSelect.addEventListener('change', function() {
+            cargarCarrocerias(this.value);
+        });
+        if (categoriaSelect.value) {
+            cargarCarrocerias(categoriaSelect.value, carroceriaSelect ? carroceriaSelect.value : null);
+        }
+    }
+
+    if (capacidadInput && categoriaSelect) {
+        function inferirCategoria() {
+            const capacidad = parseInt(capacidadInput.value) || 0;
+            const peso = parseFloat(pesoInput.value) || 0;
+            
+            if (capacidad === 0) return;
+
+            let sugerencia = "";
+            
+            if (capacidad <= 8) {
+                sugerencia = "M1";
+            } else {
+                if (peso > 0) {
+                    if (peso <= 5000) {
+                        sugerencia = "M2";
+                    } else {
+                        sugerencia = "M3";
+                    }
+                } else {
+                    sugerencia = "M2";
+                }
+            }
+
+            if (sugerencia) {
+                for (let i = 0; i < categoriaSelect.options.length; i++) {
+                    if (categoriaSelect.options[i].text.toUpperCase().includes(sugerencia)) {
+                        if (categoriaSelect.selectedIndex !== i) {
+                            categoriaSelect.selectedIndex = i;
+                            categoriaSelect.dispatchEvent(new Event('change'));
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        capacidadInput.addEventListener('input', inferirCategoria);
+        if (pesoInput) pesoInput.addEventListener('input', inferirCategoria);
+    }
+});
+</script>
+{% endblock %}

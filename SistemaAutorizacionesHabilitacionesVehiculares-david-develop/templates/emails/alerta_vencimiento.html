@@ -1,0 +1,85 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<div class="alert-box alert-warning">
+    <h2>⏰ Alerta de Vencimiento</h2>
+    <p>Un documento o habilitación está próximo a vencer.</p>
+</div>
+
+<p>Estimado(a) <strong>{{ nombre_destinatario }}</strong>,</p>
+
+<p>Le comunicamos que el siguiente {{ tipo_vencimiento }} está próximo a vencer:</p>
+
+<div class="info-card">
+    <div class="info-row">
+        <span class="info-label">Tipo:</span>
+        <span class="info-value"><strong>{{ tipo_vencimiento }}</strong></span>
+    </div>
+    {% if placa %}
+    <div class="info-row">
+        <span class="info-label">Placa:</span>
+        <span class="info-value">{{ placa }}</span>
+    </div>
+    {% endif %}
+    {% if empresa %}
+    <div class="info-row">
+        <span class="info-label">Empresa:</span>
+        <span class="info-value">{{ empresa }}</span>
+    </div>
+    {% endif %}
+    {% if conductor %}
+    <div class="info-row">
+        <span class="info-label">Conductor:</span>
+        <span class="info-value">{{ conductor }}</span>
+    </div>
+    {% endif %}
+    <div class="info-row">
+        <span class="info-label">Fecha de Vencimiento:</span>
+        <span class="info-value"><strong style="color: #dc3545;">{{ fecha_vencimiento }}</strong></span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Días Restantes:</span>
+        <span class="info-value">
+            <strong style="color: {% if dias_restantes <= 7 %}#dc3545{% elif dias_restantes <= 15 %}#ffc107{% else %}#28a745{% endif %};">
+                {{ dias_restantes }} días
+            </strong>
+        </span>
+    </div>
+</div>
+
+<div class="plazo-box" style="background: {% if dias_restantes <= 7 %}#dc3545{% elif dias_restantes <= 15 %}#ffc107{% else %}#17a2b8{% endif %};">
+    <p style="margin: 0;">⏰ Vence en:</p>
+    <strong style="font-size: 24px;">{{ dias_restantes }} días</strong>
+</div>
+
+<div class="divider"></div>
+
+<h3>📋 Recomendaciones:</h3>
+<ul>
+    <li>Inicie los trámites de renovación con anticipación para evitar interrupciones en el servicio.</li>
+    <li>Verifique que toda la documentación requerida esté vigente.</li>
+    <li>Consulte los requisitos en nuestra oficina o página web.</li>
+</ul>
+
+{% if tipo_vencimiento == 'SOAT' %}
+<p style="background: #d1ecf1; padding: 15px; border-radius: 8px; border-left: 4px solid #17a2b8;">
+    <strong>📌 Recuerde:</strong> El vehículo no puede circular sin SOAT vigente. La falta de este documento puede resultar en multas y retención del vehículo.
+</p>
+{% elif tipo_vencimiento == 'CITV' %}
+<p style="background: #d1ecf1; padding: 15px; border-radius: 8px; border-left: 4px solid #17a2b8;">
+    <strong>📌 Recuerde:</strong> La Inspección Técnica Vehicular debe realizarse en un centro autorizado antes de la fecha de vencimiento.
+</p>
+{% elif tipo_vencimiento == 'Licencia de Conducir' %}
+<p style="background: #d1ecf1; padding: 15px; border-radius: 8px; border-left: 4px solid #17a2b8;">
+    <strong>📌 Recuerde:</strong> No puede conducir con licencia vencida. Inicie el trámite de renovación ante el MTC.
+</p>
+{% endif %}
+
+<div class="divider"></div>
+
+<p>Si tiene alguna consulta, no dude en comunicarse con nosotros.</p>
+
+<p>Atentamente,</p>
+<p><strong>Dirección de Transporte Terrestre</strong><br>
+DRTC</p>
+{% endblock %}

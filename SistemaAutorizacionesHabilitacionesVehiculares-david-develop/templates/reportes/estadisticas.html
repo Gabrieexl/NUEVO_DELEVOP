@@ -1,0 +1,417 @@
+{% extends 'base.html' %}
+
+{% block title %}Estadísticas - DRTC{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-graph-up me-2"></i>Estadísticas del Sistema
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'reportes:index' %}">Reportes</a></li>
+<li class="breadcrumb-item active">Estadísticas</li>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+    .stat-card {
+        transition: transform 0.2s;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Totales Generales -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col">
+                        <h3 class="text-primary mb-0">{{ totales.empresas }}</h3>
+                        <small class="text-muted">Empresas</small>
+                    </div>
+                    <div class="col border-start">
+                        <h3 class="text-success mb-0">{{ totales.autorizaciones }}</h3>
+                        <small class="text-muted">Autorizaciones</small>
+                    </div>
+                    <div class="col border-start">
+                        <h3 class="text-info mb-0">{{ totales.vehiculos }}</h3>
+                        <small class="text-muted">Vehículos</small>
+                    </div>
+                    <div class="col border-start">
+                        <h3 class="text-secondary mb-0">{{ totales.conductores }}</h3>
+                        <small class="text-muted">Conductores</small>
+                    </div>
+                    <div class="col border-start">
+                        <h3 class="text-warning mb-0">{{ totales.tramites }}</h3>
+                        <small class="text-muted">Trámites</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Gráfico: Empresas por Estado -->
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card shadow-sm h-100 stat-card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-building me-2"></i>Empresas por Estado</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="chartEmpresasEstado"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gráfico: Autorizaciones por Estado -->
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card shadow-sm h-100 stat-card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-file-earmark-check me-2"></i>Autorizaciones por Estado</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="chartAutorizacionesEstado"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gráfico: Vehículos por Tipo -->
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card shadow-sm h-100 stat-card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-truck me-2"></i>Vehículos por Tipo</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="chartVehiculosTipo"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gráfico: Trámites por Tipo -->
+    <div class="col-md-6 col-lg-6 mb-4">
+        <div class="card shadow-sm h-100 stat-card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-folder2-open me-2"></i>Trámites por Tipo</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="chartTramitesTipo"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gráfico: Trámites por Estado -->
+    <div class="col-md-6 col-lg-6 mb-4">
+        <div class="card shadow-sm h-100 stat-card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Trámites por Estado</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="chartTramitesEstado"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gráfico: Trámites por Mes -->
+    <div class="col-12 mb-4">
+        <div class="card shadow-sm stat-card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-graph-up me-2"></i>Trámites por Mes (Últimos 6 meses)</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="height: 250px;">
+                    <canvas id="chartTramitesMes"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gráfico: Conductores por Categoría -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm h-100 stat-card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-person-badge me-2"></i>Conductores por Categoría de Licencia</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="chartConductoresCategoria"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gráfico: Vehículos por Estado -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm h-100 stat-card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-truck me-2"></i>Vehículos por Estado</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="chartVehiculosEstado"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Botón de volver -->
+<div class="row">
+    <div class="col">
+        <a href="{% url 'reportes:index' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Volver a Reportes
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Colores para gráficos
+    const colores = {
+        primario: ['#3498db', '#2ecc71', '#e74c3c', '#f39c12', '#9b59b6', '#1abc9c', '#34495e', '#e67e22'],
+        fondos: ['rgba(52, 152, 219, 0.8)', 'rgba(46, 204, 113, 0.8)', 'rgba(231, 76, 60, 0.8)', 'rgba(243, 156, 18, 0.8)', 'rgba(155, 89, 182, 0.8)', 'rgba(26, 188, 156, 0.8)', 'rgba(52, 73, 94, 0.8)', 'rgba(230, 126, 34, 0.8)']
+    };
+    
+    // Empresas por Estado
+    const dataEmpresasEstado = {{ empresas_por_estado|safe }};
+    if (dataEmpresasEstado.length > 0) {
+        new Chart(document.getElementById('chartEmpresasEstado'), {
+            type: 'doughnut',
+            data: {
+                labels: dataEmpresasEstado.map(d => d.estado || 'Sin estado'),
+                datasets: [{
+                    data: dataEmpresasEstado.map(d => d.total),
+                    backgroundColor: colores.fondos
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    }
+    
+    // Autorizaciones por Estado
+    const dataAutorizacionesEstado = {{ autorizaciones_por_estado|safe }};
+    if (dataAutorizacionesEstado.length > 0) {
+        new Chart(document.getElementById('chartAutorizacionesEstado'), {
+            type: 'doughnut',
+            data: {
+                labels: dataAutorizacionesEstado.map(d => d.estado || 'Sin estado'),
+                datasets: [{
+                    data: dataAutorizacionesEstado.map(d => d.total),
+                    backgroundColor: colores.fondos
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    }
+    
+    // Vehículos por Tipo
+    const dataVehiculosTipo = {{ vehiculos_por_tipo|safe }};
+    if (dataVehiculosTipo.length > 0) {
+        new Chart(document.getElementById('chartVehiculosTipo'), {
+            type: 'bar',
+            data: {
+                labels: dataVehiculosTipo.map(d => d.tipo_vehiculo || 'Sin tipo'),
+                datasets: [{
+                    label: 'Cantidad',
+                    data: dataVehiculosTipo.map(d => d.total),
+                    backgroundColor: colores.fondos[0]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+    
+    // Trámites por Tipo
+    const dataTramitesTipo = {{ tramites_por_tipo|safe }};
+    const tipoLabels = {
+        'AUTORIZACION_INICIAL': 'Autorización Inicial',
+        'MODIFICACION_AUTORIZACION': 'Actualización de Empresa y Autorización',
+        'INCREMENTO_FLOTA': 'Incremento Flota',
+        'SUSTITUCION_VEHICULO': 'Sustitución Veh.',
+        'BAJA_VEHICULO': 'Baja Vehículo',
+        'HABILITACION_CONDUCTOR': 'Hab. Conductor',
+        'BAJA_CONDUCTOR': 'Baja Conductor'
+    };
+    if (dataTramitesTipo.length > 0) {
+        new Chart(document.getElementById('chartTramitesTipo'), {
+            type: 'bar',
+            data: {
+                labels: dataTramitesTipo.map(d => tipoLabels[d.tipo_tramite] || d.tipo_tramite),
+                datasets: [{
+                    label: 'Cantidad',
+                    data: dataTramitesTipo.map(d => d.total),
+                    backgroundColor: colores.fondos
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: { beginAtZero: true }
+                }
+            }
+        });
+    }
+    
+    // Trámites por Estado
+    const dataTramitesEstado = {{ tramites_por_estado|safe }};
+    const estadoLabels = {
+        'RECIBIDO': 'Recibido',
+        'EN_EVAL_TECNICA': 'Eval. Técnica',
+        'EN_REVISION_LEGAL': 'Rev. Legal',
+        'PENDIENTE_FIRMA': 'Pend. Firma',
+        'APROBADO': 'Aprobado',
+        'DENEGADO': 'Denegado',
+        'OBSERVADO': 'Observado',
+        'CERRADO': 'Cerrado'
+    };
+    if (dataTramitesEstado.length > 0) {
+        new Chart(document.getElementById('chartTramitesEstado'), {
+            type: 'pie',
+            data: {
+                labels: dataTramitesEstado.map(d => estadoLabels[d.estado] || d.estado),
+                datasets: [{
+                    data: dataTramitesEstado.map(d => d.total),
+                    backgroundColor: colores.fondos
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right' }
+                }
+            }
+        });
+    }
+    
+    // Trámites por Mes
+    const dataTramitesMes = {{ tramites_por_mes|safe }};
+    if (dataTramitesMes.length > 0) {
+        const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        new Chart(document.getElementById('chartTramitesMes'), {
+            type: 'line',
+            data: {
+                labels: dataTramitesMes.map(d => {
+                    const fecha = new Date(d.mes);
+                    return meses[fecha.getMonth()] + ' ' + fecha.getFullYear();
+                }),
+                datasets: [{
+                    label: 'Trámites',
+                    data: dataTramitesMes.map(d => d.total),
+                    borderColor: colores.primario[0],
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+    
+    // Conductores por Categoría
+    const dataConductoresCategoria = {{ conductores_por_categoria|safe }};
+    if (dataConductoresCategoria.length > 0) {
+        new Chart(document.getElementById('chartConductoresCategoria'), {
+            type: 'bar',
+            data: {
+                labels: dataConductoresCategoria.map(d => d.licencia_categoria || 'Sin categoría'),
+                datasets: [{
+                    label: 'Cantidad',
+                    data: dataConductoresCategoria.map(d => d.total),
+                    backgroundColor: colores.fondos[4]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+    
+    // Vehículos por Estado
+    const dataVehiculosEstado = {{ vehiculos_por_estado|safe }};
+    if (dataVehiculosEstado.length > 0) {
+        new Chart(document.getElementById('chartVehiculosEstado'), {
+            type: 'doughnut',
+            data: {
+                labels: dataVehiculosEstado.map(d => d.estado || 'Sin estado'),
+                datasets: [{
+                    data: dataVehiculosEstado.map(d => d.total),
+                    backgroundColor: colores.fondos
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

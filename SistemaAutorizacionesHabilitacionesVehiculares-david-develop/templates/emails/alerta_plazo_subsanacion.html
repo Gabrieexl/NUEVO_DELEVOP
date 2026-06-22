@@ -1,0 +1,65 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<div class="alert-box alert-danger">
+    <h2>⚠️ URGENTE: Plazo de Subsanación Próximo a Vencer</h2>
+    <p>Su plazo para subsanar observaciones está por vencer.</p>
+</div>
+
+<p>Estimado(a) <strong>{{ nombre_destinatario }}</strong>,</p>
+
+<p>Le recordamos que el plazo para subsanar las observaciones de su trámite está próximo a vencer.</p>
+
+<div class="info-card">
+    <div class="info-row">
+        <span class="info-label">N° Expediente:</span>
+        <span class="info-value"><strong>{{ numero_expediente }}</strong></span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Tipo de Trámite:</span>
+        <span class="info-value">{{ tipo_tramite }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Plazo de Subsanación:</span>
+        <span class="info-value"><strong style="color: #dc3545;">{{ plazo_subsanacion }}</strong></span>
+    </div>
+</div>
+
+<div class="plazo-box">
+    <p style="margin: 0;">⏰ Le quedan:</p>
+    <strong style="font-size: 28px;">{{ dias_restantes }} día{% if dias_restantes != 1 %}s{% endif %}</strong>
+    <p style="margin: 0;">para subsanar</p>
+</div>
+
+<div style="background: #f8d7da; padding: 15px; border-radius: 8px; border-left: 4px solid #dc3545; margin: 20px 0;">
+    <p style="color: #721c24; margin: 0;">
+        <strong>⚠️ IMPORTANTE:</strong> Si no presenta la subsanación dentro del plazo establecido, su trámite podría ser:
+    </p>
+    <ul style="color: #721c24; margin: 10px 0 0 0;">
+        <li>Declarado en ABANDONO</li>
+        <li>ARCHIVADO definitivamente</li>
+        <li>DENEGADO</li>
+    </ul>
+</div>
+
+<div class="divider"></div>
+
+<h3>📋 Pasos a seguir:</h3>
+<ol>
+    <li>Revise las observaciones indicadas en la notificación anterior.</li>
+    <li>Prepare los documentos requeridos para la subsanación.</li>
+    <li>Presente su subsanación en Mesa de Partes antes de la fecha límite.</li>
+</ol>
+
+<p style="background: #d1ecf1; padding: 15px; border-radius: 8px; border-left: 4px solid #17a2b8;">
+    <strong>📍 Dirección:</strong><br>
+    Dirección Regional de Transportes y Comunicaciones<br>
+    <strong>Horario de Atención:</strong> Lunes a Viernes, 8:00 AM - 4:30 PM
+</p>
+
+<div class="divider"></div>
+
+<p>Atentamente,</p>
+<p><strong>Dirección de Transporte Terrestre</strong><br>
+DRTC</p>
+{% endblock %}

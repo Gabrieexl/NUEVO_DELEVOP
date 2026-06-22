@@ -1,0 +1,408 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Editar{% else %}Nuevo{% endif %} Vehículo - DRTC{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-truck me-2"></i>{% if object %}Editar{% else %}Nuevo{% endif %} Vehículo
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'vehiculos:lista' %}">Vehículos</a></li>
+<li class="breadcrumb-item active">{% if object %}Editar{% else %}Nuevo{% endif %}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">{% if object %}Editar{% else %}Registrar{% endif %} Vehículo</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                        <p class="mb-0">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <!-- Datos del Vehículo -->
+                        <div class="col-12 mb-3">
+                            <h6 class="text-primary border-bottom pb-2">
+                                <i class="bi bi-truck me-2"></i>Datos del Vehículo
+                            </h6>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.placa.id_for_label }}" class="form-label">
+                                Placa <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                {{ form.placa }}
+                                <button class="btn btn-outline-secondary" type="button" id="btn-verificar-placa">
+                                    <i class="bi bi-search"></i> Verificar
+                                </button>
+                            </div>
+                            <div id="resultado-verificacion-placa"></div>
+                            {% if form.placa.errors %}
+                            <div class="invalid-feedback d-block">{{ form.placa.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.marca.id_for_label }}" class="form-label">
+                                Marca <span class="text-danger">*</span>
+                            </label>
+                            {{ form.marca }}
+                            {% if form.marca.errors %}
+                            <div class="invalid-feedback d-block">{{ form.marca.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.modelo.id_for_label }}" class="form-label">
+                                Modelo <span class="text-danger">*</span>
+                            </label>
+                            {{ form.modelo }}
+                            {% if form.modelo.errors %}
+                            <div class="invalid-feedback d-block">{{ form.modelo.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.anio_fabricacion.id_for_label }}" class="form-label">
+                                Año de Fabricación <span class="text-danger">*</span>
+                            </label>
+                            {{ form.anio_fabricacion }}
+                            {% if form.anio_fabricacion.errors %}
+                            <div class="invalid-feedback d-block">{{ form.anio_fabricacion.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.categoria.id_for_label }}" class="form-label">
+                                Categoría <span class="text-danger">*</span>
+                            </label>
+                            {{ form.categoria }}
+                            {% if form.categoria.errors %}
+                            <div class="invalid-feedback d-block">{{ form.categoria.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.carroceria.id_for_label }}" class="form-label">
+                                Carrocería <span class="text-danger">*</span>
+                            </label>
+                            {{ form.carroceria }}
+                            {% if form.carroceria.errors %}
+                            <div class="invalid-feedback d-block">{{ form.carroceria.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.capacidad_sentados.id_for_label }}" class="form-label">
+                                Capacidad (asientos) <span class="text-danger">*</span>
+                            </label>
+                            {{ form.capacidad_sentados }}
+                            {% if form.capacidad_sentados.errors %}
+                            <div class="invalid-feedback d-block">{{ form.capacidad_sentados.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.peso_bruto.id_for_label }}" class="form-label">
+                                Peso Bruto (kg)
+                            </label>
+                            {{ form.peso_bruto }}
+                            {% if form.peso_bruto.errors %}
+                            <div class="invalid-feedback d-block">{{ form.peso_bruto.errors.0 }}</div>
+                            {% endif %}
+                            <small class="text-muted">Opcional para inferir categoría</small>
+                        </div>
+
+                        <!-- Asociación -->
+                        <div class="col-12 mb-3 mt-2">
+                            <h6 class="text-primary border-bottom pb-2">
+                                <i class="bi bi-building me-2"></i>Asociación
+                            </h6>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.empresa_propietaria.id_for_label }}" class="form-label">
+                                Empresa Propietaria
+                            </label>
+                            {{ form.empresa_propietaria }}
+                            {% if form.empresa_propietaria.errors %}
+                            <div class="invalid-feedback d-block">{{ form.empresa_propietaria.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.autorizacion_principal.id_for_label }}" class="form-label">
+                                Autorización Principal
+                            </label>
+                            {{ form.autorizacion_principal }}
+                            {% if form.autorizacion_principal.errors %}
+                            <div class="invalid-feedback d-block">{{ form.autorizacion_principal.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.vehiculo_sustituido.id_for_label }}" class="form-label">
+                                Vehículo Sustituido (si aplica)
+                            </label>
+                            {{ form.vehiculo_sustituido }}
+                            {% if form.vehiculo_sustituido.errors %}
+                            <div class="invalid-feedback d-block">{{ form.vehiculo_sustituido.errors.0 }}</div>
+                            {% endif %}
+                            <small class="text-muted">Seleccionar si este vehículo sustituye a otro</small>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.estado.id_for_label }}" class="form-label">
+                                Estado <span class="text-danger">*</span>
+                            </label>
+                            {{ form.estado }}
+                            {% if form.estado.errors %}
+                            <div class="invalid-feedback d-block">{{ form.estado.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Documentos -->
+                        <div class="col-12 mb-3 mt-2">
+                            <h6 class="text-primary border-bottom pb-2">
+                                <i class="bi bi-file-earmark me-2"></i>Documentos
+                            </h6>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.numero_tuc.id_for_label }}" class="form-label">
+                                N° TUC
+                            </label>
+                            {{ form.numero_tuc }}
+                            {% if form.numero_tuc.errors %}
+                            <div class="invalid-feedback d-block">{{ form.numero_tuc.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.fecha_expedicion_tuc.id_for_label }}" class="form-label">
+                                Fecha Expedición TUC
+                            </label>
+                            {{ form.fecha_expedicion_tuc }}
+                            {% if form.fecha_expedicion_tuc.errors %}
+                            <div class="invalid-feedback d-block">{{ form.fecha_expedicion_tuc.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.fecha_autorizacion_transportista.id_for_label }}" class="form-label">
+                                Fecha Autorización Transportista
+                            </label>
+                            {{ form.fecha_autorizacion_transportista }}
+                            {% if form.fecha_autorizacion_transportista.errors %}
+                            <div class="invalid-feedback d-block">{{ form.fecha_autorizacion_transportista.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.fecha_expiracion_transportista.id_for_label }}" class="form-label">
+                                Fecha Expiración Transportista
+                            </label>
+                            {{ form.fecha_expiracion_transportista }}
+                            {% if form.fecha_expiracion_transportista.errors %}
+                            <div class="invalid-feedback d-block">{{ form.fecha_expiracion_transportista.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.numero_tiv.id_for_label }}" class="form-label">
+                                N° TIV
+                            </label>
+                            {{ form.numero_tiv }}
+                            {% if form.numero_tiv.errors %}
+                            <div class="invalid-feedback d-block">{{ form.numero_tiv.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.fecha_venc_soat.id_for_label }}" class="form-label">
+                                Fecha Venc. SOAT
+                            </label>
+                            {{ form.fecha_venc_soat }}
+                            {% if form.fecha_venc_soat.errors %}
+                            <div class="invalid-feedback d-block">{{ form.fecha_venc_soat.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.fecha_venc_citv.id_for_label }}" class="form-label">
+                                Fecha Venc. CITV
+                            </label>
+                            {{ form.fecha_venc_citv }}
+                            {% if form.fecha_venc_citv.errors %}
+                            <div class="invalid-feedback d-block">{{ form.fecha_venc_citv.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Datos de Resolución -->
+                        <div class="col-12 mb-3 mt-2">
+                            <h6 class="text-primary border-bottom pb-2">
+                                <i class="bi bi-file-text me-2"></i>Datos de Resolución
+                            </h6>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.numero_resolucion.id_for_label }}" class="form-label">
+                                N° Resolución
+                            </label>
+                            {{ form.numero_resolucion }}
+                            {% if form.numero_resolucion.errors %}
+                            <div class="invalid-feedback d-block">{{ form.numero_resolucion.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.fecha_resolucion.id_for_label }}" class="form-label">
+                                Fecha de Resolución
+                            </label>
+                            {{ form.fecha_resolucion }}
+                            {% if form.fecha_resolucion.errors %}
+                            <div class="invalid-feedback d-block">{{ form.fecha_resolucion.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.archivo_resolucion.id_for_label }}" class="form-label">
+                                Archivo de Resolución (PDF)
+                            </label>
+                            {{ form.archivo_resolucion }}
+                            {% if form.archivo_resolucion.errors %}
+                            <div class="invalid-feedback d-block">{{ form.archivo_resolucion.errors.0 }}</div>
+                            {% endif %}
+                            {% if form.instance.archivo_resolucion %}
+                            <div class="mt-2">
+                                <a href="{{ form.instance.archivo_resolucion.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-file-earmark-pdf"></i> Ver Resolución Actual
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <hr>
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'vehiculos:lista' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg me-1"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar selectores en cascada para Empresa -> Autorización
+    CascadingSelects.init({
+        empresaSelectId: '{{ form.empresa_propietaria.id_for_label }}',
+        autorizacionSelectId: '{{ form.autorizacion_principal.id_for_label }}'
+    });
+
+    const capacidadInput = document.getElementById('{{ form.capacidad_sentados.id_for_label }}');
+    const pesoInput = document.getElementById('{{ form.peso_bruto.id_for_label }}');
+    const categoriaSelect = document.getElementById('{{ form.categoria.id_for_label }}');
+    const carroceriaSelect = document.getElementById('{{ form.carroceria.id_for_label }}');
+
+    // Función para cargar carrocerías basadas en la categoría
+    async function cargarCarrocerias(categoriaId, carroceriaSeleccionada = null) {
+        if (!categoriaId) {
+            carroceriaSelect.innerHTML = '<option value="">-- Seleccionar Categoría primero --</option>';
+            return;
+        }
+
+        try {
+            const response = await fetch(`/configuracion/api/carrocerias/?categoria_id=${categoriaId}`);
+            const data = await response.json();
+            
+            carroceriaSelect.innerHTML = '<option value="">-- Seleccionar Carrocería --</option>';
+            data.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = item.nombre;
+                if (carroceriaSeleccionada && item.id == carroceriaSeleccionada) {
+                    option.selected = true;
+                }
+                carroceriaSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error al cargar carrocerías:', error);
+        }
+    }
+
+    // Evento cuando cambia la categoría
+    categoriaSelect.addEventListener('change', function() {
+        cargarCarrocerias(this.value);
+    });
+
+    // Función para inferir categoría
+    function inferirCategoria() {
+        const capacidad = parseInt(capacidadInput.value) || 0;
+        const peso = parseFloat(pesoInput.value) || 0;
+        
+        if (capacidad === 0) return;
+
+        let sugerencia = "";
+        if (capacidad <= 8) {
+            sugerencia = "M1";
+        } else {
+            if (peso > 0) {
+                if (peso <= 5000) {
+                    sugerencia = "M2";
+                } else {
+                    sugerencia = "M3";
+                }
+            } else {
+                sugerencia = "M2";
+            }
+        }
+
+        if (sugerencia) {
+            // Buscar la opción que coincida con la sugerencia en el select de categoría
+            for (let i = 0; i < categoriaSelect.options.length; i++) {
+                if (categoriaSelect.options[i].text.toUpperCase().includes(sugerencia)) {
+                    if (categoriaSelect.selectedIndex !== i) {
+                        categoriaSelect.selectedIndex = i;
+                        // Disparar el cambio para cargar las carrocerías
+                        categoriaSelect.dispatchEvent(new Event('change'));
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    capacidadInput.addEventListener('input', inferirCategoria);
+    pesoInput.addEventListener('input', inferirCategoria);
+
+    // Carga inicial si hay una categoría seleccionada (ej: al editar)
+    if (categoriaSelect.value) {
+        const carroceriaId = "{{ form.instance.carroceria_id|default:'' }}";
+        cargarCarrocerias(categoriaSelect.value, carroceriaId);
+    }
+});
+</script>
+
+{% include 'includes/verificar_placa_script.html' %}
+{% endblock %}

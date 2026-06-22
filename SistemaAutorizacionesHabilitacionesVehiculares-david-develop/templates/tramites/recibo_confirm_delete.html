@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Recibo - DRTC{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Eliminar Recibo de Pago</h5>
+            </div>
+            <div class="card-body">
+                <p>¿Está seguro que desea eliminar el siguiente recibo de pago?</p>
+                
+                <div class="alert alert-secondary">
+                    <strong>Serie:</strong> {{ object.numero_serie }}<br>
+                    <strong>Documento:</strong> {{ object.numero_documento }}<br>
+                    <strong>Fecha:</strong> {{ object.fecha_pago|date:"d/m/Y" }}<br>
+                    <strong>Total:</strong> S/ {{ object.total }}
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'tramites:detalle' object.tramite.pk %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash me-1"></i>Eliminar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

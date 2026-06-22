@@ -1,0 +1,371 @@
+{% extends 'base.html' %}
+
+{% block title %}Autorización {{ object.numero_resolucion }} - DRTC{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-file-earmark-text me-2"></i>Autorización {{ object.numero_resolucion }}
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'autorizaciones:lista' %}">Autorizaciones</a></li>
+<li class="breadcrumb-item active">{{ object.numero_resolucion }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Información Principal -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Información de la Autorización</h5>
+                {% if perms.autorizaciones.change_autorizacion %}
+                <a href="{% url 'autorizaciones:editar' object.pk %}" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-pencil me-1"></i>Editar
+                </a>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted small">N° Resolución</label>
+                        <p class="fw-medium mb-0">
+                            {{ object.numero_resolucion }}
+                            {% if object.archivo_resolucion %}
+                            <a href="{{ object.archivo_resolucion.url }}" target="_blank" class="ms-2 btn btn-xs btn-outline-danger" title="Ver Resolución">
+                                <i class="bi bi-file-earmark-pdf"></i>
+                            </a>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted small">Fecha de Resolución</label>
+                        <p class="mb-0">{{ object.fecha_resolucion|date:"d/m/Y" }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted small">Tipo de Servicio</label>
+                        <p class="mb-0">{{ object.tipo_servicio.nombre|default:"-" }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted small">Ámbito</label>
+                        <p class="mb-0">{{ object.get_ambito_display }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted small">Fecha Inicio Vigencia</label>
+                        <p class="mb-0">{{ object.fecha_inicio_vigencia|date:"d/m/Y" }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted small">Fecha Fin Vigencia</label>
+                        <p class="mb-0">{{ object.fecha_fin_vigencia|date:"d/m/Y" }}</p>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <label class="form-label text-muted small">Descripción de Rutas</label>
+                        <p class="mb-0">{{ object.descripcion_rutas|default:"-"|linebreaks }}</p>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <label class="form-label text-muted small">Frecuencias</label>
+                        <p class="mb-0">{{ object.frecuencias|default:"-"|linebreaks }}</p>
+                    </div>
+                </div>
+
+                <!-- Rutas Autorizadas -->
+                {% if object.rutas.exists %}
+                <h6 class="text-primary border-bottom pb-2 mt-3">
+                    <i class="bi bi-signpost-2 me-2"></i>Rutas Autorizadas
+                </h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Código</th>
+                                <th>Ruta</th>
+                                <th>Distancia</th>
+                                <th>Tiempo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ruta in object.rutas.all %}
+                            <tr>
+                                <td><code>{{ ruta.codigo }}</code></td>
+                                <td>{{ ruta.origen }} → {{ ruta.destino }}</td>
+                                <td>{% if ruta.distancia_km %}{{ ruta.distancia_km }} km{% else %}-{% endif %}</td>
+                                <td>{% if ruta.tiempo_estimado_minutos %}{{ ruta.tiempo_estimado_minutos }} min{% else %}-{% endif %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+
+                <!-- Frecuencias Asignadas -->
+                {% if object.frecuencias_asignadas.exists %}
+                <h6 class="text-primary border-bottom pb-2 mt-3">
+                    <i class="bi bi-clock me-2"></i>Frecuencias Asignadas
+                </h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Hora Salida</th>
+                                <th>Días</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for frec in object.frecuencias_asignadas.all %}
+                            <tr>
+                                <td><code>{{ frec.codigo }}</code></td>
+                                <td>{{ frec.nombre }}</td>
+                                <td>{{ frec.hora_salida|time:"H:i" }}</td>
+                                <td>{{ frec.dias_operacion }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+
+                <div class="row mt-3">
+                    {% if object.observaciones %}
+                    <div class="col-12">
+                        <label class="form-label text-muted small">Observaciones</label>
+                        <p class="mb-0">{{ object.observaciones|linebreaks }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Vehículos Habilitados -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-truck me-2"></i>Vehículos Habilitados</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Placa</th>
+                                <th>Marca/Modelo</th>
+                                <th>N° Resolución</th>
+                                <th>Capacidad</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for hab in habilitaciones_vehiculares %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'vehiculos:detalle' hab.vehiculo.pk %}">
+                                        {{ hab.vehiculo.placa }}
+                                    </a>
+                                </td>
+                                <td>{{ hab.vehiculo.marca }} {{ hab.vehiculo.modelo }}</td>
+                                <td>{{ hab.vehiculo.numero_resolucion|default:"-" }}</td>
+                                <td>{{ hab.vehiculo.capacidad_sentados }} asientos</td>
+                                <td>
+                                    {% if hab.vehiculo.estado == 'HABILITADO' %}
+                                    <span class="badge bg-success">{{ hab.vehiculo.get_estado_display }}</span>
+                                    {% elif hab.vehiculo.estado == 'NO_HABILITADO' %}
+                                    <span class="badge bg-warning">{{ hab.vehiculo.get_estado_display }}</span>
+                                    {% elif hab.vehiculo.estado == 'BAJA' %}
+                                    <span class="badge bg-danger">{{ hab.vehiculo.get_estado_display }}</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{{ hab.vehiculo.get_estado_display }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-3">
+                                    Sin vehículos habilitados
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conductores Habilitados -->
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-person-badge me-2"></i>Conductores Habilitados</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>DNI</th>
+                                <th>Nombre</th>
+                                <th>N° Resolución</th>
+                                <th>Licencia</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for hab in object.habilitaciones_conductores.all %}
+                            <tr>
+                                <td>{{ hab.conductor.dni }}</td>
+                                <td>
+                                    <a href="{% url 'conductores:detalle' hab.conductor.pk %}">
+                                        {{ hab.conductor.nombre_completo }}
+                                    </a>
+                                </td>
+                                <td>{{ hab.conductor.numero_resolucion|default:"-" }}</td>
+                                <td>{{ hab.conductor.licencia_categoria }}</td>
+                                <td>
+                                    {% if hab.estado == 'VIGENTE' %}
+                                    <span class="badge bg-success">Vigente</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{{ hab.get_estado_display }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-3">
+                                    Sin conductores habilitados
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historial de Trámites -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Historial de Trámites Asociados</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Expediente</th>
+                                <th>Resolución</th>
+                                <th>Tipo de Trámite</th>
+                                <th>Estado</th>
+                                <th>Fecha</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tramite in historial_tramites %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'tramites:detalle' tramite.pk %}?next={{ request.get_full_path|urlencode }}" class="fw-bold">
+                                        {{ tramite.numero_expediente }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {{ tramite.numero_resolucion|default:"-" }}
+                                    {% if tramite.archivo_resolucion %}
+                                    <a href="{{ tramite.archivo_resolucion.url }}" target="_blank" class="text-danger ms-1" title="Ver Resolución">
+                                        <i class="bi bi-file-earmark-pdf"></i>
+                                    </a>
+                                    {% endif %}
+                                </td>
+                                <td>{{ tramite.get_tipo_tramite_display }}</td>
+                                <td>
+                                    {% if tramite.estado == 'APROBADO' %}
+                                    <span class="badge bg-success">{{ tramite.get_estado_display }}</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{{ tramite.get_estado_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ tramite.fecha_creacion|date:"d/m/Y" }}</td>
+                                <td>
+                                    <a href="{% url 'tramites:detalle' tramite.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-info" title="Ver Trámite">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-3">
+                                    No hay trámites registrados para esta autorización.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel Lateral -->
+    <div class="col-lg-4">
+        <!-- Estado -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body text-center">
+                {% if object.estado == 'VIGENTE' %}
+                <span class="badge bg-success fs-5 px-4 py-2">VIGENTE</span>
+                {% elif object.estado == 'VENCIDA' %}
+                <span class="badge bg-secondary fs-5 px-4 py-2">VENCIDA</span>
+                {% elif object.estado == 'SUSPENDIDA' %}
+                <span class="badge bg-warning text-dark fs-5 px-4 py-2">SUSPENDIDA</span>
+                {% else %}
+                <span class="badge bg-danger fs-5 px-4 py-2">CANCELADA</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Empresa -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-building me-2"></i>Empresa</h6>
+            </div>
+            <div class="card-body">
+                <h6 class="fw-bold mb-1">
+                    <a href="{% url 'empresas:detalle' object.empresa.pk %}" class="text-decoration-none">
+                        {{ object.empresa.razon_social }}
+                    </a>
+                </h6>
+                <p class="text-muted small mb-2">RUC: {{ object.empresa.ruc }}</p>
+                <p class="mb-0">
+                    {% if object.empresa.estado == 'ACTIVA' %}
+                    <span class="badge bg-success">Activa</span>
+                    {% else %}
+                    <span class="badge bg-danger">Inactiva</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <!-- Información de Auditoría -->
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-clock-history me-2"></i>Auditoría</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <small class="text-muted">Creado por:</small>
+                    <p class="mb-0">
+                        {% if object.creado_por %}
+                            {{ object.creado_por.get_full_name|default:object.creado_por.username }}
+                        {% else %}
+                            Sistema
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Fecha creación:</small>
+                    <p class="mb-0">{{ object.fecha_creacion|date:"d/m/Y H:i" }}</p>
+                </div>
+                <div>
+                    <small class="text-muted">Última actualización:</small>
+                    <p class="mb-0">{{ object.fecha_actualizacion|date:"d/m/Y H:i" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

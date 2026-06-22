@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - DRTC{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h1>{{ titulo }}</h1>
+    <span class="text-muted">Bienvenido, {{ usuario.get_full_name }}</span>
+</div>
+
+<!-- Estadísticas generales -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div class="stat-value text-primary">{{ estadisticas.tramites_pendientes }}</div>
+                        <div class="stat-label">Trámites Pendientes</div>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-folder2-open text-primary opacity-50" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3">
+        <div class="card stat-card success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div class="stat-value text-success">{{ estadisticas.empresas_activas }}</div>
+                        <div class="stat-label">Empresas Activas</div>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-building text-success opacity-50" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3">
+        <div class="card stat-card warning">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div class="stat-value text-warning">{{ estadisticas.vehiculos_habilitados }}</div>
+                        <div class="stat-label">Vehículos Habilitados</div>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-truck text-warning opacity-50" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div class="stat-value text-info">{{ estadisticas.tramites_hoy }}</div>
+                        <div class="stat-label">Trámites Hoy</div>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-calendar-check text-info opacity-50" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Panel según rol -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>
+                    {% if usuario.es_admin %}
+                    <i class="bi bi-list-task me-2"></i>Trámites Recientes
+                    {% elif usuario.es_mesa_partes %}
+                    <i class="bi bi-inbox me-2"></i>Trámites por Recibir
+                    {% elif usuario.es_especialista %}
+                    <i class="bi bi-clipboard-check me-2"></i>Trámites en Evaluación Técnica
+                    {% elif usuario.es_legal %}
+                    <i class="bi bi-file-earmark-text me-2"></i>Trámites en Revisión Legal
+                    {% elif usuario.es_director %}
+                    <i class="bi bi-pen me-2"></i>Trámites Pendientes de Firma
+                    {% elif usuario.es_control_calidad %}
+                    <i class="bi bi-check-circle me-2"></i>Trámites por Cerrar
+                    {% else %}
+                    <i class="bi bi-info-circle me-2"></i>Información del Sistema
+                    {% endif %}
+                </span>
+                <a href="{% url 'tramites:lista' %}" class="btn btn-sm btn-outline-primary">Ver todos</a>
+            </div>
+            <div class="card-body">
+                {% if usuario.es_admin %}
+                    {% with tramites=tramites_recientes %}
+                        {% include "usuarios/partials/dashboard_tramites.html" %}
+                    {% endwith %}
+                {% elif usuario.es_mesa_partes %}
+                    {% with tramites=tramites_por_recibir %}
+                        {% include "usuarios/partials/dashboard_tramites.html" %}
+                    {% endwith %}
+                {% elif usuario.es_especialista %}
+                    {% with tramites=tramites_en_evaluacion %}
+                        {% include "usuarios/partials/dashboard_tramites.html" %}
+                    {% endwith %}
+                {% elif usuario.es_legal %}
+                    {% with tramites=tramites_revision_legal %}
+                        {% include "usuarios/partials/dashboard_tramites.html" %}
+                    {% endwith %}
+                {% elif usuario.es_director %}
+                    {% with tramites=tramites_pendientes_firma %}
+                        {% include "usuarios/partials/dashboard_tramites.html" %}
+                    {% endwith %}
+                {% elif usuario.es_control_calidad %}
+                    {% with tramites=tramites_por_cerrar %}
+                        {% include "usuarios/partials/dashboard_tramites.html" %}
+                    {% endwith %}
+                {% else %}
+                    <div class="text-center text-muted py-5">
+                        <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                        <p class="mt-2">No hay trámites pendientes</p>
+                        {% if usuario.puede_crear_tramites %}
+                        <a href="{% url 'tramites:crear' %}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-2"></i>Crear Nuevo Trámite
+                        </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Panel lateral -->
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-person-badge me-2"></i>Mi Información
+            </div>
+            <div class="card-body">
+                <table class="table table-sm table-borderless mb-0">
+                    <tr>
+                        <td class="text-muted">Nombre:</td>
+                        <td class="text-end">{{ usuario.get_full_name }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">DNI:</td>
+                        <td class="text-end">{{ usuario.dni }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Rol:</td>
+                        <td class="text-end">
+                            <span class="badge bg-primary">{{ usuario.get_rol_display }}</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Área:</td>
+                        <td class="text-end">{{ usuario.area|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Email:</td>
+                        <td class="text-end">{{ usuario.email|default:"-" }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-lightning me-2"></i>Accesos Rápidos
+            </div>
+            <div class="list-group list-group-flush">
+                {% if usuario.puede_crear_tramites %}
+                <a href="{% url 'tramites:crear' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-plus-circle me-2 text-success"></i>Nuevo Trámite
+                </a>
+                {% endif %}
+                <a href="{% url 'consultas:consulta_placa' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-search me-2 text-primary"></i>Consulta por Placa
+                </a>
+                <a href="{% url 'empresas:lista' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-building me-2 text-info"></i>Buscar Empresa
+                </a>
+                <a href="{% url 'usuarios:perfil' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-person me-2 text-secondary"></i>Mi Perfil
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

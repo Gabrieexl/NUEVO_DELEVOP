@@ -33,7 +33,8 @@ urlpatterns = [
     path('reportes/', include('apps.reportes.urls')),
     path('notificaciones/', include('apps.notificaciones.urls')),  # Sistema de notificaciones
     path('documentacion/', include('apps.documentacion.urls')),
-    
+    path('fiscalizacion/', include('apps.fiscalizacion.urls', namespace='fiscalizacion')),
+
     # API de consultas
     path('api/consulta/', include('apps.consultas.api_urls')),
     

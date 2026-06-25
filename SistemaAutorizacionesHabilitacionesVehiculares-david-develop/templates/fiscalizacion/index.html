@@ -1,0 +1,2334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fiscalización · Dirección Regional de Transportes</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+
+  <style>
+    :root {
+      --c-bg: #f1f5f9;
+      --c-surface: #ffffff;
+      --c-surface-2: #f8fafc;
+      --c-border: #e2e8f0;
+      --c-border-strong: #cbd5e1;
+      --c-text: #0f172a;
+      --c-text-soft: #475569;
+      --c-text-muted: #94a3b8;
+      --c-brand: #0f3d5e;
+      --c-brand-soft: #1e6091;
+      --c-brand-pale: #e0f2fe;
+      --c-accent: #f59e0b;
+      --c-success: #16a34a;
+      --c-success-pale: #dcfce7;
+      --c-warning: #d97706;
+      --c-warning-pale: #fef3c7;
+      --c-danger: #dc2626;
+      --c-danger-pale: #fee2e2;
+      --c-info: #0891b2;
+      --c-info-pale: #cffafe;
+      --shadow-sm: 0 1px 2px rgba(15,23,42,.05);
+      --shadow-md: 0 4px 12px rgba(15,23,42,.08);
+      --shadow-lg: 0 12px 32px rgba(15,23,42,.12);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--c-bg);
+      color: var(--c-text);
+      font-size: 14px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button { font-family: inherit; cursor: pointer; }
+    input, select, textarea { font-family: inherit; }
+    a { color: inherit; text-decoration: none; }
+
+    /* ===== Shell ===== */
+    .app {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: linear-gradient(180deg, #0f3d5e 0%, #0a2a44 100%);
+      color: #cbd5e1;
+      padding: 22px 14px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 8px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      margin-bottom: 14px;
+    }
+    .brand-mark {
+      width: 36px; height: 36px;
+      background: var(--c-accent);
+      color: #1f2937;
+      border-radius: 9px;
+      display: grid; place-items: center;
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: -0.5px;
+    }
+    .brand-text { line-height: 1.1; }
+    .brand-text strong { color: white; font-size: 14px; display: block; }
+    .brand-text span { font-size: 11px; color: #94a3b8; }
+
+    .nav-section {
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      padding: 14px 12px 6px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      color: #cbd5e1;
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: background .15s, color .15s;
+      cursor: pointer;
+      user-select: none;
+    }
+    .nav-item i { width: 16px; font-size: 15px; opacity: .9; }
+    .nav-item:hover { background: rgba(255,255,255,.06); color: white; }
+    .nav-item.active {
+      background: rgba(245, 158, 11, .12);
+      color: white;
+      box-shadow: inset 3px 0 0 var(--c-accent);
+    }
+    .nav-item .count {
+      margin-left: auto;
+      background: rgba(255,255,255,.08);
+      padding: 1px 7px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 12px 8px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      display: flex; align-items: center; gap: 10px;
+      font-size: 12px;
+    }
+    .avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: #1e6091; color: white;
+      display: grid; place-items: center;
+      font-weight: 700; font-size: 12px;
+    }
+
+    /* ===== Main ===== */
+    .main { padding: 0; min-width: 0; }
+
+    .topbar {
+      background: var(--c-surface);
+      border-bottom: 1px solid var(--c-border);
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar h1 {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0;
+      color: var(--c-text);
+    }
+    .topbar .crumb { color: var(--c-text-muted); font-size: 12.5px; margin-top: 2px; }
+
+    .topbar-search {
+      flex: 1;
+      max-width: 480px;
+      margin-left: auto;
+      position: relative;
+    }
+    .topbar-search input {
+      width: 100%;
+      padding: 9px 14px 9px 38px;
+      border: 1px solid var(--c-border);
+      background: var(--c-surface-2);
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+      transition: border-color .15s, background .15s;
+    }
+    .topbar-search input:focus {
+      border-color: var(--c-brand-soft);
+      background: white;
+    }
+    .topbar-search i {
+      position: absolute;
+      left: 12px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--c-text-muted);
+    }
+    .topbar-search kbd {
+      position: absolute;
+      right: 10px; top: 50%;
+      transform: translateY(-50%);
+      background: var(--c-surface);
+      border: 1px solid var(--c-border);
+      border-radius: 5px;
+      padding: 1px 6px;
+      font-size: 10.5px;
+      color: var(--c-text-muted);
+      font-family: ui-monospace, monospace;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid transparent;
+      transition: transform .04s ease, background .15s, box-shadow .15s;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary {
+      background: var(--c-brand);
+      color: white;
+    }
+    .btn-primary:hover { background: var(--c-brand-soft); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--c-text-soft);
+      border-color: var(--c-border);
+    }
+    .btn-ghost:hover { background: var(--c-surface-2); color: var(--c-text); }
+    .btn-icon {
+      width: 36px; height: 36px;
+      display: grid; place-items: center;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--c-text-soft);
+      border: 1px solid var(--c-border);
+    }
+    .btn-icon:hover { background: var(--c-surface-2); color: var(--c-text); }
+    .btn-danger-ghost {
+      background: transparent;
+      color: var(--c-danger);
+      border-color: var(--c-danger-pale);
+    }
+    .btn-danger-ghost:hover { background: var(--c-danger-pale); }
+
+    .content { padding: 24px 28px 60px; }
+
+    /* ===== View transitions ===== */
+    .view { display: none; }
+    .view.active { display: block; animation: fade .18s ease; }
+    @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+    /* ===== KPI Cards ===== */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+    .kpi {
+      background: var(--c-surface);
+      border: 1px solid var(--c-border);
+      border-radius: var(--radius);
+      padding: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi-label {
+      font-size: 12px;
+      color: var(--c-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+    .kpi-value {
+      font-size: 30px;
+      font-weight: 700;
+      margin: 8px 0 4px;
+      letter-spacing: -0.5px;
+      color: var(--c-text);
+    }
+    .kpi-delta {
+      font-size: 12px;
+      color: var(--c-success);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+    }
+    .kpi-delta.down { color: var(--c-danger); }
+    .kpi-icon {
+      position: absolute;
+      right: 16px; top: 16px;
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      display: grid; place-items: center;
+      font-size: 18px;
+    }
+    .kpi-icon.blue { background: var(--c-brand-pale); color: var(--c-brand-soft); }
+    .kpi-icon.amber { background: var(--c-warning-pale); color: var(--c-warning); }
+    .kpi-icon.green { background: var(--c-success-pale); color: var(--c-success); }
+    .kpi-icon.red { background: var(--c-danger-pale); color: var(--c-danger); }
+
+    /* ===== Charts row ===== */
+    .row-2 {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+    .card {
+      background: var(--c-surface);
+      border: 1px solid var(--c-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .card-head {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--c-border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .card-head h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0;
+    }
+    .card-head .subtitle {
+      font-size: 12px;
+      color: var(--c-text-muted);
+      margin-top: 2px;
+    }
+    .card-head .right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+    .card-body { padding: 18px 20px; }
+
+    .seg {
+      display: inline-flex;
+      background: var(--c-surface-2);
+      border-radius: 7px;
+      padding: 3px;
+      border: 1px solid var(--c-border);
+    }
+    .seg button {
+      padding: 5px 11px;
+      font-size: 12px;
+      font-weight: 600;
+      background: transparent;
+      border: none;
+      border-radius: 5px;
+      color: var(--c-text-soft);
+    }
+    .seg button.active {
+      background: white;
+      color: var(--c-brand);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .chart-wrap { position: relative; height: 280px; }
+    .chart-wrap.sm { height: 240px; }
+
+    /* ===== Recent actas / mini list ===== */
+    .mini-list { list-style: none; padding: 0; margin: 0; }
+    .mini-list li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--c-border);
+    }
+    .mini-list li:last-child { border-bottom: none; }
+    .mini-list .icon-circ {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: grid; place-items: center;
+      background: var(--c-brand-pale);
+      color: var(--c-brand-soft);
+      flex-shrink: 0;
+    }
+    .mini-list .body { flex: 1; min-width: 0; }
+    .mini-list .body strong {
+      display: block;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--c-text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .mini-list .body span {
+      font-size: 12px;
+      color: var(--c-text-muted);
+    }
+    .mini-list .when {
+      font-size: 11.5px;
+      color: var(--c-text-muted);
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* ===== Filters bar ===== */
+    .filters-bar {
+      background: var(--c-surface);
+      border: 1px solid var(--c-border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+    .filters-bar label {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--c-text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 4px;
+      display: block;
+    }
+    .filters-bar input,
+    .filters-bar select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--c-border);
+      border-radius: 7px;
+      font-size: 13px;
+      background: white;
+      outline: none;
+    }
+    .filters-bar input:focus,
+    .filters-bar select:focus { border-color: var(--c-brand-soft); }
+    .filters-bar .field { min-width: 0; }
+    .filters-actions { display: flex; gap: 8px; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: var(--c-brand-pale);
+      color: var(--c-brand-soft);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .chip button {
+      background: transparent;
+      border: none;
+      color: inherit;
+      padding: 0;
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    /* ===== Table ===== */
+    .table-card { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius); overflow: hidden; }
+    .table-toolbar {
+      padding: 12px 16px;
+      display: flex; align-items: center; gap: 12px;
+      border-bottom: 1px solid var(--c-border);
+      background: var(--c-surface-2);
+    }
+    .table-toolbar .count {
+      font-size: 13px; color: var(--c-text-soft); font-weight: 600;
+    }
+    .table-toolbar .count b { color: var(--c-text); }
+    .table-toolbar .right { margin-left: auto; display: flex; gap: 8px; }
+
+    table.actas {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    table.actas thead th {
+      text-align: left;
+      padding: 11px 14px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--c-text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: var(--c-surface-2);
+      border-bottom: 1px solid var(--c-border);
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    table.actas thead th .sort-ind { color: var(--c-text-muted); margin-left: 4px; }
+    table.actas tbody td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--c-border);
+      vertical-align: middle;
+    }
+    table.actas tbody tr:hover { background: var(--c-surface-2); }
+    table.actas tbody tr:last-child td { border-bottom: none; }
+    table.actas .num { font-weight: 700; color: var(--c-brand); }
+    table.actas .placa {
+      font-family: ui-monospace, "SF Mono", monospace;
+      background: var(--c-surface-2);
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      border: 1px solid var(--c-border);
+    }
+    table.actas .row-actions {
+      display: inline-flex; gap: 4px;
+    }
+    table.actas .row-actions button {
+      width: 30px; height: 30px;
+      border: 1px solid var(--c-border);
+      background: white;
+      color: var(--c-text-soft);
+      border-radius: 6px;
+      display: grid; place-items: center;
+    }
+    table.actas .row-actions button:hover {
+      background: var(--c-surface-2);
+      color: var(--c-brand);
+    }
+    table.actas .row-actions .del:hover { color: var(--c-danger); border-color: var(--c-danger-pale); }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .badge::before {
+      content: "";
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .badge.borrador { background: #f1f5f9; color: #475569; }
+    .badge.emitida  { background: var(--c-info-pale); color: var(--c-info); }
+    .badge.notificada { background: var(--c-brand-pale); color: var(--c-brand-soft); }
+    .badge.sancionada { background: var(--c-warning-pale); color: var(--c-warning); }
+    .badge.archivada { background: var(--c-success-pale); color: var(--c-success); }
+    .badge.anulada { background: var(--c-danger-pale); color: var(--c-danger); }
+
+    .table-empty {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--c-text-muted);
+    }
+    .table-empty i { font-size: 40px; display: block; margin-bottom: 10px; color: var(--c-border-strong); }
+    .table-empty strong { display: block; color: var(--c-text-soft); font-size: 14px; margin-bottom: 4px; }
+
+    .pagination {
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-top: 1px solid var(--c-border);
+      background: var(--c-surface-2);
+    }
+    .pagination .info { font-size: 12.5px; color: var(--c-text-soft); margin-right: auto; }
+    .pagination button {
+      min-width: 32px; height: 32px;
+      padding: 0 8px;
+      border: 1px solid var(--c-border);
+      background: white;
+      border-radius: 6px;
+      font-size: 12.5px;
+      color: var(--c-text-soft);
+      font-weight: 600;
+    }
+    .pagination button:hover:not(:disabled) { background: var(--c-surface); border-color: var(--c-border-strong); }
+    .pagination button.active { background: var(--c-brand); color: white; border-color: var(--c-brand); }
+    .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ===== Modal / Drawer ===== */
+    .scrim {
+      position: fixed; inset: 0;
+      background: rgba(15,23,42,.5);
+      display: none;
+      z-index: 200;
+      backdrop-filter: blur(2px);
+    }
+    .scrim.open { display: block; animation: fade .2s; }
+
+    .drawer {
+      position: fixed;
+      top: 0; right: 0;
+      width: min(820px, 92vw);
+      height: 100vh;
+      background: var(--c-surface);
+      box-shadow: var(--shadow-lg);
+      transform: translateX(100%);
+      transition: transform .25s cubic-bezier(.2,.8,.2,1);
+      z-index: 210;
+      display: flex; flex-direction: column;
+    }
+    .drawer.open { transform: translateX(0); }
+    .drawer-head {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--c-border);
+      display: flex; align-items: center; gap: 14px;
+    }
+    .drawer-head h2 { font-size: 17px; font-weight: 700; margin: 0; }
+    .drawer-head .subtitle { font-size: 12px; color: var(--c-text-muted); margin-top: 2px; }
+    .drawer-head .close {
+      margin-left: auto;
+      width: 34px; height: 34px;
+      border: none;
+      background: transparent;
+      border-radius: 7px;
+      color: var(--c-text-soft);
+      display: grid; place-items: center;
+      font-size: 18px;
+    }
+    .drawer-head .close:hover { background: var(--c-surface-2); }
+    .drawer-body { flex: 1; overflow-y: auto; padding: 22px 24px; }
+    .drawer-foot {
+      padding: 14px 24px;
+      border-top: 1px solid var(--c-border);
+      display: flex; gap: 10px; justify-content: flex-end;
+      background: var(--c-surface-2);
+    }
+
+    /* ===== Form ===== */
+    .form-section { margin-bottom: 26px; }
+    .form-section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .form-section-num {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: var(--c-brand);
+      color: white;
+      display: grid; place-items: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .form-section h4 { margin: 0; font-size: 14.5px; font-weight: 700; color: var(--c-text); }
+
+    .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .form-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+    .form-field { display: flex; flex-direction: column; min-width: 0; }
+    .form-field.full { grid-column: 1 / -1; }
+    .form-field label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--c-text-soft);
+      margin-bottom: 5px;
+    }
+    .form-field label .req { color: var(--c-danger); }
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+      padding: 9px 11px;
+      border: 1px solid var(--c-border);
+      border-radius: 7px;
+      font-size: 13.5px;
+      background: white;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .form-field input:focus,
+    .form-field select:focus,
+    .form-field textarea:focus {
+      border-color: var(--c-brand-soft);
+      box-shadow: 0 0 0 3px rgba(15,61,94,.08);
+    }
+    .form-field input.err,
+    .form-field select.err,
+    .form-field textarea.err {
+      border-color: var(--c-danger);
+      background: #fff5f5;
+    }
+    .form-field .help { font-size: 11.5px; color: var(--c-text-muted); margin-top: 4px; }
+    .form-field .err-msg { font-size: 11.5px; color: var(--c-danger); margin-top: 4px; display: none; }
+    .form-field input.err + .err-msg,
+    .form-field select.err + .err-msg,
+    .form-field textarea.err + .err-msg { display: block; }
+    .form-field textarea { min-height: 86px; resize: vertical; }
+
+    .sub-card {
+      background: var(--c-surface-2);
+      border: 1px solid var(--c-border);
+      border-radius: 9px;
+      padding: 14px;
+    }
+    .sub-card h5 {
+      margin: 0 0 10px;
+      font-size: 12.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--c-text-soft);
+      font-weight: 700;
+    }
+
+    .dropzone {
+      border: 2px dashed var(--c-border-strong);
+      border-radius: 10px;
+      padding: 22px;
+      text-align: center;
+      background: var(--c-surface-2);
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+    .dropzone:hover, .dropzone.drag {
+      border-color: var(--c-brand-soft);
+      background: var(--c-brand-pale);
+    }
+    .dropzone i { font-size: 32px; color: var(--c-text-muted); display: block; margin-bottom: 8px; }
+    .dropzone strong { display: block; font-size: 13.5px; color: var(--c-text); }
+    .dropzone span { font-size: 12px; color: var(--c-text-muted); }
+    .file-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: white;
+      border: 1px solid var(--c-border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12.5px;
+      margin-top: 10px;
+    }
+    .file-pill button {
+      background: transparent; border: none; color: var(--c-danger); padding: 0;
+    }
+
+    /* ===== Detail view ===== */
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+    .detail-card {
+      background: var(--c-surface-2);
+      border: 1px solid var(--c-border);
+      border-radius: 9px;
+      padding: 14px 16px;
+    }
+    .detail-card h5 {
+      margin: 0 0 10px;
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--c-text-soft);
+      font-weight: 700;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--c-border);
+    }
+    .kv { display: grid; grid-template-columns: 38% 62%; gap: 6px 12px; font-size: 13px; }
+    .kv dt { color: var(--c-text-muted); font-weight: 500; }
+    .kv dd { margin: 0; color: var(--c-text); font-weight: 600; }
+
+    .header-banner {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 18px;
+      background: linear-gradient(135deg, #0f3d5e 0%, #1e6091 100%);
+      color: white;
+      border-radius: 11px;
+      margin-bottom: 18px;
+    }
+    .header-banner .num-box {
+      background: rgba(255,255,255,.15);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-family: ui-monospace, monospace;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    .header-banner .meta { flex: 1; }
+    .header-banner .meta strong { display: block; font-size: 15px; }
+    .header-banner .meta span { font-size: 12.5px; opacity: .8; }
+
+    /* ===== Toasts ===== */
+    .toasts {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex; flex-direction: column;
+      gap: 8px;
+      z-index: 300;
+    }
+    .toast {
+      background: var(--c-text);
+      color: white;
+      padding: 11px 16px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      display: flex; align-items: center; gap: 10px;
+      min-width: 240px;
+      animation: slide .25s ease;
+    }
+    .toast.success { background: var(--c-success); }
+    .toast.error { background: var(--c-danger); }
+    .toast.info { background: var(--c-brand); }
+    @keyframes slide {
+      from { transform: translateX(20px); opacity: 0; }
+      to { transform: none; opacity: 1; }
+    }
+
+    /* ===== Confirm dialog ===== */
+    .confirm {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border-radius: 12px;
+      padding: 22px;
+      box-shadow: var(--shadow-lg);
+      width: min(420px, 92vw);
+      z-index: 220;
+      display: none;
+    }
+    .confirm.open { display: block; }
+    .confirm h3 { margin: 0 0 8px; font-size: 16px; }
+    .confirm p { margin: 0 0 18px; font-size: 13.5px; color: var(--c-text-soft); }
+    .confirm .actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 1100px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .row-2 { grid-template-columns: 1fr; }
+      .filters-bar { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 760px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .form-grid, .form-grid.cols-2, .detail-grid { grid-template-columns: 1fr; }
+      .filters-bar { grid-template-columns: 1fr; }
+      .topbar { padding: 12px 16px; }
+      .content { padding: 16px; }
+    }
+
+    /* ===== Print (for acta detail) ===== */
+    @media print {
+      .sidebar, .topbar, .drawer-head .close, .drawer-foot, .toasts { display: none !important; }
+      body, .drawer { background: white; }
+      .drawer { position: static; width: 100%; height: auto; box-shadow: none; transform: none; }
+      .drawer-body { overflow: visible; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ===== Sidebar ===== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">DR</div>
+      <div class="brand-text">
+        <strong>DRTC · Fiscalización</strong>
+        <span>Transporte Terrestre</span>
+      </div>
+    </div>
+
+    <div class="nav-section">Módulo</div>
+    <div class="nav-item active" data-view="dashboard"><i class="bi bi-speedometer2"></i> Panel</div>
+    <div class="nav-item" data-view="actas"><i class="bi bi-file-earmark-text"></i> Actas <span class="count" id="navCount">0</span></div>
+    <div class="nav-item" data-view="dashboard" id="navNueva"><i class="bi bi-plus-circle"></i> Nueva acta</div>
+
+    <div class="nav-section">Reportes</div>
+    <div class="nav-item" id="navExport"><i class="bi bi-download"></i> Exportar</div>
+    <div class="nav-item" id="navSeed"><i class="bi bi-database"></i> Datos demo</div>
+    <div class="nav-item" id="navWipe"><i class="bi bi-trash"></i> Vaciar registro</div>
+
+    <div class="sidebar-footer">
+      <div class="avatar">IT</div>
+      <div>
+        <div style="color:white;font-weight:600;">Inspector de turno</div>
+        <div style="color:#94a3b8;">Sesión local</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== Main ===== -->
+  <main class="main">
+
+    <header class="topbar">
+      <div>
+        <div class="crumb" id="crumb">Inicio · Fiscalización</div>
+        <h1 id="pageTitle">Panel de Fiscalización</h1>
+      </div>
+      <div class="topbar-search">
+        <i class="bi bi-search"></i>
+        <input id="globalSearch" type="search" placeholder="Buscar acta, placa, RUC, DNI, conductor…" autocomplete="off">
+        <kbd>/</kbd>
+      </div>
+      <button class="btn btn-primary" id="btnNueva"><i class="bi bi-plus-lg"></i> Nueva acta</button>
+    </header>
+
+    <div class="content">
+
+      <!-- ===== Dashboard ===== -->
+      <section class="view active" id="view-dashboard">
+
+        <div class="kpi-grid">
+          <div class="kpi">
+            <div class="kpi-icon blue"><i class="bi bi-file-earmark-text"></i></div>
+            <div class="kpi-label">Actas totales</div>
+            <div class="kpi-value" id="kpiTotal">0</div>
+            <div class="kpi-delta" id="kpiTotalDelta">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-icon amber"><i class="bi bi-calendar-event"></i></div>
+            <div class="kpi-label">Esta semana</div>
+            <div class="kpi-value" id="kpiSemana">0</div>
+            <div class="kpi-delta" id="kpiSemanaDelta">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-icon red"><i class="bi bi-exclamation-triangle"></i></div>
+            <div class="kpi-label">Infracciones detectadas</div>
+            <div class="kpi-value" id="kpiInfracciones">0</div>
+            <div class="kpi-delta">Promedio <span id="kpiPromedio">0</span> por acta</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-icon green"><i class="bi bi-check-circle"></i></div>
+            <div class="kpi-label">Notificadas</div>
+            <div class="kpi-value" id="kpiNotificadas">0</div>
+            <div class="kpi-delta"><span id="kpiNotifPct">0</span>% del total</div>
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h3>Tendencia de intervenciones</h3>
+                <div class="subtitle">Volumen de actas registradas por período</div>
+              </div>
+              <div class="right">
+                <div class="seg" id="trendSeg">
+                  <button data-range="7" class="active">7 días</button>
+                  <button data-range="30">30 días</button>
+                  <button data-range="90">90 días</button>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="chart-wrap"><canvas id="chartTrend"></canvas></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h3>Por modalidad de servicio</h3>
+                <div class="subtitle">Distribución de actas</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="chart-wrap sm"><canvas id="chartModalidad"></canvas></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h3>Actas recientes</h3>
+                <div class="subtitle">Últimas intervenciones registradas</div>
+              </div>
+              <div class="right">
+                <button class="btn btn-ghost" id="btnVerTodas"><i class="bi bi-arrow-right"></i> Ver todas</button>
+              </div>
+            </div>
+            <div class="card-body">
+              <ul class="mini-list" id="recientes"></ul>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h3>Lugares más intervenidos</h3>
+                <div class="subtitle">Top 5 ubicaciones</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="chart-wrap sm"><canvas id="chartLugares"></canvas></div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ===== Lista de actas ===== -->
+      <section class="view" id="view-actas">
+
+        <div class="filters-bar">
+          <div class="field">
+            <label>Búsqueda</label>
+            <input type="search" id="fText" placeholder="Nº acta, placa, nombre, RUC/DNI, conductor…">
+          </div>
+          <div class="field">
+            <label>Desde</label>
+            <input type="date" id="fDesde">
+          </div>
+          <div class="field">
+            <label>Hasta</label>
+            <input type="date" id="fHasta">
+          </div>
+          <div class="field">
+            <label>Estado</label>
+            <select id="fEstado">
+              <option value="">Todos</option>
+              <option value="borrador">Borrador</option>
+              <option value="emitida">Emitida</option>
+              <option value="notificada">Notificada</option>
+              <option value="sancionada">Sancionada</option>
+              <option value="archivada">Archivada</option>
+              <option value="anulada">Anulada</option>
+            </select>
+          </div>
+          <div class="filters-actions">
+            <button class="btn btn-ghost" id="fLimpiar"><i class="bi bi-x-circle"></i> Limpiar</button>
+          </div>
+          <div class="chips" id="activeChips" style="grid-column: 1 / -1;"></div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-toolbar">
+            <div class="count">Mostrando <b id="countShown">0</b> de <b id="countTotal">0</b> actas</div>
+            <div class="right">
+              <button class="btn btn-ghost" id="btnExportCsv"><i class="bi bi-filetype-csv"></i> Exportar CSV</button>
+              <button class="btn btn-ghost" id="btnExportJson"><i class="bi bi-filetype-json"></i> JSON</button>
+            </div>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table class="actas" id="tableActas">
+              <thead>
+                <tr>
+                  <th data-sort="numero">N° Acta <span class="sort-ind"></span></th>
+                  <th data-sort="fecha">Fecha <span class="sort-ind"></span></th>
+                  <th data-sort="placa">Placa <span class="sort-ind"></span></th>
+                  <th data-sort="administrado">Administrado <span class="sort-ind"></span></th>
+                  <th data-sort="modalidad">Modalidad <span class="sort-ind"></span></th>
+                  <th data-sort="lugar">Lugar <span class="sort-ind"></span></th>
+                  <th data-sort="infracciones">Infracc. <span class="sort-ind"></span></th>
+                  <th data-sort="estado">Estado <span class="sort-ind"></span></th>
+                  <th style="text-align:right;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyActas"></tbody>
+            </table>
+            <div class="table-empty" id="emptyState" style="display:none;">
+              <i class="bi bi-inbox"></i>
+              <strong>No hay actas que coincidan</strong>
+              <span>Modifica los filtros o registra una nueva acta.</span>
+            </div>
+          </div>
+
+          <div class="pagination" id="pagination"></div>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- ===== Drawer Formulario ===== -->
+<div class="scrim" id="scrim"></div>
+
+<aside class="drawer" id="drawerForm" aria-hidden="true">
+  <div class="drawer-head">
+    <div>
+      <h2 id="formTitle">Nueva acta de fiscalización</h2>
+      <div class="subtitle" id="formSubtitle">Complete los datos de la intervención</div>
+    </div>
+    <button class="close" data-close-drawer><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <div class="drawer-body">
+    <form id="actaForm" novalidate>
+      <input type="hidden" name="id">
+
+      <!-- 1. Datos del acta -->
+      <div class="form-section">
+        <div class="form-section-title">
+          <span class="form-section-num">1</span>
+          <h4>Datos del acta</h4>
+        </div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Número de acta <span class="req">*</span></label>
+            <input type="text" name="numero" placeholder="Ej. 000369" required>
+            <div class="err-msg">Campo obligatorio</div>
+          </div>
+          <div class="form-field">
+            <label>Fecha de intervención <span class="req">*</span></label>
+            <input type="date" name="fecha" required>
+            <div class="err-msg">Campo obligatorio</div>
+          </div>
+          <div class="form-field">
+            <label>Hora <span class="req">*</span></label>
+            <input type="time" name="hora" required>
+            <div class="err-msg">Campo obligatorio</div>
+          </div>
+          <div class="form-field">
+            <label>Tipo de intervención</label>
+            <select name="tipoIntervencion">
+              <option value="">Seleccione…</option>
+              <option>Punto fijo</option>
+              <option>Terminal</option>
+              <option>Punto móvil</option>
+              <option>Otro</option>
+            </select>
+          </div>
+          <div class="form-field full">
+            <label>Lugar de intervención <span class="req">*</span></label>
+            <input type="text" name="lugar" placeholder="Vía, kilómetro, distrito" required>
+            <div class="err-msg">Campo obligatorio</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Administrado -->
+      <div class="form-section">
+        <div class="form-section-title">
+          <span class="form-section-num">2</span>
+          <h4>Administrado</h4>
+        </div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Tipo</label>
+            <select name="adminTipo">
+              <option value="">Seleccione…</option>
+              <option>Transportista</option>
+              <option>Generador de carga</option>
+              <option>Conductor</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Tipo de documento</label>
+            <select name="adminDocTipo">
+              <option value="">Seleccione…</option>
+              <option>RUC</option>
+              <option>DNI</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Número de documento</label>
+            <input type="text" name="adminDocNum" placeholder="RUC u 8 dígitos">
+            <div class="err-msg">Documento inválido</div>
+          </div>
+          <div class="form-field full">
+            <label>Nombre o razón social</label>
+            <input type="text" name="adminNombre" placeholder="Razón social o nombres completos">
+          </div>
+          <div class="form-field">
+            <label>N° de habilitación</label>
+            <input type="text" name="habilitacion" placeholder="Habilitación vigente">
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Vehículo -->
+      <div class="form-section">
+        <div class="form-section-title">
+          <span class="form-section-num">3</span>
+          <h4>Vehículo intervenido</h4>
+        </div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Placa <span class="req">*</span></label>
+            <input type="text" name="placa" placeholder="ABC-123" style="text-transform:uppercase;" required>
+            <div class="err-msg">Placa obligatoria</div>
+          </div>
+          <div class="form-field">
+            <label>Modalidad del servicio</label>
+            <select name="modalidad">
+              <option value="">Seleccione…</option>
+              <option>Mercancías</option>
+              <option>Pasajeros</option>
+              <option>Otro</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Otro servicio</label>
+            <input type="text" name="otroServicio" placeholder="Solo si seleccionó Otro">
+          </div>
+          <div class="form-field">
+            <label>Origen</label>
+            <input type="text" name="origen" placeholder="Lugar de origen">
+          </div>
+          <div class="form-field">
+            <label>Destino</label>
+            <input type="text" name="destino" placeholder="Lugar de destino">
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Conductores -->
+      <div class="form-section">
+        <div class="form-section-title">
+          <span class="form-section-num">4</span>
+          <h4>Conductores</h4>
+        </div>
+        <div class="form-grid cols-2">
+          <div class="sub-card">
+            <h5>Conductor al volante</h5>
+            <div class="form-field"><label>Nombre completo</label><input type="text" name="condVolNombre"></div>
+            <div class="form-field" style="margin-top:10px;">
+              <label>Tipo de identificación</label>
+              <select name="condVolTipoId">
+                <option value="">Seleccione…</option>
+                <option>Licencia de conducir</option>
+                <option>DNI</option>
+              </select>
+            </div>
+            <div class="form-field" style="margin-top:10px;"><label>Número</label><input type="text" name="condVolNum"></div>
+            <div class="form-field" style="margin-top:10px;">
+              <label>Clase y categoría</label>
+              <select name="condVolClase">
+                <option value="">Seleccione…</option>
+                <option>A-I</option><option>A-II-a</option><option>A-II-b</option>
+                <option>A-III-a</option><option>A-III-b</option><option>A-III-c</option>
+                <option>A-IV</option><option>Internacional</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sub-card">
+            <h5>Conductor alterno</h5>
+            <div class="form-field"><label>Nombre completo</label><input type="text" name="condAltNombre"></div>
+            <div class="form-field" style="margin-top:10px;">
+              <label>Tipo de identificación</label>
+              <select name="condAltTipoId">
+                <option value="">Seleccione…</option>
+                <option>Licencia de conducir</option>
+                <option>DNI</option>
+              </select>
+            </div>
+            <div class="form-field" style="margin-top:10px;"><label>Número</label><input type="text" name="condAltNum"></div>
+            <div class="form-field" style="margin-top:10px;">
+              <label>Clase y categoría</label>
+              <select name="condAltClase">
+                <option value="">Seleccione…</option>
+                <option>A-I</option><option>A-II-a</option><option>A-II-b</option>
+                <option>A-III-a</option><option>A-III-b</option><option>A-III-c</option>
+                <option>A-IV</option><option>Internacional</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Resultado -->
+      <div class="form-section">
+        <div class="form-section-title">
+          <span class="form-section-num">5</span>
+          <h4>Resultado de fiscalización</h4>
+        </div>
+        <div class="form-grid">
+          <div class="form-field full">
+            <label>Hechos verificados</label>
+            <textarea name="hechos" placeholder="Describa los hechos encontrados durante la intervención"></textarea>
+          </div>
+          <div class="form-field">
+            <label>Códigos de infracciones</label>
+            <input type="text" name="infracciones" placeholder="Ej. F.1, F.2, F.3">
+            <div class="help">Separe con comas. Cada código suma al contador.</div>
+          </div>
+          <div class="form-field">
+            <label>Códigos de incumplimientos</label>
+            <input type="text" name="incumplimientos" placeholder="Ej. I.1, I.2">
+          </div>
+          <div class="form-field">
+            <label>Estado</label>
+            <select name="estado">
+              <option value="borrador">Borrador</option>
+              <option value="emitida">Emitida</option>
+              <option value="notificada">Notificada</option>
+              <option value="sancionada">Sancionada</option>
+              <option value="archivada">Archivada</option>
+              <option value="anulada">Anulada</option>
+            </select>
+          </div>
+          <div class="form-field full">
+            <label>Manifestación del administrado</label>
+            <textarea name="manifestacion" placeholder="Lo que manifiesta el administrado"></textarea>
+          </div>
+          <div class="form-field full">
+            <label>Medida administrativa impuesta</label>
+            <textarea name="medida" placeholder="Medida administrativa aplicada, si corresponde"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Archivo -->
+      <div class="form-section">
+        <div class="form-section-title">
+          <span class="form-section-num">6</span>
+          <h4>Archivo del acta</h4>
+        </div>
+        <div class="dropzone" id="dropzone">
+          <i class="bi bi-cloud-arrow-up"></i>
+          <strong>Arrastra o haz clic para adjuntar el acta escaneada</strong>
+          <span>PDF, JPG o PNG · máximo 5 MB</span>
+          <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" hidden>
+        </div>
+        <div id="filePreview"></div>
+      </div>
+
+      <!-- 7. Firmas -->
+      <div class="form-section">
+        <div class="form-section-title">
+          <span class="form-section-num">7</span>
+          <h4>Firmas y responsables</h4>
+        </div>
+        <div class="form-grid">
+          <div class="form-field"><label>Inspector de transporte</label><input type="text" name="inspectorNombre"></div>
+          <div class="form-field"><label>DNI del inspector</label><input type="text" name="inspectorDni"></div>
+          <div class="form-field"><label>Intervenido / representante</label><input type="text" name="intervenidoNombre"></div>
+          <div class="form-field"><label>DNI del intervenido</label><input type="text" name="intervenidoDni"></div>
+          <div class="form-field"><label>Representante PNP</label><input type="text" name="pnpNombre"></div>
+          <div class="form-field"><label>CIP del PNP</label><input type="text" name="pnpCip"></div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="drawer-foot">
+    <button class="btn btn-ghost" data-close-drawer>Cancelar</button>
+    <button class="btn btn-ghost" id="btnSaveDraft"><i class="bi bi-save"></i> Guardar borrador</button>
+    <button class="btn btn-primary" id="btnSave"><i class="bi bi-check2-circle"></i> Registrar acta</button>
+  </div>
+</aside>
+
+<!-- ===== Drawer Detalle ===== -->
+<aside class="drawer" id="drawerDetail" aria-hidden="true">
+  <div class="drawer-head">
+    <div>
+      <h2 id="detailTitle">Detalle del acta</h2>
+      <div class="subtitle" id="detailSubtitle"></div>
+    </div>
+    <button class="close" data-close-drawer><i class="bi bi-x-lg"></i></button>
+  </div>
+  <div class="drawer-body" id="detailBody"></div>
+  <div class="drawer-foot">
+    <button class="btn btn-ghost" data-close-drawer>Cerrar</button>
+    <button class="btn btn-ghost" id="btnPrint"><i class="bi bi-printer"></i> Imprimir</button>
+    <button class="btn btn-primary" id="btnEditFromDetail"><i class="bi bi-pencil"></i> Editar</button>
+  </div>
+</aside>
+
+<!-- ===== Confirm ===== -->
+<div class="confirm" id="confirmBox" role="dialog">
+  <h3 id="confirmTitle">¿Eliminar acta?</h3>
+  <p id="confirmText">Esta acción no se puede deshacer.</p>
+  <div class="actions">
+    <button class="btn btn-ghost" id="confirmCancel">Cancelar</button>
+    <button class="btn btn-primary" style="background:var(--c-danger);" id="confirmOk">Eliminar</button>
+  </div>
+</div>
+
+<!-- ===== Toasts ===== -->
+<div class="toasts" id="toasts"></div>
+
+<script>
+/* =====================================================================
+   Módulo de Fiscalización · Frontend
+   ---------------------------------------------------------------------
+   Arquitectura:
+   - ActasService: capa de datos. Implementación con localStorage,
+     diseñada con la misma forma que tendrá el API REST en Python
+     (Django / FastAPI). Métodos async para permitir sustitución
+     transparente por fetch(). El contrato es:
+        list({ q, estado, desde, hasta, sort, dir, page, size })
+        get(id), create(data), update(id, data), remove(id)
+        stats({ rangeDays })
+   - Mappers: serialización entre el formulario plano y el modelo.
+   - Controlador UI: vistas, filtros, tablas, gráficos.
+   ===================================================================== */
+
+const API_BASE = ''; // p. ej. '/api/fiscalizacion' cuando exista backend
+const STORAGE_KEY = 'drtc.fiscalizacion.actas.v1';
+
+const ESTADOS = {
+  borrador:   { label: 'Borrador',   cls: 'borrador' },
+  emitida:    { label: 'Emitida',    cls: 'emitida' },
+  notificada: { label: 'Notificada', cls: 'notificada' },
+  sancionada: { label: 'Sancionada', cls: 'sancionada' },
+  archivada:  { label: 'Archivada',  cls: 'archivada' },
+  anulada:    { label: 'Anulada',    cls: 'anulada' },
+};
+
+/* --------------- Utilidades --------------- */
+const uid = () => 'a_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+const fmtDate = (iso) => {
+  if (!iso) return '—';
+  const [y, m, d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+};
+const fmtDateLong = (iso) => {
+  if (!iso) return '—';
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' });
+};
+const todayIso = () => new Date().toISOString().slice(0, 10);
+const addDaysIso = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+const norm = (s) => (s || '').toString().normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const countCsv = (s) => (s || '').split(',').map(x => x.trim()).filter(Boolean).length;
+const debounce = (fn, ms = 200) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+
+/* --------------- Toasts y Confirm --------------- */
+const toast = (msg, type = 'info') => {
+  const wrap = document.getElementById('toasts');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i> ${msg}`;
+  wrap.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(20px)'; }, 2600);
+  setTimeout(() => el.remove(), 3000);
+};
+
+const confirmDialog = ({ title, text, okText = 'Confirmar' }) => new Promise(resolve => {
+  const box = document.getElementById('confirmBox');
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmText').textContent = text;
+  document.getElementById('confirmOk').textContent = okText;
+  document.getElementById('scrim').classList.add('open');
+  box.classList.add('open');
+  const cleanup = (val) => {
+    box.classList.remove('open');
+    document.getElementById('scrim').classList.remove('open');
+    document.getElementById('confirmOk').onclick = null;
+    document.getElementById('confirmCancel').onclick = null;
+    resolve(val);
+  };
+  document.getElementById('confirmOk').onclick = () => cleanup(true);
+  document.getElementById('confirmCancel').onclick = () => cleanup(false);
+});
+
+/* =====================================================================
+   ActasService — capa de datos
+   ===================================================================== */
+class ActasService {
+  constructor({ useBackend = false } = {}) {
+    this.useBackend = useBackend && !!API_BASE;
+  }
+
+  async _all() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      console.warn('Storage corrupt, resetting', e);
+      localStorage.removeItem(STORAGE_KEY);
+      return [];
+    }
+  }
+
+  async _persist(items) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  }
+
+  async list({ q = '', estado = '', desde = '', hasta = '', sort = 'fecha', dir = 'desc', page = 1, size = 10 } = {}) {
+    if (this.useBackend) {
+      const url = new URL(`${API_BASE}/actas/`, location.origin);
+      Object.entries({ q, estado, desde, hasta, sort, dir, page, size }).forEach(([k, v]) => v !== '' && url.searchParams.set(k, v));
+      const r = await fetch(url);
+      return r.json();
+    }
+
+    let items = await this._all();
+
+    if (q) {
+      const nq = norm(q);
+      items = items.filter(a => norm([
+        a.numero, a.placa, a.adminNombre, a.adminDocNum,
+        a.condVolNombre, a.condAltNombre, a.lugar, a.origen, a.destino,
+        a.infracciones, a.incumplimientos
+      ].join(' ')).includes(nq));
+    }
+    if (estado) items = items.filter(a => a.estado === estado);
+    if (desde)  items = items.filter(a => a.fecha >= desde);
+    if (hasta)  items = items.filter(a => a.fecha <= hasta);
+
+    items.sort((a, b) => {
+      const va = a[sort] ?? ''; const vb = b[sort] ?? '';
+      if (sort === 'infracciones') {
+        return ((countCsv(a.infracciones) - countCsv(b.infracciones)) * (dir === 'asc' ? 1 : -1));
+      }
+      return (va > vb ? 1 : va < vb ? -1 : 0) * (dir === 'asc' ? 1 : -1);
+    });
+
+    const total = items.length;
+    const start = (page - 1) * size;
+    const results = items.slice(start, start + size);
+
+    return { count: total, page, size, results };
+  }
+
+  async get(id) {
+    const items = await this._all();
+    return items.find(a => a.id === id) || null;
+  }
+
+  async create(data) {
+    const items = await this._all();
+    const acta = {
+      ...data,
+      id: uid(),
+      creadoEn: new Date().toISOString(),
+      actualizadoEn: new Date().toISOString(),
+    };
+    items.unshift(acta);
+    await this._persist(items);
+    return acta;
+  }
+
+  async update(id, data) {
+    const items = await this._all();
+    const idx = items.findIndex(a => a.id === id);
+    if (idx < 0) throw new Error('Acta no encontrada');
+    items[idx] = { ...items[idx], ...data, actualizadoEn: new Date().toISOString() };
+    await this._persist(items);
+    return items[idx];
+  }
+
+  async remove(id) {
+    const items = await this._all();
+    await this._persist(items.filter(a => a.id !== id));
+  }
+
+  async stats({ rangeDays = 7 } = {}) {
+    const items = await this._all();
+    const today = new Date();
+    const from = new Date(); from.setDate(today.getDate() - (rangeDays - 1));
+    const fromIso = from.toISOString().slice(0, 10);
+
+    const buckets = {};
+    for (let i = 0; i < rangeDays; i++) {
+      const d = new Date(); d.setDate(today.getDate() - (rangeDays - 1 - i));
+      buckets[d.toISOString().slice(0, 10)] = 0;
+    }
+
+    const byModalidad = {};
+    const byLugar = {};
+    let infracciones = 0;
+    let notificadas = 0;
+    let semana = 0;
+    const weekAgo = addDaysIso(-7);
+
+    items.forEach(a => {
+      if (a.fecha >= fromIso && buckets[a.fecha] !== undefined) buckets[a.fecha]++;
+      if (a.fecha >= weekAgo) semana++;
+      if (['notificada', 'sancionada', 'archivada'].includes(a.estado)) notificadas++;
+      infracciones += countCsv(a.infracciones);
+      const m = a.modalidad || 'Sin especificar';
+      byModalidad[m] = (byModalidad[m] || 0) + 1;
+      const l = (a.lugar || 'Sin especificar').split(',')[0].trim();
+      byLugar[l] = (byLugar[l] || 0) + 1;
+    });
+
+    const topLugares = Object.entries(byLugar)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+
+    return {
+      total: items.length,
+      semana,
+      infracciones,
+      promedio: items.length ? (infracciones / items.length).toFixed(1) : '0.0',
+      notificadas,
+      notifPct: items.length ? Math.round((notificadas / items.length) * 100) : 0,
+      trend: { labels: Object.keys(buckets), values: Object.values(buckets) },
+      modalidad: byModalidad,
+      topLugares,
+    };
+  }
+
+  async seedDemo() {
+    const lugares = [
+      'Av. Industrial, km 4', 'Garita de Pucusana', 'Av. Universitaria 1500',
+      'Terminal Yerbateros', 'Carretera Central km 22', 'Av. Néstor Gambetta',
+      'Av. Argentina 3200', 'Panamericana Sur km 38', 'Av. Tomás Marsano',
+    ];
+    const modalidades = ['Pasajeros', 'Mercancías', 'Pasajeros', 'Mercancías', 'Otro'];
+    const tipos = ['Punto fijo', 'Terminal', 'Punto móvil'];
+    const estados = ['emitida', 'notificada', 'sancionada', 'borrador', 'archivada'];
+    const infs = ['F.1', 'F.2', 'F.3', 'F.5', 'F.7', 'M.20', 'M.21', 'F.6'];
+    const nombres = [
+      'Transportes San Cristóbal SAC', 'Logística Andina EIRL', 'Carga Express del Sur SA',
+      'Empresa de Transportes El Sol SRL', 'Inversiones Vega SAC', 'Transcargo Lima SAC',
+    ];
+    const conductores = ['Juan Pérez Quispe', 'María Huamán Soto', 'Luis Ríos Salas', 'Carlos Mendoza V.', 'Pedro Salinas R.'];
+
+    const items = [];
+    for (let i = 0; i < 38; i++) {
+      const d = new Date(); d.setDate(d.getDate() - Math.floor(Math.random() * 75));
+      const numInfs = Math.floor(Math.random() * 4);
+      const sel = [];
+      while (sel.length < numInfs) {
+        const c = infs[Math.floor(Math.random() * infs.length)];
+        if (!sel.includes(c)) sel.push(c);
+      }
+      items.push({
+        id: uid(),
+        numero: String(369 + i).padStart(6, '0'),
+        fecha: d.toISOString().slice(0, 10),
+        hora: `${String(6 + Math.floor(Math.random() * 14)).padStart(2, '0')}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`,
+        tipoIntervencion: tipos[i % tipos.length],
+        lugar: lugares[i % lugares.length],
+        adminTipo: 'Transportista',
+        adminDocTipo: 'RUC',
+        adminDocNum: '20' + String(100000000 + Math.floor(Math.random() * 99999999)).slice(0, 9),
+        adminNombre: nombres[i % nombres.length],
+        habilitacion: 'H-' + (1000 + i),
+        placa: ['ABC', 'ATQ', 'BUC', 'CVA', 'PNT'][i % 5] + '-' + String(100 + i).slice(-3),
+        modalidad: modalidades[i % modalidades.length],
+        origen: ['Lima', 'Ica', 'Arequipa', 'Trujillo', 'Tacna'][i % 5],
+        destino: ['Cusco', 'Huancayo', 'Piura', 'Lima', 'Chiclayo'][i % 5],
+        condVolNombre: conductores[i % conductores.length],
+        condVolTipoId: 'Licencia de conducir',
+        condVolNum: 'Q' + String(40000000 + Math.floor(Math.random() * 9999999)),
+        condVolClase: ['A-IIIa', 'A-IIIb', 'A-IIa'][i % 3],
+        condAltNombre: i % 3 === 0 ? conductores[(i + 1) % conductores.length] : '',
+        condAltTipoId: '', condAltNum: '', condAltClase: '',
+        hechos: numInfs ? 'Se detectó incumplimiento durante la verificación del servicio prestado.' : 'Verificación conforme a la normativa vigente.',
+        infracciones: sel.join(', '),
+        incumplimientos: numInfs && Math.random() > 0.5 ? 'I.1' : '',
+        manifestacion: '',
+        medida: numInfs > 1 ? 'Retención del vehículo' : '',
+        inspectorNombre: 'Insp. ' + ['R. Vega', 'J. Tello', 'L. Quispe', 'M. Silva'][i % 4],
+        inspectorDni: String(40000000 + i),
+        intervenidoNombre: conductores[i % conductores.length],
+        intervenidoDni: String(70000000 + i),
+        pnpNombre: i % 4 === 0 ? 'Sub. Of. Castro' : '',
+        pnpCip: i % 4 === 0 ? String(300000 + i) : '',
+        estado: estados[i % estados.length],
+        archivo: null,
+        creadoEn: d.toISOString(),
+        actualizadoEn: d.toISOString(),
+      });
+    }
+    await this._persist(items);
+    return items.length;
+  }
+
+  async wipe() { localStorage.removeItem(STORAGE_KEY); }
+}
+
+/* =====================================================================
+   Controlador UI
+   ===================================================================== */
+const svc = new ActasService();
+
+const state = {
+  view: 'dashboard',
+  filters: { q: '', estado: '', desde: '', hasta: '' },
+  sort: 'fecha',
+  dir: 'desc',
+  page: 1,
+  size: 10,
+  trendRange: 7,
+  editingId: null,
+  detailId: null,
+  charts: {},
+};
+
+/* --------------- Navegación --------------- */
+const setView = (name) => {
+  state.view = name;
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === `view-${name}`));
+  document.querySelectorAll('.nav-item[data-view]').forEach(n => n.classList.toggle('active', n.dataset.view === name));
+  const titles = {
+    dashboard: { title: 'Panel de Fiscalización', crumb: 'Inicio · Fiscalización' },
+    actas:     { title: 'Historial de actas',     crumb: 'Fiscalización · Actas' },
+  };
+  document.getElementById('pageTitle').textContent = titles[name].title;
+  document.getElementById('crumb').textContent = titles[name].crumb;
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'actas')     renderTable();
+};
+
+document.querySelectorAll('.nav-item[data-view]').forEach(n => n.addEventListener('click', () => setView(n.dataset.view)));
+document.getElementById('btnVerTodas').addEventListener('click', () => setView('actas'));
+
+/* --------------- Drawer helpers --------------- */
+const openDrawer = (id) => {
+  document.getElementById('scrim').classList.add('open');
+  document.getElementById(id).classList.add('open');
+};
+const closeDrawers = () => {
+  document.getElementById('scrim').classList.remove('open');
+  document.getElementById('drawerForm').classList.remove('open');
+  document.getElementById('drawerDetail').classList.remove('open');
+  document.getElementById('confirmBox').classList.remove('open');
+};
+document.getElementById('scrim').addEventListener('click', closeDrawers);
+document.querySelectorAll('[data-close-drawer]').forEach(b => b.addEventListener('click', closeDrawers));
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawers(); });
+
+/* --------------- Formulario --------------- */
+const form = document.getElementById('actaForm');
+
+const blankForm = () => {
+  form.reset();
+  form.querySelector('[name=id]').value = '';
+  form.querySelector('[name=fecha]').value = todayIso();
+  form.querySelector('[name=hora]').value = new Date().toTimeString().slice(0, 5);
+  form.querySelector('[name=estado]').value = 'borrador';
+  document.getElementById('filePreview').innerHTML = '';
+  form.querySelectorAll('.err').forEach(el => el.classList.remove('err'));
+  state.editingId = null;
+};
+
+const openNuevaActa = () => {
+  blankForm();
+  document.getElementById('formTitle').textContent = 'Nueva acta de fiscalización';
+  document.getElementById('formSubtitle').textContent = 'Complete los datos de la intervención';
+  openDrawer('drawerForm');
+};
+
+const openEditActa = async (id) => {
+  const a = await svc.get(id);
+  if (!a) return toast('Acta no encontrada', 'error');
+  blankForm();
+  state.editingId = id;
+  Object.entries(a).forEach(([k, v]) => {
+    const el = form.querySelector(`[name=${CSS.escape(k)}]`);
+    if (el) el.value = v ?? '';
+  });
+  form.querySelector('[name=id]').value = id;
+  if (a.archivo) renderFilePill(a.archivo);
+  document.getElementById('formTitle').textContent = `Editar acta N° ${a.numero || '—'}`;
+  document.getElementById('formSubtitle').textContent = `Última actualización: ${new Date(a.actualizadoEn).toLocaleString('es-PE')}`;
+  openDrawer('drawerForm');
+};
+
+document.getElementById('btnNueva').addEventListener('click', openNuevaActa);
+document.getElementById('navNueva').addEventListener('click', openNuevaActa);
+
+/* Validación */
+const REQUIRED = ['numero', 'fecha', 'hora', 'lugar', 'placa'];
+const validate = (data) => {
+  let ok = true;
+  form.querySelectorAll('.err').forEach(el => el.classList.remove('err'));
+
+  REQUIRED.forEach(name => {
+    if (!data[name] || !String(data[name]).trim()) {
+      const el = form.querySelector(`[name=${name}]`); if (el) el.classList.add('err'); ok = false;
+    }
+  });
+
+  if (data.adminDocTipo === 'RUC' && data.adminDocNum && !/^\d{11}$/.test(data.adminDocNum)) {
+    form.querySelector('[name=adminDocNum]').classList.add('err'); ok = false;
+  }
+  if (data.adminDocTipo === 'DNI' && data.adminDocNum && !/^\d{8}$/.test(data.adminDocNum)) {
+    form.querySelector('[name=adminDocNum]').classList.add('err'); ok = false;
+  }
+  return ok;
+};
+
+const readForm = () => {
+  const data = {};
+  new FormData(form).forEach((v, k) => { data[k] = typeof v === 'string' ? v.trim() : v; });
+  data.placa = (data.placa || '').toUpperCase();
+  const file = form.dataset.attached;
+  if (file) data.archivo = JSON.parse(file);
+  return data;
+};
+
+const submitForm = async (overrideEstado) => {
+  const data = readForm();
+  if (overrideEstado) data.estado = overrideEstado;
+  if (!validate(data)) {
+    toast('Revisa los campos marcados en rojo', 'error');
+    form.querySelector('.err')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  try {
+    if (state.editingId) {
+      await svc.update(state.editingId, data);
+      toast(`Acta N° ${data.numero} actualizada`, 'success');
+    } else {
+      const created = await svc.create(data);
+      toast(`Acta N° ${created.numero} registrada`, 'success');
+    }
+    closeDrawers();
+    if (state.view === 'dashboard') renderDashboard(); else renderTable();
+    refreshNavCount();
+  } catch (e) {
+    toast(e.message || 'Error al guardar', 'error');
+  }
+};
+
+document.getElementById('btnSave').addEventListener('click', () => submitForm());
+document.getElementById('btnSaveDraft').addEventListener('click', () => submitForm('borrador'));
+
+/* Dropzone */
+const dz = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+dz.addEventListener('click', () => fileInput.click());
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('drag');
+  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+
+const handleFile = (file) => {
+  if (file.size > 5 * 1024 * 1024) return toast('El archivo supera 5 MB', 'error');
+  const meta = { name: file.name, size: file.size, type: file.type };
+  form.dataset.attached = JSON.stringify(meta);
+  renderFilePill(meta);
+};
+const renderFilePill = (meta) => {
+  document.getElementById('filePreview').innerHTML = `
+    <span class="file-pill">
+      <i class="bi bi-paperclip"></i>${meta.name} <span style="color:var(--c-text-muted);">(${(meta.size/1024).toFixed(0)} KB)</span>
+      <button type="button" title="Quitar"><i class="bi bi-x"></i></button>
+    </span>`;
+  document.querySelector('#filePreview button').addEventListener('click', () => {
+    delete form.dataset.attached; document.getElementById('filePreview').innerHTML = '';
+  });
+};
+
+/* =====================================================================
+   Dashboard
+   ===================================================================== */
+const renderDashboard = async () => {
+  const s = await svc.stats({ rangeDays: state.trendRange });
+
+  document.getElementById('kpiTotal').textContent = s.total;
+  document.getElementById('kpiSemana').textContent = s.semana;
+  document.getElementById('kpiInfracciones').textContent = s.infracciones;
+  document.getElementById('kpiPromedio').textContent = s.promedio;
+  document.getElementById('kpiNotificadas').textContent = s.notificadas;
+  document.getElementById('kpiNotifPct').textContent = s.notifPct;
+
+  const deltaTotal = s.semana > 0 ? `<i class="bi bi-arrow-up"></i> ${s.semana} en 7 días` : 'Sin registros nuevos';
+  document.getElementById('kpiTotalDelta').innerHTML = deltaTotal;
+  document.getElementById('kpiSemanaDelta').innerHTML = s.semana >= 5 ? '<i class="bi bi-arrow-up"></i> Actividad alta' : '<i class="bi bi-dash"></i> Actividad regular';
+
+  /* Recientes */
+  const { results } = await svc.list({ sort: 'creadoEn', dir: 'desc', size: 6 });
+  document.getElementById('recientes').innerHTML = results.length ? results.map(a => `
+    <li>
+      <div class="icon-circ"><i class="bi bi-file-earmark-text"></i></div>
+      <div class="body">
+        <strong>N° ${a.numero} · ${a.adminNombre || 'Sin administrado'}</strong>
+        <span>${a.placa} · ${a.lugar || 'Sin lugar'}</span>
+      </div>
+      <div class="when">${fmtDate(a.fecha)}<br><span style="font-size:10.5px;">${a.hora || ''}</span></div>
+    </li>
+  `).join('') : `
+    <li style="border:none;justify-content:center;color:var(--c-text-muted);padding:24px 0;">
+      Aún no hay actas registradas
+    </li>`;
+
+  renderCharts(s);
+};
+
+const renderCharts = (s) => {
+  if (typeof Chart === 'undefined') { setTimeout(() => renderCharts(s), 120); return; }
+  Object.values(state.charts).forEach(c => c?.destroy?.());
+
+  const grid = { color: 'rgba(148,163,184,.15)' };
+  const tickColor = '#64748b';
+
+  state.charts.trend = new Chart(document.getElementById('chartTrend'), {
+    type: 'line',
+    data: {
+      labels: s.trend.labels.map(d => {
+        const dt = new Date(d + 'T00:00:00');
+        return dt.toLocaleDateString('es-PE', { day: '2-digit', month: 'short' });
+      }),
+      datasets: [{
+        label: 'Actas',
+        data: s.trend.values,
+        borderColor: '#0f3d5e',
+        backgroundColor: ctx => {
+          const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 240);
+          g.addColorStop(0, 'rgba(15,61,94,.25)'); g.addColorStop(1, 'rgba(15,61,94,0)');
+          return g;
+        },
+        fill: true, tension: 0.35, borderWidth: 2,
+        pointBackgroundColor: '#0f3d5e', pointRadius: 3, pointHoverRadius: 5,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0f172a' } },
+      scales: {
+        y: { beginAtZero: true, grid, ticks: { color: tickColor, precision: 0 } },
+        x: { grid: { display: false }, ticks: { color: tickColor } },
+      },
+    },
+  });
+
+  const palette = ['#0f3d5e', '#1e6091', '#f59e0b', '#16a34a', '#dc2626', '#7c3aed'];
+  const modKeys = Object.keys(s.modalidad);
+  state.charts.modalidad = new Chart(document.getElementById('chartModalidad'), {
+    type: 'doughnut',
+    data: {
+      labels: modKeys.length ? modKeys : ['Sin datos'],
+      datasets: [{
+        data: modKeys.length ? Object.values(s.modalidad) : [1],
+        backgroundColor: modKeys.length ? palette : ['#e2e8f0'],
+        borderWidth: 0,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '62%',
+      plugins: {
+        legend: { position: 'bottom', labels: { color: tickColor, boxWidth: 10, padding: 12 } },
+      },
+    },
+  });
+
+  state.charts.lugares = new Chart(document.getElementById('chartLugares'), {
+    type: 'bar',
+    data: {
+      labels: s.topLugares.length ? s.topLugares.map(([l]) => l.length > 28 ? l.slice(0, 25) + '…' : l) : ['Sin datos'],
+      datasets: [{
+        label: 'Actas',
+        data: s.topLugares.length ? s.topLugares.map(([, v]) => v) : [0],
+        backgroundColor: '#1e6091', borderRadius: 6, barThickness: 14,
+      }],
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0f172a' } },
+      scales: {
+        x: { beginAtZero: true, grid, ticks: { color: tickColor, precision: 0 } },
+        y: { grid: { display: false }, ticks: { color: tickColor } },
+      },
+    },
+  });
+};
+
+/* Segmentos de rango */
+document.querySelectorAll('#trendSeg button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('#trendSeg button').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  state.trendRange = parseInt(b.dataset.range, 10);
+  renderDashboard();
+}));
+
+/* =====================================================================
+   Tabla / búsqueda
+   ===================================================================== */
+const renderTable = async () => {
+  const { q, estado, desde, hasta } = state.filters;
+  const { count, results } = await svc.list({
+    q, estado, desde, hasta,
+    sort: state.sort, dir: state.dir,
+    page: state.page, size: state.size,
+  });
+
+  const all = await svc.list({ page: 1, size: 99999 });
+  document.getElementById('countShown').textContent = results.length;
+  document.getElementById('countTotal').textContent = all.count;
+
+  const tbody = document.getElementById('tbodyActas');
+  const empty = document.getElementById('emptyState');
+
+  if (!results.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    document.getElementById('pagination').innerHTML = '';
+    renderChips();
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = results.map(a => {
+    const est = ESTADOS[a.estado] || ESTADOS.borrador;
+    return `
+      <tr data-id="${a.id}">
+        <td><span class="num">N° ${a.numero || '—'}</span></td>
+        <td>${fmtDate(a.fecha)} <span style="color:var(--c-text-muted);">${a.hora || ''}</span></td>
+        <td><span class="placa">${a.placa || '—'}</span></td>
+        <td>
+          <div style="font-weight:600;">${a.adminNombre || '—'}</div>
+          <div style="font-size:11.5px;color:var(--c-text-muted);">${a.adminDocTipo || ''} ${a.adminDocNum || ''}</div>
+        </td>
+        <td>${a.modalidad || '—'}</td>
+        <td style="max-width:200px;">
+          <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${a.lugar || ''}">${a.lugar || '—'}</div>
+        </td>
+        <td><strong>${countCsv(a.infracciones)}</strong></td>
+        <td><span class="badge ${est.cls}">${est.label}</span></td>
+        <td style="text-align:right;">
+          <div class="row-actions">
+            <button class="view" title="Ver"><i class="bi bi-eye"></i></button>
+            <button class="edit" title="Editar"><i class="bi bi-pencil"></i></button>
+            <button class="del" title="Eliminar"><i class="bi bi-trash"></i></button>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+
+  tbody.querySelectorAll('tr').forEach(tr => {
+    const id = tr.dataset.id;
+    tr.querySelector('.view').addEventListener('click', () => openDetail(id));
+    tr.querySelector('.edit').addEventListener('click', () => openEditActa(id));
+    tr.querySelector('.del').addEventListener('click', () => deleteActa(id));
+    tr.addEventListener('dblclick', () => openDetail(id));
+  });
+
+  renderPagination(count);
+  renderChips();
+  updateSortIndicators();
+};
+
+const renderPagination = (total) => {
+  const pages = Math.max(1, Math.ceil(total / state.size));
+  const wrap = document.getElementById('pagination');
+  const start = (state.page - 1) * state.size + 1;
+  const end = Math.min(state.page * state.size, total);
+
+  const btn = (label, page, opts = {}) =>
+    `<button ${opts.active ? 'class="active"' : ''} ${opts.disabled ? 'disabled' : ''} data-page="${page}">${label}</button>`;
+
+  let pagesHtml = btn('<i class="bi bi-chevron-left"></i>', state.page - 1, { disabled: state.page === 1 });
+  const range = (() => {
+    if (pages <= 7) return [...Array(pages)].map((_, i) => i + 1);
+    if (state.page <= 4) return [1, 2, 3, 4, 5, '…', pages];
+    if (state.page >= pages - 3) return [1, '…', pages - 4, pages - 3, pages - 2, pages - 1, pages];
+    return [1, '…', state.page - 1, state.page, state.page + 1, '…', pages];
+  })();
+  range.forEach(p => {
+    pagesHtml += p === '…'
+      ? `<button disabled style="border:none;background:transparent;">…</button>`
+      : btn(p, p, { active: p === state.page });
+  });
+  pagesHtml += btn('<i class="bi bi-chevron-right"></i>', state.page + 1, { disabled: state.page === pages });
+
+  wrap.innerHTML = `
+    <div class="info">${total ? `${start}–${end} de ${total}` : '0 resultados'}</div>
+    ${pagesHtml}
+  `;
+  wrap.querySelectorAll('button[data-page]').forEach(b => b.addEventListener('click', () => {
+    const p = parseInt(b.dataset.page, 10);
+    if (!isNaN(p) && p >= 1 && p <= pages) { state.page = p; renderTable(); }
+  }));
+};
+
+const updateSortIndicators = () => {
+  document.querySelectorAll('table.actas thead th[data-sort]').forEach(th => {
+    const ind = th.querySelector('.sort-ind');
+    if (th.dataset.sort === state.sort) {
+      ind.innerHTML = state.dir === 'asc' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>';
+    } else {
+      ind.innerHTML = '';
+    }
+  });
+};
+
+document.querySelectorAll('table.actas thead th[data-sort]').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.sort;
+    if (state.sort === col) state.dir = state.dir === 'asc' ? 'desc' : 'asc';
+    else { state.sort = col; state.dir = 'asc'; }
+    state.page = 1;
+    renderTable();
+  });
+});
+
+/* Filtros */
+const debouncedFilter = debounce(() => { state.page = 1; renderTable(); }, 220);
+document.getElementById('fText').addEventListener('input', e => { state.filters.q = e.target.value; debouncedFilter(); });
+document.getElementById('fEstado').addEventListener('change', e => { state.filters.estado = e.target.value; state.page = 1; renderTable(); });
+document.getElementById('fDesde').addEventListener('change', e => { state.filters.desde = e.target.value; state.page = 1; renderTable(); });
+document.getElementById('fHasta').addEventListener('change', e => { state.filters.hasta = e.target.value; state.page = 1; renderTable(); });
+document.getElementById('fLimpiar').addEventListener('click', () => {
+  state.filters = { q: '', estado: '', desde: '', hasta: '' };
+  ['fText', 'fEstado', 'fDesde', 'fHasta'].forEach(id => document.getElementById(id).value = '');
+  state.page = 1; renderTable();
+});
+
+const renderChips = () => {
+  const chips = [];
+  const f = state.filters;
+  if (f.q) chips.push({ label: `Texto: "${f.q}"`, k: 'q' });
+  if (f.estado) chips.push({ label: `Estado: ${ESTADOS[f.estado].label}`, k: 'estado' });
+  if (f.desde) chips.push({ label: `Desde: ${fmtDate(f.desde)}`, k: 'desde' });
+  if (f.hasta) chips.push({ label: `Hasta: ${fmtDate(f.hasta)}`, k: 'hasta' });
+
+  const wrap = document.getElementById('activeChips');
+  if (!chips.length) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = chips.map(c => `<span class="chip">${c.label}<button data-k="${c.k}" title="Quitar filtro">×</button></span>`).join('');
+  wrap.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    state.filters[b.dataset.k] = '';
+    const map = { q: 'fText', estado: 'fEstado', desde: 'fDesde', hasta: 'fHasta' };
+    document.getElementById(map[b.dataset.k]).value = '';
+    state.page = 1; renderTable();
+  }));
+};
+
+/* Búsqueda global */
+const globalSearch = document.getElementById('globalSearch');
+globalSearch.addEventListener('input', debounce((e) => {
+  state.filters.q = e.target.value;
+  document.getElementById('fText').value = e.target.value;
+  state.page = 1;
+  if (state.view !== 'actas') setView('actas');
+  else renderTable();
+}, 200));
+document.addEventListener('keydown', (e) => {
+  if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+    e.preventDefault(); globalSearch.focus();
+  }
+});
+
+/* =====================================================================
+   Detalle
+   ===================================================================== */
+const openDetail = async (id) => {
+  const a = await svc.get(id);
+  if (!a) return;
+  state.detailId = id;
+
+  const est = ESTADOS[a.estado] || ESTADOS.borrador;
+  document.getElementById('detailTitle').textContent = `Acta N° ${a.numero}`;
+  document.getElementById('detailSubtitle').textContent = `${fmtDateLong(a.fecha)} · ${a.hora || ''} · ${a.lugar || ''}`;
+
+  document.getElementById('detailBody').innerHTML = `
+    <div class="header-banner">
+      <div class="num-box">${a.numero || '—'}</div>
+      <div class="meta">
+        <strong>${a.adminNombre || 'Sin administrado'}</strong>
+        <span>${a.adminDocTipo || ''} ${a.adminDocNum || ''} · Placa ${a.placa || '—'}</span>
+      </div>
+      <span class="badge ${est.cls}">${est.label}</span>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-card">
+        <h5>Intervención</h5>
+        <dl class="kv">
+          <dt>Fecha</dt><dd>${fmtDateLong(a.fecha)}</dd>
+          <dt>Hora</dt><dd>${a.hora || '—'}</dd>
+          <dt>Tipo</dt><dd>${a.tipoIntervencion || '—'}</dd>
+          <dt>Lugar</dt><dd>${a.lugar || '—'}</dd>
+        </dl>
+      </div>
+      <div class="detail-card">
+        <h5>Administrado</h5>
+        <dl class="kv">
+          <dt>Tipo</dt><dd>${a.adminTipo || '—'}</dd>
+          <dt>Documento</dt><dd>${a.adminDocTipo || '—'} ${a.adminDocNum || ''}</dd>
+          <dt>Nombre</dt><dd>${a.adminNombre || '—'}</dd>
+          <dt>Habilitación</dt><dd>${a.habilitacion || '—'}</dd>
+        </dl>
+      </div>
+      <div class="detail-card">
+        <h5>Vehículo</h5>
+        <dl class="kv">
+          <dt>Placa</dt><dd>${a.placa || '—'}</dd>
+          <dt>Modalidad</dt><dd>${a.modalidad || '—'}${a.otroServicio ? ' / ' + a.otroServicio : ''}</dd>
+          <dt>Origen</dt><dd>${a.origen || '—'}</dd>
+          <dt>Destino</dt><dd>${a.destino || '—'}</dd>
+        </dl>
+      </div>
+      <div class="detail-card">
+        <h5>Conductor al volante</h5>
+        <dl class="kv">
+          <dt>Nombre</dt><dd>${a.condVolNombre || '—'}</dd>
+          <dt>Identificación</dt><dd>${a.condVolTipoId || '—'}: ${a.condVolNum || ''}</dd>
+          <dt>Clase y cat.</dt><dd>${a.condVolClase || '—'}</dd>
+        </dl>
+      </div>
+      ${a.condAltNombre ? `
+      <div class="detail-card">
+        <h5>Conductor alterno</h5>
+        <dl class="kv">
+          <dt>Nombre</dt><dd>${a.condAltNombre}</dd>
+          <dt>Identificación</dt><dd>${a.condAltTipoId || '—'}: ${a.condAltNum || ''}</dd>
+          <dt>Clase y cat.</dt><dd>${a.condAltClase || '—'}</dd>
+        </dl>
+      </div>` : ''}
+      <div class="detail-card" style="grid-column:1/-1;">
+        <h5>Resultado de fiscalización</h5>
+        <dl class="kv">
+          <dt>Hechos</dt><dd>${a.hechos || '—'}</dd>
+          <dt>Infracciones</dt><dd>${a.infracciones || '—'} <span style="color:var(--c-text-muted);">(${countCsv(a.infracciones)})</span></dd>
+          <dt>Incumplimientos</dt><dd>${a.incumplimientos || '—'}</dd>
+          <dt>Manifestación</dt><dd>${a.manifestacion || '—'}</dd>
+          <dt>Medida</dt><dd>${a.medida || '—'}</dd>
+        </dl>
+      </div>
+      <div class="detail-card">
+        <h5>Firmas</h5>
+        <dl class="kv">
+          <dt>Inspector</dt><dd>${a.inspectorNombre || '—'}${a.inspectorDni ? ' · DNI ' + a.inspectorDni : ''}</dd>
+          <dt>Intervenido</dt><dd>${a.intervenidoNombre || '—'}${a.intervenidoDni ? ' · DNI ' + a.intervenidoDni : ''}</dd>
+          <dt>PNP</dt><dd>${a.pnpNombre || '—'}${a.pnpCip ? ' · CIP ' + a.pnpCip : ''}</dd>
+        </dl>
+      </div>
+      <div class="detail-card">
+        <h5>Archivo y trazabilidad</h5>
+        <dl class="kv">
+          <dt>Archivo</dt><dd>${a.archivo ? `<i class="bi bi-paperclip"></i> ${a.archivo.name}` : 'No adjunto'}</dd>
+          <dt>Creado</dt><dd>${new Date(a.creadoEn).toLocaleString('es-PE')}</dd>
+          <dt>Modificado</dt><dd>${new Date(a.actualizadoEn).toLocaleString('es-PE')}</dd>
+        </dl>
+      </div>
+    </div>
+  `;
+
+  openDrawer('drawerDetail');
+};
+
+document.getElementById('btnEditFromDetail').addEventListener('click', () => {
+  const id = state.detailId;
+  closeDrawers();
+  setTimeout(() => openEditActa(id), 220);
+});
+document.getElementById('btnPrint').addEventListener('click', () => window.print());
+
+/* Eliminar */
+const deleteActa = async (id) => {
+  const a = await svc.get(id);
+  if (!a) return;
+  const ok = await confirmDialog({
+    title: `¿Eliminar acta N° ${a.numero}?`,
+    text: `Se eliminará del registro local. Esta acción no se puede deshacer.`,
+    okText: 'Eliminar',
+  });
+  if (!ok) return;
+  await svc.remove(id);
+  toast('Acta eliminada', 'success');
+  renderTable();
+  refreshNavCount();
+};
+
+/* =====================================================================
+   Exportar
+   ===================================================================== */
+const downloadBlob = (content, mime, filename) => {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 0);
+};
+
+const exportCsv = async () => {
+  const { results } = await svc.list({ page: 1, size: 99999, ...state.filters });
+  if (!results.length) return toast('No hay actas para exportar', 'error');
+  const cols = ['numero', 'fecha', 'hora', 'tipoIntervencion', 'lugar', 'adminDocTipo', 'adminDocNum', 'adminNombre',
+    'habilitacion', 'placa', 'modalidad', 'origen', 'destino',
+    'condVolNombre', 'condVolNum', 'condVolClase',
+    'infracciones', 'incumplimientos', 'estado', 'inspectorNombre'];
+  const head = cols.join(';');
+  const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const rows = results.map(a => cols.map(c => esc(a[c])).join(';'));
+  downloadBlob('﻿' + [head, ...rows].join('\n'), 'text/csv;charset=utf-8', `actas_fiscalizacion_${todayIso()}.csv`);
+  toast(`${results.length} actas exportadas`, 'success');
+};
+
+const exportJson = async () => {
+  const { results } = await svc.list({ page: 1, size: 99999, ...state.filters });
+  if (!results.length) return toast('No hay actas para exportar', 'error');
+  downloadBlob(JSON.stringify(results, null, 2), 'application/json', `actas_fiscalizacion_${todayIso()}.json`);
+  toast(`${results.length} actas exportadas`, 'success');
+};
+
+document.getElementById('btnExportCsv').addEventListener('click', exportCsv);
+document.getElementById('btnExportJson').addEventListener('click', exportJson);
+document.getElementById('navExport').addEventListener('click', exportCsv);
+
+document.getElementById('navSeed').addEventListener('click', async () => {
+  const ok = await confirmDialog({
+    title: 'Cargar datos de demostración',
+    text: 'Se reemplazará el registro actual con 38 actas de muestra.',
+    okText: 'Cargar demo',
+  });
+  if (!ok) return;
+  await svc.wipe();
+  const n = await svc.seedDemo();
+  toast(`${n} actas de demostración cargadas`, 'success');
+  refreshNavCount();
+  if (state.view === 'dashboard') renderDashboard(); else renderTable();
+});
+
+document.getElementById('navWipe').addEventListener('click', async () => {
+  const ok = await confirmDialog({
+    title: 'Vaciar registro completo',
+    text: 'Se eliminarán todas las actas almacenadas localmente.',
+    okText: 'Vaciar',
+  });
+  if (!ok) return;
+  await svc.wipe();
+  toast('Registro vaciado', 'success');
+  refreshNavCount();
+  if (state.view === 'dashboard') renderDashboard(); else renderTable();
+});
+
+/* Contador en sidebar */
+const refreshNavCount = async () => {
+  const { count } = await svc.list({ page: 1, size: 1 });
+  document.getElementById('navCount').textContent = count;
+};
+
+/* =====================================================================
+   Init
+   ===================================================================== */
+(async function init() {
+  const items = await svc._all();
+  if (!items.length) {
+    await svc.seedDemo();
+    toast('Cargados 38 registros de demostración', 'info');
+  }
+  refreshNavCount();
+  renderDashboard();
+})();
+</script>
+
+</body>
+</html>
